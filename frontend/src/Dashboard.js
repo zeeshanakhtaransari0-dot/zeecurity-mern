@@ -22,7 +22,8 @@ import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000/api";
+const API_BASE = process.env.REACT_APP_API_BASE || "https://zeecurity-backend.onrender.com/api";
+
 
 export default function Dashboard() {
   const [stats, setStats] = useState({

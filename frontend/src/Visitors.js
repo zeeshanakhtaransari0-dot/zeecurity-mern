@@ -30,7 +30,8 @@ import {
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import LogoutIcon from "@mui/icons-material/Logout";
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000/api";
+const API_BASE = process.env.REACT_APP_API_BASE || "https://zeecurity-backend.onrender.com/api";
+
 
 export default function Visitors() {
   const [name, setName] = useState("");

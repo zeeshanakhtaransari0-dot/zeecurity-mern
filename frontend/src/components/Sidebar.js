@@ -21,13 +21,11 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import ReportIcon from "@mui/icons-material/Report";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import WarningIcon from "@mui/icons-material/Warning";
-
-// ✅ import your logo file (only once!)
 import logo from "../assets/zeecurity_logo.png";
 
 const drawerWidth = 220;
 
-export default function Sidebar({ role }) {
+export default function Sidebar() {
   const location = useLocation();
   const path = location.pathname;
 
@@ -36,26 +34,17 @@ export default function Sidebar({ role }) {
     return path.startsWith(to);
   };
 
-   const guardMenuItems = [
-    { label: "Home", to: "/", icon: <HomeIcon /> },
+  const menuItems = [
+    { label: "Guard Home", to: "/guard", icon: <HomeIcon /> },
     { label: "Dashboard", to: "/dashboard", icon: <DashboardIcon /> },
     { label: "Visitors", to: "/visitors", icon: <PeopleIcon /> },
     { label: "Notices", to: "/notices", icon: <NotificationsIcon /> },
     { label: "Complaints", to: "/complaints", icon: <ReportIcon /> },
     { label: "Payments", to: "/payments", icon: <PaymentsIcon /> },
+    // NEW: Residents list for guard
+    { label: "Residents", to: "/residents", icon: <PeopleIcon /> },
     { label: "SOS", to: "/sos", icon: <WarningIcon />, danger: true },
   ];
-
-  const residentMenuItems = [
-    { label: "Home", to: "/", icon: <HomeIcon /> },
-    { label: "Notices", to: "/notices", icon: <NotificationsIcon /> },
-    { label: "Complaints", to: "/complaints", icon: <ReportIcon /> },
-    { label: "Payments", to: "/payments", icon: <PaymentsIcon /> },
-    { label: "SOS", to: "/sos", icon: <WarningIcon />, danger: true },
-  ];
-
-  const menuItems = role === "resident" ? residentMenuItems : guardMenuItems;
-
 
   return (
     <Drawer
@@ -71,7 +60,7 @@ export default function Sidebar({ role }) {
         },
       }}
     >
-      {/* ---------- LOGO AREA ---------- */}
+      {/* LOGO AREA */}
       <Toolbar sx={{ minHeight: 80, px: 2 }}>
         <Box sx={{ textAlign: "center", width: "100%" }}>
           <img
@@ -80,25 +69,24 @@ export default function Sidebar({ role }) {
             style={{ width: 120, objectFit: "contain" }}
           />
           <Typography
-  variant="caption"
-  sx={{
-    color: "rgba(148,163,184,0.9)",
-    textTransform: "uppercase",
-    letterSpacing: 1.5,
-    fontSize: 11,
-    mt: 0.5,
-    display: "block",
-  }}
->
-  {role === "resident" ? "Resident Panel" : "Guard Panel"}
-</Typography>
-
+            variant="caption"
+            sx={{
+              color: "rgba(148,163,184,0.9)",
+              textTransform: "uppercase",
+              letterSpacing: 1.5,
+              fontSize: 11,
+              mt: 0.5,
+              display: "block",
+            }}
+          >
+            Guard Panel
+          </Typography>
         </Box>
       </Toolbar>
 
       <Divider sx={{ borderColor: "rgba(51,65,85,0.8)" }} />
 
-      {/* ---------- MENU ---------- */}
+      {/* MENU */}
       <List sx={{ mt: 1 }}>
         {menuItems.map((item) => {
           const active = isActive(item.to);
@@ -149,7 +137,7 @@ export default function Sidebar({ role }) {
 
       <Box sx={{ flexGrow: 1 }} />
 
-      {/* footer small text */}
+      {/* FOOTER SMALL TEXT */}
       <Box sx={{ px: 2, pb: 2 }}>
         <Typography
           variant="caption"

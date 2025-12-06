@@ -24,7 +24,9 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-const API = process.env.REACT_APP_API_BASE || "http://localhost:5000/api";
+const API_BASE =
+  process.env.REACT_APP_API_BASE ||
+  "https://zeecurity-backend.onrender.com/api";
 
 export default function Notices() {
   const [notices, setNotices] = useState([]);
@@ -46,7 +48,7 @@ export default function Notices() {
   async function fetchNotices() {
     setLoading(true);
     try {
-      const res = await axios.get(`${API}/notices`);
+      const res = await axios.get(`${API_BASE}/notices`);
       const data = res.data;
 
       if (Array.isArray(data)) setNotices(data);
@@ -76,7 +78,8 @@ export default function Notices() {
       return;
     }
     try {
-      await axios.post(`${API}/notices`, { title, message });
+      // ✅ use API_BASE here
+      await axios.post(`${API_BASE}/notices`, { title, message });
       setSnack({
         open: true,
         severity: "success",
@@ -106,7 +109,8 @@ export default function Notices() {
       return;
     }
     try {
-      await axios.delete(`${API}/notices/${delId}`);
+      // ✅ and here
+      await axios.delete(`${API_BASE}/notices/${delId}`);
       setSnack({
         open: true,
         severity: "success",
@@ -128,7 +132,7 @@ export default function Notices() {
 
   return (
     <Box sx={{ p: 2 }}>
-      {/* --- Add Notice form (kept same) --- */}
+      {/* --- Add Notice form --- */}
       <Typography variant="h4" sx={{ mb: 2, fontWeight: 700 }}>
         Notices
       </Typography>
@@ -165,7 +169,7 @@ export default function Notices() {
         </CardContent>
       </Card>
 
-      {/* --- Table, styled similar to Active Visitors --- */}
+      {/* --- Table --- */}
       <Typography variant="h5" sx={{ mb: 1, fontWeight: 700 }}>
         Notice Board
       </Typography>
@@ -187,9 +191,7 @@ export default function Notices() {
                   <TableCell sx={{ fontWeight: 600 }}>Title</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>Message</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>Created At</TableCell>
-                  <TableCell
-                    sx={{ fontWeight: 600, textAlign: "right" }}
-                  >
+                  <TableCell sx={{ fontWeight: 600, textAlign: "right" }}>
                     Actions
                   </TableCell>
                 </TableRow>
@@ -206,10 +208,7 @@ export default function Notices() {
                       <Typography variant="body2">{n.message}</Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                      >
+                      <Typography variant="body2" color="text.secondary">
                         {n.createdAt
                           ? new Date(n.createdAt).toLocaleString()
                           : ""}
@@ -234,7 +233,7 @@ export default function Notices() {
         </CardContent>
       </Card>
 
-      {/* --- Snackbar --- */}
+      {/* Snackbar */}
       <Snackbar
         open={snack.open}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
@@ -244,7 +243,7 @@ export default function Notices() {
         <Alert severity={snack.severity}>{snack.text}</Alert>
       </Snackbar>
 
-      {/* --- Delete confirm dialog --- */}
+      {/* Delete confirm dialog */}
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
         <DialogTitle>Delete this notice?</DialogTitle>
         <DialogActions>

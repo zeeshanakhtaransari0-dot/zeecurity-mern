@@ -29,7 +29,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import RefreshIcon from "@mui/icons-material/Refresh";
 
 // base URL -- uses same base logic as other pages
-const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000/api";
+const API_BASE = process.env.REACT_APP_API_BASE || "https://zeecurity-backend.onrender.com/api";
+
 
 // Payment UI that works with your existing Maintenance model & routes.
 export default function Payments() {

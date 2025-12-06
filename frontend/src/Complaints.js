@@ -7,7 +7,8 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions
 } from "@mui/material";
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000/api";
+const API_BASE = process.env.REACT_APP_API_BASE || "https://zeecurity-backend.onrender.com/api";
+
 
 const STATUS_COLORS = { Pending: "warning", "In Progress": "info", Resolved: "success" };
 
