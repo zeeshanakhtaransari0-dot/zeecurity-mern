@@ -8,15 +8,17 @@ import {
   useNavigate,
 } from "react-router-dom";
 
-import Sidebar from "./components/Sidebar";              // Guard Sidebar
-import ResidentSidebar from "./components/ResidentSidebar"; // Resident Sidebar
+import Sidebar from "./components/Sidebar";
+import ResidentSidebar from "./components/ResidentSidebar";
 
 import Visitors from "./Visitors";
 import Notices from "./Notices";
 import Complaints from "./Complaints";
 import Payments from "./Payments";
 import SOS from "./SOS";
-import Dashboard from "./Dashboard";
+import Dashboard from "./Dashboard"; // (not used yet, but ok to keep)
+import ResidentHome from "./ResidentHome";
+import ResidentProfile from "./ResidentProfile";
 
 import axios from "axios";
 import {
@@ -26,53 +28,114 @@ import {
   Card,
   CardContent,
   Button,
-  Chip,
   Divider,
   TextField,
   Paper,
 } from "@mui/material";
 
 import logo from "./assets/zeecurity_logo.png";
-import ResidentHome from "./ResidentHome";
+
+const API_BASE =
+  process.env.REACT_APP_API_BASE ||
+  "https://zeecurity-backend.onrender.com/api";
+
 
 // ========== LOGIN PAGE ==========
 function Login() {
   const navigate = useNavigate();
   const [role, setRole] = useState("guard");
 
+  const [username, setUsername] = useState("");
+  const [flat, setFlat] = useState("");
+  const [password, setPassword] = useState("");
+
   const handleLogin = () => {
-    if (role === "guard") navigate("/guard");
-    else navigate("/resident");
+    if (role === "resident") {
+      // save resident info for profile screen
+      localStorage.setItem("residentName", username || "Resident");
+      localStorage.setItem("residentFlat", flat || "A-101");
+      navigate("/resident");
+    } else {
+      navigate("/guard");
+    }
   };
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", bgcolor: "#f3f4f6" }}>
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        bgcolor: "#f3f4f6",
+      }}
+    >
       <Paper sx={{ p: 4, width: 360, textAlign: "center" }} elevation={6}>
         <img src={logo} alt="Zeecurity Logo" width={110} />
-        <Typography variant="h5" sx={{ mt: 2, fontWeight: 700 }}>Login</Typography>
+        <Typography variant="h5" sx={{ mt: 2, fontWeight: 700 }}>
+          Login
+        </Typography>
 
-        <TextField fullWidth label="Username" sx={{ mt: 2 }} />
-        <TextField fullWidth label="Password" type="password" sx={{ mt: 2 }} />
+        <TextField
+          fullWidth
+          label="Username"
+          sx={{ mt: 2 }}
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
 
-        <Typography variant="body2" sx={{ mt: 2 }}>Choose Role</Typography>
+        <TextField
+          fullWidth
+          label="Password"
+          type="password"
+          sx={{ mt: 2 }}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        {/* Flat number – always visible now */}
+        <TextField
+          fullWidth
+          label="Flat Number (e.g. A-101)"
+          sx={{ mt: 2 }}
+          value={flat}
+          onChange={(e) => setFlat(e.target.value)}
+        />
+
+        <Typography variant="body2" sx={{ mt: 2 }}>
+          Choose Role
+        </Typography>
 
         <Box sx={{ display: "flex", gap: 1, justifyContent: "center", mt: 1 }}>
-          <Button variant={role === "guard" ? "contained" : "outlined"} onClick={() => setRole("guard")}>Guard</Button>
-          <Button variant={role === "resident" ? "contained" : "outlined"} onClick={() => setRole("resident")}>Resident</Button>
+          <Button
+            variant={role === "guard" ? "contained" : "outlined"}
+            onClick={() => setRole("guard")}
+          >
+            GUARD
+          </Button>
+          <Button
+            variant={role === "resident" ? "contained" : "outlined"}
+            onClick={() => setRole("resident")}
+          >
+            RESIDENT
+          </Button>
         </Box>
 
-        <Button fullWidth variant="contained" sx={{ mt: 3 }} onClick={handleLogin}>
-          Continue
+        <Button
+          fullWidth
+          variant="contained"
+          sx={{ mt: 3 }}
+          onClick={handleLogin}
+        >
+          CONTINUE
         </Button>
       </Paper>
     </Box>
   );
 }
 
-// ========== GUARD HOME PAGE (your full existing UI) ==========
-function Home() {
-  const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000/api";
-
+// ========== GUARD HOME ==========
+function GuardHome() {
   const [stats, setStats] = useState({
     visitorsInside: "--",
     openComplaints: "--",
@@ -106,7 +169,9 @@ function Home() {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>Guard Home</Typography>
+      <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
+        Guard Home
+      </Typography>
 
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {[
@@ -119,33 +184,49 @@ function Home() {
             <Card>
               <CardContent>
                 <Typography variant="caption">{item.label}</Typography>
-                <Typography variant="h5" sx={{ fontWeight: 700 }}>{item.value}</Typography>
+                <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                  {item.value}
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
         ))}
       </Grid>
 
-      <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>Quick Actions</Typography>
+      <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+        Quick Actions
+      </Typography>
       <Divider sx={{ mb: 2 }} />
 
       <Box sx={{ display: "flex", gap: 1 }}>
-        <Button variant="contained" component={RouterLink} to="/visitors">Add Visitor</Button>
-        <Button variant="outlined" component={RouterLink} to="/complaints">New Complaint</Button>
-        <Button variant="outlined" component={RouterLink} to="/notices">Post Notice</Button>
-        <Button variant="outlined" color="error" component={RouterLink} to="/sos">View SOS Alerts</Button>
+        <Button variant="contained" component={RouterLink} to="/visitors">
+          Add Visitor
+        </Button>
+        <Button variant="outlined" component={RouterLink} to="/complaints">
+          New Complaint
+        </Button>
+        <Button variant="outlined" component={RouterLink} to="/notices">
+          Post Notice
+        </Button>
+        <Button
+          variant="outlined"
+          color="error"
+          component={RouterLink}
+          to="/sos"
+        >
+          View SOS Alerts
+        </Button>
       </Box>
     </Box>
   );
 }
 
-// ========== APP ROUTES ==========
+// ========== MAIN APP ROUTES ==========
 export default function App() {
   return (
     <Router>
       <Routes>
-
-        {/* LOGIN FIRST */}
+        {/* LOGIN */}
         <Route path="/" element={<Login />} />
 
         {/* GUARD PANEL */}
@@ -155,33 +236,37 @@ export default function App() {
             <div style={{ display: "flex" }}>
               <Sidebar />
               <div style={{ marginLeft: 220, flex: 1, background: "#fafafa" }}>
-                <Home />
+                <GuardHome />
               </div>
             </div>
           }
         />
 
-        {/* INTERNAL GUARD MODULES */}
-        {["/visitors", "/complaints", "/payments", "/notices", "/sos"].map((path, i) => (
-          <Route
-            key={i}
-            path={path}
-            element={
-              <div style={{ display: "flex" }}>
-                <Sidebar />
-                <div style={{ marginLeft: 220, flex: 1, background: "#fafafa" }}>
-                  {path === "/visitors" && <Visitors />}
-                  {path === "/complaints" && <Complaints />}
-                  {path === "/payments" && <Payments />}
-                  {path === "/notices" && <Notices />}
-                  {path === "/sos" && <SOS />}
+        {/* Guard internal modules */}
+        {["/visitors", "/complaints", "/payments", "/notices", "/sos"].map(
+          (path, i) => (
+            <Route
+              key={i}
+              path={path}
+              element={
+                <div style={{ display: "flex" }}>
+                  <Sidebar />
+                  <div
+                    style={{ marginLeft: 220, flex: 1, background: "#fafafa" }}
+                  >
+                    {path === "/visitors" && <Visitors />}
+                    {path === "/complaints" && <Complaints />}
+                    {path === "/payments" && <Payments />}
+                    {path === "/notices" && <Notices />}
+                    {path === "/sos" && <SOS />}
+                  </div>
                 </div>
-              </div>
-            }
-          />
-        ))}
+              }
+            />
+          )
+        )}
 
-        {/* RESIDENT PANEL */}
+        {/* RESIDENT PANEL HOME */}
         <Route
           path="/resident"
           element={
@@ -239,7 +324,17 @@ export default function App() {
             </div>
           }
         />
-
+        <Route
+          path="/resident/profile"
+          element={
+            <div style={{ display: "flex" }}>
+              <ResidentSidebar />
+              <div style={{ marginLeft: 220, flex: 1, background: "#ffffff" }}>
+                <ResidentProfile />
+              </div>
+            </div>
+          }
+        />
       </Routes>
     </Router>
   );
