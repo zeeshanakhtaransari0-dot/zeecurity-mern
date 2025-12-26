@@ -14,7 +14,6 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  IconButton,
   CircularProgress,
   Snackbar,
   Alert,
@@ -22,8 +21,6 @@ import {
   DialogTitle,
   DialogActions,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-
 const API_BASE =
   process.env.REACT_APP_API_BASE ||
   "https://zeecurity-backend.onrender.com/api";
@@ -215,15 +212,14 @@ export default function Notices() {
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
-                      <Button
-                        variant="contained"
-                        color="error"
-                        size="small"
-                        startIcon={<DeleteIcon />}
-                        onClick={() => confirmDelete(n._id)}
-                      >
-                        Delete
-                      </Button>
+                     <Button
+  variant="contained"
+  color="error"
+  size="small"
+  onClick={() => confirmDelete(n._id)}
+>
+  Delete
+</Button>
                     </TableCell>
                   </TableRow>
                 ))}
