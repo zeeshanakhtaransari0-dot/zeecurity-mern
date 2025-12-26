@@ -39,22 +39,33 @@ const API_BASE =
   "https://zeecurity-backend.onrender.com/api";
 
 
-// ========== LOGIN PAGE ==========
+// ================= LOGIN PAGE =================
 function Login() {
   const navigate = useNavigate();
-  const [role, setRole] = useState("guard");
 
+  const [role, setRole] = useState("guard");
   const [username, setUsername] = useState("");
   const [flat, setFlat] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = () => {
+    if (!username.trim()) {
+      alert("Please enter username");
+      return;
+    }
+
+    if (role === "resident" && !flat.trim()) {
+      alert("Please enter flat number");
+      return;
+    }
+
     if (role === "resident") {
-      // save resident info for profile screen
-      localStorage.setItem("residentName", username || "Resident");
-      localStorage.setItem("residentFlat", flat || "A-101");
+      localStorage.setItem("residentName", username.trim());
+      localStorage.setItem("residentFlat", flat.trim());
+      localStorage.setItem("role", "resident");
       navigate("/resident");
     } else {
+      localStorage.setItem("role", "guard");
       navigate("/guard");
     }
   };
@@ -92,14 +103,15 @@ function Login() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        {/* Flat number – always visible now */}
-        <TextField
-          fullWidth
-          label="Flat Number (e.g. A-101)"
-          sx={{ mt: 2 }}
-          value={flat}
-          onChange={(e) => setFlat(e.target.value)}
-        />
+        {role === "resident" && (
+          <TextField
+            fullWidth
+            label="Flat Number (e.g. A-101)"
+            sx={{ mt: 2 }}
+            value={flat}
+            onChange={(e) => setFlat(e.target.value)}
+          />
+        )}
 
         <Typography variant="body2" sx={{ mt: 2 }}>
           Choose Role
@@ -133,7 +145,7 @@ function Login() {
   );
 }
 
-// ========== GUARD HOME ==========
+// ================= GUARD HOME =================
 function GuardHome() {
   const [stats, setStats] = useState({
     visitorsInside: "--",
@@ -143,9 +155,9 @@ function GuardHome() {
   });
 
   useEffect(() => {
-  fetchStats();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, []);
+    fetchStats();
+    // eslint-disable-next-line
+  }, []);
 
   async function fetchStats() {
     try {
@@ -163,14 +175,14 @@ function GuardHome() {
         totalNotices: nRes.data.length,
       });
     } catch (err) {
-      console.error("Failed to fetch dashboard stats:", err);
+      console.error("Dashboard error:", err);
     }
   }
 
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
-        Guard Home
+        Guard Dashboard
       </Typography>
 
       <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -208,41 +220,34 @@ function GuardHome() {
         <Button variant="outlined" component={RouterLink} to="/notices">
           Post Notice
         </Button>
-        <Button
-          variant="outlined"
-          color="error"
-          component={RouterLink}
-          to="/sos"
-        >
-          View SOS Alerts
+        <Button variant="outlined" color="error" component={RouterLink} to="/sos">
+          View SOS
         </Button>
       </Box>
     </Box>
   );
 }
 
-// ========== MAIN APP ROUTES ==========
+// ================= MAIN ROUTES =================
 export default function App() {
   return (
     <Router>
       <Routes>
-        {/* LOGIN */}
         <Route path="/" element={<Login />} />
 
-        {/* GUARD PANEL */}
+        {/* GUARD */}
         <Route
           path="/guard"
           element={
             <div style={{ display: "flex" }}>
               <Sidebar />
-              <div style={{ marginLeft: 220, flex: 1, background: "#fafafa" }}>
+              <div style={{ marginLeft: 220, flex: 1 }}>
                 <GuardHome />
               </div>
             </div>
           }
         />
 
-        {/* Guard internal modules */}
         {["/visitors", "/complaints", "/payments", "/notices", "/sos"].map(
           (path, i) => (
             <Route
@@ -251,9 +256,7 @@ export default function App() {
               element={
                 <div style={{ display: "flex" }}>
                   <Sidebar />
-                  <div
-                    style={{ marginLeft: 220, flex: 1, background: "#fafafa" }}
-                  >
+                  <div style={{ marginLeft: 220, flex: 1 }}>
                     {path === "/visitors" && <Visitors />}
                     {path === "/complaints" && <Complaints />}
                     {path === "/payments" && <Payments />}
@@ -266,75 +269,39 @@ export default function App() {
           )
         )}
 
-        {/* RESIDENT PANEL HOME */}
+        {/* RESIDENT */}
         <Route
           path="/resident"
           element={
             <div style={{ display: "flex" }}>
               <ResidentSidebar />
-              <div style={{ marginLeft: 220, flex: 1, background: "#ffffff" }}>
+              <div style={{ marginLeft: 220, flex: 1 }}>
                 <ResidentHome />
               </div>
             </div>
           }
         />
 
-        {/* RESIDENT SUBPAGES */}
-        <Route
-          path="/resident/notices"
-          element={
-            <div style={{ display: "flex" }}>
-              <ResidentSidebar />
-              <div style={{ marginLeft: 220, flex: 1, background: "#ffffff" }}>
-                <Notices />
-              </div>
-            </div>
-          }
-        />
-        <Route
-          path="/resident/complaints"
-          element={
-            <div style={{ display: "flex" }}>
-              <ResidentSidebar />
-              <div style={{ marginLeft: 220, flex: 1, background: "#ffffff" }}>
-                <Complaints />
-              </div>
-            </div>
-          }
-        />
-        <Route
-          path="/resident/payments"
-          element={
-            <div style={{ display: "flex" }}>
-              <ResidentSidebar />
-              <div style={{ marginLeft: 220, flex: 1, background: "#ffffff" }}>
-                <Payments />
-              </div>
-            </div>
-          }
-        />
-        <Route
-          path="/resident/sos"
-          element={
-            <div style={{ display: "flex" }}>
-              <ResidentSidebar />
-              <div style={{ marginLeft: 220, flex: 1, background: "#ffffff" }}>
-                <SOS />
-              </div>
-            </div>
-          }
-        />
-        <Route
-          path="/resident/profile"
-          element={
-            <div style={{ display: "flex" }}>
-              <ResidentSidebar />
-              <div style={{ marginLeft: 220, flex: 1, background: "#ffffff" }}>
-                <ResidentProfile />
-              </div>
-            </div>
-          }
-        />
+        {["notices", "complaints", "payments", "sos", "profile"].map(
+          (page) => (
+            <Route
+              key={page}
+              path={`/resident/${page}`}
+              element={
+                <div style={{ display: "flex" }}>
+                  <ResidentSidebar />
+                  <div style={{ marginLeft: 220, flex: 1 }}>
+                    {page === "notices" && <Notices />}
+                    {page === "complaints" && <Complaints />}
+                    {page === "payments" && <Payments />}
+                    {page === "sos" && <SOS />}
+                    {page === "profile" && <ResidentProfile />}
+                  </div>
+                </div>
+              }
+            />
+          )
+        )}
       </Routes>
     </Router>
   );

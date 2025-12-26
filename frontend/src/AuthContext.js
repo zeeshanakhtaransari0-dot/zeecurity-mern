@@ -1,29 +1,21 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState } from "react";
 
-export const AuthContext = createContext();
+const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
-    try {
-      const raw = localStorage.getItem("zeec_user");
-      return raw && raw !== "undefined" ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
+    const saved = localStorage.getItem("zeecurity_user");
+    return saved ? JSON.parse(saved) : null;
   });
 
-  useEffect(() => {
-    if (user) localStorage.setItem("zeec_user", JSON.stringify(user));
-    else localStorage.removeItem("zeec_user");
-  }, [user]);
-
-  const login = (payload) => {
-    // payload example: { role: "guard" } or { role: "resident", name, flatNumber }
-    setUser(payload);
+  const login = (userData) => {
+    setUser(userData);
+    localStorage.setItem("zeecurity_user", JSON.stringify(userData));
   };
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem("zeecurity_user");
   };
 
   return (
@@ -31,4 +23,8 @@ export function AuthProvider({ children }) {
       {children}
     </AuthContext.Provider>
   );
+}
+
+export function useAuth() {
+  return useContext(AuthContext);
 }
