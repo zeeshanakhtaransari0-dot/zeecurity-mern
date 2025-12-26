@@ -1,4 +1,3 @@
-// src/Complaints.js
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
@@ -35,20 +34,17 @@ const STATUS_COLORS = {
 };
 
 export default function Complaints() {
-  // ✅ auto-fill from login but EDITABLE
-  const [name, setName] = useState(
-    localStorage.getItem("residentName") || ""
-  );
-  const [flat, setFlat] = useState(
-    localStorage.getItem("residentFlat") || ""
-  );
+  const storedName = localStorage.getItem("residentName") || "";
+  const storedFlat = localStorage.getItem("residentFlat") || "";
+  const isResident = !!storedFlat;
 
+  const [name, setName] = useState(storedName);
+  const [flat, setFlat] = useState(storedFlat);
   const [details, setDetails] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState(null);
-
   const [snack, setSnack] = useState({
     open: false,
     severity: "success",
@@ -78,56 +74,63 @@ export default function Complaints() {
     }
   }
 
-  async function handleSubmit(e) {
+  async function submitComplaint(e) {
     e.preventDefault();
-
     if (!name || !flat || !details) {
       setSnack({
         open: true,
         severity: "warning",
-        msg: "Please fill all fields",
+        msg: "Fill all fields",
       });
       return;
     }
 
     try {
-      const payload = {
+      const res = await axios.post(`${API_BASE}/complaints`, {
         name,
         flatNumber: flat,
         details,
         status: "Pending",
-      };
+      });
 
-      const res = await axios.post(`${API_BASE}/complaints`, payload);
       setComplaints((prev) => [res.data, ...prev]);
-
+      setDetails("");
       setSnack({
         open: true,
         severity: "success",
         msg: "Complaint submitted",
       });
-
-      setDetails("");
     } catch {
       setSnack({
         open: true,
         severity: "error",
-        msg: "Failed to submit complaint",
+        msg: "Submit failed",
       });
     }
   }
 
-  async function handleDelete(id) {
-    if (!window.confirm("Delete this complaint?")) return;
-
+  async function changeStatus(id, status) {
     try {
-      await axios.delete(`${API_BASE}/complaints/${id}`);
-      setComplaints((p) => p.filter((c) => c._id !== id));
+      await axios.put(`${API_BASE}/complaints/${id}/status`, { status });
+      setComplaints((prev) =>
+        prev.map((c) => (c._id === id ? { ...c, status } : c))
+      );
+      setPreview((p) => (p ? { ...p, status } : p));
+    } catch {
       setSnack({
         open: true,
-        severity: "success",
-        msg: "Complaint deleted",
+        severity: "error",
+        msg: "Status update failed",
       });
+    }
+  }
+
+  async function deleteComplaint(id) {
+    if (!window.confirm("Delete this complaint?")) return;
+    try {
+      await axios.delete(`${API_BASE}/complaints/${id}`);
+      setComplaints((prev) => prev.filter((c) => c._id !== id));
+      setPreview(null);
     } catch {
       setSnack({
         open: true,
@@ -148,14 +151,14 @@ export default function Complaints() {
         Submit Complaint
       </Typography>
 
-      {/* ---------- FORM ---------- */}
-      <Box component="form" onSubmit={handleSubmit} sx={{ mb: 4 }}>
+      <Box component="form" onSubmit={submitComplaint} sx={{ mb: 4 }}>
         <Grid container spacing={2}>
           <Grid item xs={12} md={4}>
             <TextField
               label="Your Name"
               fullWidth
               value={name}
+              disabled={isResident}
               onChange={(e) => setName(e.target.value)}
             />
           </Grid>
@@ -165,12 +168,9 @@ export default function Complaints() {
               label="Flat Number"
               fullWidth
               value={flat}
+              disabled={isResident}
               onChange={(e) => setFlat(e.target.value)}
             />
-          </Grid>
-
-          <Grid item xs={12} md={5}>
-            <TextField label="Status" value="Pending" fullWidth disabled />
           </Grid>
 
           <Grid item xs={12}>
@@ -192,119 +192,86 @@ export default function Complaints() {
         </Grid>
       </Box>
 
-      {/* ---------- FILTER ---------- */}
-      <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-        <Typography variant="h6">All Complaints</Typography>
-        <FormControl size="small">
-          <InputLabel>Status</InputLabel>
-          <Select
-            value={statusFilter}
-            label="Status"
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <MenuItem value="All">All</MenuItem>
-            <MenuItem value="Pending">Pending</MenuItem>
-            <MenuItem value="In Progress">In Progress</MenuItem>
-            <MenuItem value="Resolved">Resolved</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
-
-      {/* ---------- LIST ---------- */}
-      {loading ? (
-        <Box sx={{ py: 6, display: "flex", justifyContent: "center" }}>
-          <CircularProgress />
-        </Box>
-      ) : filtered.length === 0 ? (
-        <Typography>No complaints found.</Typography>
-      ) : (
-        <Grid container spacing={2}>
-          {filtered.map((c) => {
-            const id = c._id;
-            return (
-              <Grid item xs={12} md={6} key={id}>
-                <Card>
-                  <CardContent>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Box>
-                        <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                          {c.name} — Flat {c.flatNumber}
-                        </Typography>
-                        <Typography sx={{ mt: 1 }}>{c.details}</Typography>
-                      </Box>
-                      <Chip
-                        label={c.status}
-                        color={STATUS_COLORS[c.status]}
-                      />
-                    </Box>
-                  </CardContent>
-
-                  <CardActions>
-                    <Button size="small" onClick={() => setPreview(c)}>
-                      Preview
-                    </Button>
-                    <Button
-                      size="small"
-                      color="error"
-                      onClick={() => handleDelete(id)}
-                    >
-                      Delete
-                    </Button>
-                  </CardActions>
-                </Card>
-              </Grid>
-            );
-          })}
-        </Grid>
-      )}
-
-      {/* ---------- PREVIEW ---------- */}
-     <Dialog open={!!preview} onClose={() => setPreview(null)} maxWidth="sm" fullWidth>
-  <DialogTitle>Complaint Details</DialogTitle>
-
-  <DialogContent>
-    <Typography sx={{ fontWeight: 700 }}>
-      {preview?.name} — Flat {preview?.flatNumber}
-    </Typography>
-
-    <Typography sx={{ mt: 2 }}>
-      {preview?.details}
-    </Typography>
-
-    {/* 🔐 STATUS CONTROL — GUARD ONLY */}
-    {!localStorage.getItem("residentFlat") && (
-      <FormControl fullWidth sx={{ mt: 3 }}>
+      <FormControl size="small" sx={{ mb: 2 }}>
         <InputLabel>Status</InputLabel>
         <Select
-          value={preview?.status || "Pending"}
+          value={statusFilter}
           label="Status"
-          onChange={async (e) => {
-            const newStatus = e.target.value;
-
-            await changeStatus(preview._id, newStatus);
-
-            setPreview((p) => ({ ...p, status: newStatus }));
-          }}
+          onChange={(e) => setStatusFilter(e.target.value)}
         >
+          <MenuItem value="All">All</MenuItem>
           <MenuItem value="Pending">Pending</MenuItem>
           <MenuItem value="In Progress">In Progress</MenuItem>
           <MenuItem value="Resolved">Resolved</MenuItem>
         </Select>
       </FormControl>
-    )}
-  </DialogContent>
 
-  <DialogActions>
-    <Button onClick={() => setPreview(null)}>Close</Button>
-  </DialogActions>
-</Dialog>
+      {loading ? (
+        <CircularProgress />
+      ) : (
+        <Grid container spacing={2}>
+          {filtered.map((c) => (
+            <Grid item xs={12} md={6} key={c._id}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6">
+                    {c.name} — Flat {c.flatNumber}
+                  </Typography>
+                  <Typography>{c.details}</Typography>
+                  <Chip
+                    sx={{ mt: 1 }}
+                    label={c.status}
+                    color={STATUS_COLORS[c.status]}
+                  />
+                </CardContent>
+                <CardActions>
+                  <Button onClick={() => setPreview(c)}>Preview</Button>
+                  {!isResident && (
+                    <Button
+                      color="error"
+                      onClick={() => deleteComplaint(c._id)}
+                    >
+                      Delete
+                    </Button>
+                  )}
+                </CardActions>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      )}
 
-      {/* ---------- SNACKBAR ---------- */}
+      {/* PREVIEW + STATUS CHANGE */}
+      <Dialog open={!!preview} onClose={() => setPreview(null)} fullWidth>
+        <DialogTitle>Complaint</DialogTitle>
+        <DialogContent>
+          <Typography sx={{ fontWeight: 700 }}>
+            {preview?.name} — Flat {preview?.flatNumber}
+          </Typography>
+          <Typography sx={{ mt: 2 }}>{preview?.details}</Typography>
+
+          {!isResident && (
+            <FormControl fullWidth sx={{ mt: 3 }}>
+              <InputLabel>Status</InputLabel>
+              <Select
+                value={preview?.status || "Pending"}
+                label="Status"
+                onChange={(e) =>
+                  changeStatus(preview._id, e.target.value)
+                }
+              >
+                <MenuItem value="Pending">Pending</MenuItem>
+                <MenuItem value="In Progress">In Progress</MenuItem>
+                <MenuItem value="Resolved">Resolved</MenuItem>
+              </Select>
+            </FormControl>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPreview(null)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
       <Snackbar
         open={snack.open}
         autoHideDuration={3000}
