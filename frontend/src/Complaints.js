@@ -14,6 +14,7 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Chip,
   CircularProgress,
   Snackbar,
   Alert,
@@ -27,22 +28,32 @@ const API_BASE =
   process.env.REACT_APP_API_BASE ||
   "https://zeecurity-backend.onrender.com/api";
 
-export default function Complaints() {
-  const storedName = localStorage.getItem("residentName") || "";
-  const storedFlat = localStorage.getItem("residentFlat") || "";
+const STATUS_COLORS = {
+  Pending: "warning",
+  "In Progress": "info",
+  Resolved: "success",
+};
 
-  const [name] = useState(storedName);
-  const [flat] = useState(storedFlat);
+export default function Complaints() {
+  // ✅ auto-fill from login but EDITABLE
+  const [name, setName] = useState(
+    localStorage.getItem("residentName") || ""
+  );
+  const [flat, setFlat] = useState(
+    localStorage.getItem("residentFlat") || ""
+  );
+
   const [details, setDetails] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [preview, setPreview] = useState(null);
+
   const [snack, setSnack] = useState({
     open: false,
     severity: "success",
     msg: "",
   });
-  const [preview, setPreview] = useState(null);
 
   useEffect(() => {
     fetchComplaints();
@@ -69,11 +80,12 @@ export default function Complaints() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!details) {
+
+    if (!name || !flat || !details) {
       setSnack({
         open: true,
         severity: "warning",
-        msg: "Enter complaint details",
+        msg: "Please fill all fields",
       });
       return;
     }
@@ -87,14 +99,15 @@ export default function Complaints() {
       };
 
       const res = await axios.post(`${API_BASE}/complaints`, payload);
-      setComplaints((p) => [res.data, ...p]);
-      setDetails("");
+      setComplaints((prev) => [res.data, ...prev]);
 
       setSnack({
         open: true,
         severity: "success",
         msg: "Complaint submitted",
       });
+
+      setDetails("");
     } catch {
       setSnack({
         open: true,
@@ -110,6 +123,11 @@ export default function Complaints() {
     try {
       await axios.delete(`${API_BASE}/complaints/${id}`);
       setComplaints((p) => p.filter((c) => c._id !== id));
+      setSnack({
+        open: true,
+        severity: "success",
+        msg: "Complaint deleted",
+      });
     } catch {
       setSnack({
         open: true,
@@ -130,14 +148,31 @@ export default function Complaints() {
         Submit Complaint
       </Typography>
 
+      {/* ---------- FORM ---------- */}
       <Box component="form" onSubmit={handleSubmit} sx={{ mb: 4 }}>
         <Grid container spacing={2}>
           <Grid item xs={12} md={4}>
-            <TextField label="Your Name" fullWidth value={name} disabled />
+            <TextField
+              label="Your Name"
+              fullWidth
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </Grid>
+
           <Grid item xs={12} md={3}>
-            <TextField label="Flat Number" fullWidth value={flat} disabled />
+            <TextField
+              label="Flat Number"
+              fullWidth
+              value={flat}
+              onChange={(e) => setFlat(e.target.value)}
+            />
           </Grid>
+
+          <Grid item xs={12} md={5}>
+            <TextField label="Status" value="Pending" fullWidth disabled />
+          </Grid>
+
           <Grid item xs={12}>
             <TextField
               label="Complaint Details"
@@ -148,6 +183,7 @@ export default function Complaints() {
               onChange={(e) => setDetails(e.target.value)}
             />
           </Grid>
+
           <Grid item xs={12}>
             <Button type="submit" variant="contained">
               Submit Complaint
@@ -156,6 +192,7 @@ export default function Complaints() {
         </Grid>
       </Box>
 
+      {/* ---------- FILTER ---------- */}
       <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
         <Typography variant="h6">All Complaints</Typography>
         <FormControl size="small">
@@ -167,11 +204,13 @@ export default function Complaints() {
           >
             <MenuItem value="All">All</MenuItem>
             <MenuItem value="Pending">Pending</MenuItem>
+            <MenuItem value="In Progress">In Progress</MenuItem>
             <MenuItem value="Resolved">Resolved</MenuItem>
           </Select>
         </FormControl>
       </Box>
 
+      {/* ---------- LIST ---------- */}
       {loading ? (
         <Box sx={{ py: 6, display: "flex", justifyContent: "center" }}>
           <CircularProgress />
@@ -181,28 +220,41 @@ export default function Complaints() {
       ) : (
         <Grid container spacing={2}>
           {filtered.map((c) => {
-            const id = c._id || c.id;
+            const id = c._id;
             return (
               <Grid item xs={12} md={6} key={id}>
                 <Card>
                   <CardContent>
-                    <Typography variant="h6">
-                      {c.name} — Flat {c.flatNumber}
-                    </Typography>
-                    <Typography sx={{ mt: 1 }}>{c.details}</Typography>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Box>
+                        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                          {c.name} — Flat {c.flatNumber}
+                        </Typography>
+                        <Typography sx={{ mt: 1 }}>{c.details}</Typography>
+                      </Box>
+                      <Chip
+                        label={c.status}
+                        color={STATUS_COLORS[c.status]}
+                      />
+                    </Box>
                   </CardContent>
-                  <CardActions>
-                    <Button onClick={() => setPreview(c)}>Preview</Button>
 
-                    {/* Guard only */}
-                    {!storedFlat && (
-                      <Button
-                        color="error"
-                        onClick={() => handleDelete(id)}
-                      >
-                        Delete
-                      </Button>
-                    )}
+                  <CardActions>
+                    <Button size="small" onClick={() => setPreview(c)}>
+                      Preview
+                    </Button>
+                    <Button
+                      size="small"
+                      color="error"
+                      onClick={() => handleDelete(id)}
+                    >
+                      Delete
+                    </Button>
                   </CardActions>
                 </Card>
               </Grid>
@@ -211,6 +263,7 @@ export default function Complaints() {
         </Grid>
       )}
 
+      {/* ---------- PREVIEW ---------- */}
       <Dialog open={!!preview} onClose={() => setPreview(null)}>
         <DialogTitle>Complaint</DialogTitle>
         <DialogContent>
@@ -224,6 +277,7 @@ export default function Complaints() {
         </DialogActions>
       </Dialog>
 
+      {/* ---------- SNACKBAR ---------- */}
       <Snackbar
         open={snack.open}
         autoHideDuration={3000}
