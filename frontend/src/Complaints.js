@@ -264,18 +264,45 @@ export default function Complaints() {
       )}
 
       {/* ---------- PREVIEW ---------- */}
-      <Dialog open={!!preview} onClose={() => setPreview(null)}>
-        <DialogTitle>Complaint</DialogTitle>
-        <DialogContent>
-          <Typography sx={{ fontWeight: 700 }}>
-            {preview?.name} — Flat {preview?.flatNumber}
-          </Typography>
-          <Typography sx={{ mt: 2 }}>{preview?.details}</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setPreview(null)}>Close</Button>
-        </DialogActions>
-      </Dialog>
+     <Dialog open={!!preview} onClose={() => setPreview(null)} maxWidth="sm" fullWidth>
+  <DialogTitle>Complaint Details</DialogTitle>
+
+  <DialogContent>
+    <Typography sx={{ fontWeight: 700 }}>
+      {preview?.name} — Flat {preview?.flatNumber}
+    </Typography>
+
+    <Typography sx={{ mt: 2 }}>
+      {preview?.details}
+    </Typography>
+
+    {/* 🔐 STATUS CONTROL — GUARD ONLY */}
+    {!localStorage.getItem("residentFlat") && (
+      <FormControl fullWidth sx={{ mt: 3 }}>
+        <InputLabel>Status</InputLabel>
+        <Select
+          value={preview?.status || "Pending"}
+          label="Status"
+          onChange={async (e) => {
+            const newStatus = e.target.value;
+
+            await changeStatus(preview._id, newStatus);
+
+            setPreview((p) => ({ ...p, status: newStatus }));
+          }}
+        >
+          <MenuItem value="Pending">Pending</MenuItem>
+          <MenuItem value="In Progress">In Progress</MenuItem>
+          <MenuItem value="Resolved">Resolved</MenuItem>
+        </Select>
+      </FormControl>
+    )}
+  </DialogContent>
+
+  <DialogActions>
+    <Button onClick={() => setPreview(null)}>Close</Button>
+  </DialogActions>
+</Dialog>
 
       {/* ---------- SNACKBAR ---------- */}
       <Snackbar
