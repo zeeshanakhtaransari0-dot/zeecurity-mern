@@ -51,23 +51,36 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Update status (PUT)
-router.put("/:id/status", async (req, res) => {
+// UPDATE complaint (name / flatNumber / details / status)
+router.put("/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const { status } = req.body;
-    console.log("PUT /api/complaints/:id/status", id, status);
 
-    if (!status) return res.status(400).json({ error: "Missing status in body" });
+    const { name, flatNumber, details, complaintText, status } = req.body;
 
-    const updated = await Complaint.findByIdAndUpdate(id, { $set: { status } }, { new: true });
-    if (!updated) return res.status(404).json({ error: "Not found" });
+    const updateData = {};
 
-    console.log("Complaint status updated:", id, status);
-    res.json({ success: true, complaint: updated });
+    if (name) updateData.name = name.trim();
+    if (flatNumber) updateData.flatNumber = flatNumber.trim();
+    if (details) updateData.details = details.trim();
+    if (complaintText) updateData.complaintText = complaintText.trim();
+    if (status) updateData.status = status;
+
+    const updated = await Complaint.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ error: "Complaint not found" });
+    }
+
+    console.log("Complaint updated:", id);
+    res.json(updated);
   } catch (err) {
-    console.error("Error updating complaint status:", err && err.stack ? err.stack : err);
-    res.status(500).json({ error: "Server error", message: err && err.message ? err.message : "" });
+    console.error("Error updating complaint:", err);
+    res.status(500).json({ error: "Update failed" });
   }
 });
 
