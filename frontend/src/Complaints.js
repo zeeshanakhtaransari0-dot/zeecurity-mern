@@ -1,3 +1,4 @@
+// src/Complaints.js
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
@@ -34,16 +35,14 @@ const STATUS_COLORS = {
 };
 
 export default function Complaints() {
-  const storedName = localStorage.getItem("residentName") || "";
-  const storedFlat = localStorage.getItem("residentFlat") || "";
-  const isResident = !!storedFlat;
-
-  const [name, setName] = useState(storedName);
-  const [flat, setFlat] = useState(storedFlat);
+  const [name, setName] = useState(localStorage.getItem("residentName") || "");
+  const [flat, setFlat] = useState(localStorage.getItem("residentFlat") || "");
   const [details, setDetails] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
+
   const [complaints, setComplaints] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("All");
   const [loading, setLoading] = useState(false);
+
   const [preview, setPreview] = useState(null);
   const [snack, setSnack] = useState({
     open: false,
@@ -63,7 +62,7 @@ export default function Complaints() {
         ? res.data
         : res.data?.complaints || [];
       setComplaints(list);
-    } catch {
+    } catch (err) {
       setSnack({
         open: true,
         severity: "error",
@@ -74,8 +73,9 @@ export default function Complaints() {
     }
   }
 
-  async function submitComplaint(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
+
     if (!name || !flat || !details) {
       setSnack({
         open: true,
@@ -86,14 +86,16 @@ export default function Complaints() {
     }
 
     try {
-      const res = await axios.post(`${API_BASE}/complaints`, {
+      const payload = {
         name,
         flatNumber: flat,
         details,
         status: "Pending",
-      });
+      };
 
+      const res = await axios.post(`${API_BASE}/complaints`, payload);
       setComplaints((prev) => [res.data, ...prev]);
+
       setDetails("");
       setSnack({
         open: true,
@@ -104,23 +106,29 @@ export default function Complaints() {
       setSnack({
         open: true,
         severity: "error",
-        msg: "Submit failed",
+        msg: "Failed to submit complaint",
       });
     }
   }
 
-  async function changeStatus(id, status) {
+  async function saveEditedComplaint() {
     try {
-      await axios.put(`${API_BASE}/complaints/${id}/status`, { status });
-      setComplaints((prev) =>
-        prev.map((c) => (c._id === id ? { ...c, status } : c))
+      await axios.put(
+        `${API_BASE}/complaints/${preview._id}`,
+        preview
       );
-      setPreview((p) => (p ? { ...p, status } : p));
+      setPreview(null);
+      fetchComplaints();
+      setSnack({
+        open: true,
+        severity: "success",
+        msg: "Complaint updated",
+      });
     } catch {
       setSnack({
         open: true,
         severity: "error",
-        msg: "Status update failed",
+        msg: "Update failed",
       });
     }
   }
@@ -129,8 +137,7 @@ export default function Complaints() {
     if (!window.confirm("Delete this complaint?")) return;
     try {
       await axios.delete(`${API_BASE}/complaints/${id}`);
-      setComplaints((prev) => prev.filter((c) => c._id !== id));
-      setPreview(null);
+      setComplaints((p) => p.filter((c) => c._id !== id));
     } catch {
       setSnack({
         open: true,
@@ -151,14 +158,14 @@ export default function Complaints() {
         Submit Complaint
       </Typography>
 
-      <Box component="form" onSubmit={submitComplaint} sx={{ mb: 4 }}>
+      {/* SUBMIT FORM */}
+      <Box component="form" onSubmit={handleSubmit} sx={{ mb: 4 }}>
         <Grid container spacing={2}>
           <Grid item xs={12} md={4}>
             <TextField
               label="Your Name"
               fullWidth
               value={name}
-              disabled={isResident}
               onChange={(e) => setName(e.target.value)}
             />
           </Grid>
@@ -168,17 +175,20 @@ export default function Complaints() {
               label="Flat Number"
               fullWidth
               value={flat}
-              disabled={isResident}
               onChange={(e) => setFlat(e.target.value)}
             />
+          </Grid>
+
+          <Grid item xs={12} md={5}>
+            <TextField label="Status" value="Pending" disabled fullWidth />
           </Grid>
 
           <Grid item xs={12}>
             <TextField
               label="Complaint Details"
-              fullWidth
               multiline
               minRows={3}
+              fullWidth
               value={details}
               onChange={(e) => setDetails(e.target.value)}
             />
@@ -192,20 +202,25 @@ export default function Complaints() {
         </Grid>
       </Box>
 
-      <FormControl size="small" sx={{ mb: 2 }}>
-        <InputLabel>Status</InputLabel>
-        <Select
-          value={statusFilter}
-          label="Status"
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
-          <MenuItem value="All">All</MenuItem>
-          <MenuItem value="Pending">Pending</MenuItem>
-          <MenuItem value="In Progress">In Progress</MenuItem>
-          <MenuItem value="Resolved">Resolved</MenuItem>
-        </Select>
-      </FormControl>
+      {/* FILTER */}
+      <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+        <Typography variant="h6">All Complaints</Typography>
+        <FormControl size="small">
+          <InputLabel>Status</InputLabel>
+          <Select
+            value={statusFilter}
+            label="Status"
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <MenuItem value="All">All</MenuItem>
+            <MenuItem value="Pending">Pending</MenuItem>
+            <MenuItem value="In Progress">In Progress</MenuItem>
+            <MenuItem value="Resolved">Resolved</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
 
+      {/* LIST */}
       {loading ? (
         <CircularProgress />
       ) : (
@@ -225,15 +240,10 @@ export default function Complaints() {
                   />
                 </CardContent>
                 <CardActions>
-                  <Button onClick={() => setPreview(c)}>Preview</Button>
-                  {!isResident && (
-                    <Button
-                      color="error"
-                      onClick={() => deleteComplaint(c._id)}
-                    >
-                      Delete
-                    </Button>
-                  )}
+                  <Button onClick={() => setPreview(c)}>Preview / Edit</Button>
+                  <Button color="error" onClick={() => deleteComplaint(c._id)}>
+                    Delete
+                  </Button>
                 </CardActions>
               </Card>
             </Grid>
@@ -241,34 +251,57 @@ export default function Complaints() {
         </Grid>
       )}
 
-      {/* PREVIEW + STATUS CHANGE */}
+      {/* EDIT MODAL */}
       <Dialog open={!!preview} onClose={() => setPreview(null)} fullWidth>
-        <DialogTitle>Complaint</DialogTitle>
-        <DialogContent>
-          <Typography sx={{ fontWeight: 700 }}>
-            {preview?.name} — Flat {preview?.flatNumber}
-          </Typography>
-          <Typography sx={{ mt: 2 }}>{preview?.details}</Typography>
+        <DialogTitle>Edit Complaint</DialogTitle>
+        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <TextField
+            label="Name"
+            value={preview?.name || ""}
+            onChange={(e) =>
+              setPreview({ ...preview, name: e.target.value })
+            }
+          />
 
-          {!isResident && (
-            <FormControl fullWidth sx={{ mt: 3 }}>
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={preview?.status || "Pending"}
-                label="Status"
-                onChange={(e) =>
-                  changeStatus(preview._id, e.target.value)
-                }
-              >
-                <MenuItem value="Pending">Pending</MenuItem>
-                <MenuItem value="In Progress">In Progress</MenuItem>
-                <MenuItem value="Resolved">Resolved</MenuItem>
-              </Select>
-            </FormControl>
-          )}
+          <TextField
+            label="Flat Number"
+            value={preview?.flatNumber || ""}
+            onChange={(e) =>
+              setPreview({ ...preview, flatNumber: e.target.value })
+            }
+          />
+
+          <TextField
+            label="Details"
+            multiline
+            minRows={3}
+            value={preview?.details || ""}
+            onChange={(e) =>
+              setPreview({ ...preview, details: e.target.value })
+            }
+          />
+
+          <FormControl fullWidth>
+            <InputLabel>Status</InputLabel>
+            <Select
+              value={preview?.status || "Pending"}
+              label="Status"
+              onChange={(e) =>
+                setPreview({ ...preview, status: e.target.value })
+              }
+            >
+              <MenuItem value="Pending">Pending</MenuItem>
+              <MenuItem value="In Progress">In Progress</MenuItem>
+              <MenuItem value="Resolved">Resolved</MenuItem>
+            </Select>
+          </FormControl>
         </DialogContent>
+
         <DialogActions>
-          <Button onClick={() => setPreview(null)}>Close</Button>
+          <Button onClick={() => setPreview(null)}>Cancel</Button>
+          <Button variant="contained" onClick={saveEditedComplaint}>
+            Save
+          </Button>
         </DialogActions>
       </Dialog>
 
