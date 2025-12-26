@@ -14,7 +14,6 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Chip,
   CircularProgress,
   Snackbar,
   Alert,
@@ -27,12 +26,6 @@ import {
 const API_BASE =
   process.env.REACT_APP_API_BASE ||
   "https://zeecurity-backend.onrender.com/api";
-
-const STATUS_COLORS = {
-  Pending: "warning",
-  "In Progress": "info",
-  Resolved: "success",
-};
 
 export default function Complaints() {
   const storedName = localStorage.getItem("residentName") || "";
@@ -92,9 +85,11 @@ export default function Complaints() {
         details,
         status: "Pending",
       };
+
       const res = await axios.post(`${API_BASE}/complaints`, payload);
       setComplaints((p) => [res.data, ...p]);
       setDetails("");
+
       setSnack({
         open: true,
         severity: "success",
@@ -111,19 +106,15 @@ export default function Complaints() {
 
   async function handleDelete(id) {
     if (!window.confirm("Delete this complaint?")) return;
+
     try {
       await axios.delete(`${API_BASE}/complaints/${id}`);
       setComplaints((p) => p.filter((c) => c._id !== id));
-      setSnack({
-        open: true,
-        severity: "success",
-        msg: "Complaint deleted",
-      });
     } catch {
       setSnack({
         open: true,
         severity: "error",
-        msg: "Failed to delete complaint",
+        msg: "Delete failed",
       });
     }
   }
@@ -139,7 +130,6 @@ export default function Complaints() {
         Submit Complaint
       </Typography>
 
-      {/* FORM */}
       <Box component="form" onSubmit={handleSubmit} sx={{ mb: 4 }}>
         <Grid container spacing={2}>
           <Grid item xs={12} md={4}>
@@ -147,9 +137,6 @@ export default function Complaints() {
           </Grid>
           <Grid item xs={12} md={3}>
             <TextField label="Flat Number" fullWidth value={flat} disabled />
-          </Grid>
-          <Grid item xs={12} md={5}>
-            <TextField label="Status" fullWidth value="Pending" disabled />
           </Grid>
           <Grid item xs={12}>
             <TextField
@@ -169,7 +156,6 @@ export default function Complaints() {
         </Grid>
       </Box>
 
-      {/* FILTER */}
       <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
         <Typography variant="h6">All Complaints</Typography>
         <FormControl size="small">
@@ -181,13 +167,11 @@ export default function Complaints() {
           >
             <MenuItem value="All">All</MenuItem>
             <MenuItem value="Pending">Pending</MenuItem>
-            <MenuItem value="In Progress">In Progress</MenuItem>
             <MenuItem value="Resolved">Resolved</MenuItem>
           </Select>
         </FormControl>
       </Box>
 
-      {/* LIST */}
       {loading ? (
         <Box sx={{ py: 6, display: "flex", justifyContent: "center" }}>
           <CircularProgress />
@@ -202,14 +186,16 @@ export default function Complaints() {
               <Grid item xs={12} md={6} key={id}>
                 <Card>
                   <CardContent>
-                    <Typography variant="h6" fontWeight={700}>
+                    <Typography variant="h6">
                       {c.name} — Flat {c.flatNumber}
                     </Typography>
                     <Typography sx={{ mt: 1 }}>{c.details}</Typography>
                   </CardContent>
                   <CardActions>
                     <Button onClick={() => setPreview(c)}>Preview</Button>
-                    {!localStorage.getItem("residentFlat") && (
+
+                    {/* Guard only */}
+                    {!storedFlat && (
                       <Button
                         color="error"
                         onClick={() => handleDelete(id)}
@@ -225,11 +211,10 @@ export default function Complaints() {
         </Grid>
       )}
 
-      {/* PREVIEW */}
       <Dialog open={!!preview} onClose={() => setPreview(null)}>
         <DialogTitle>Complaint</DialogTitle>
         <DialogContent>
-          <Typography fontWeight={700}>
+          <Typography sx={{ fontWeight: 700 }}>
             {preview?.name} — Flat {preview?.flatNumber}
           </Typography>
           <Typography sx={{ mt: 2 }}>{preview?.details}</Typography>
@@ -239,7 +224,6 @@ export default function Complaints() {
         </DialogActions>
       </Dialog>
 
-      {/* SNACKBAR */}
       <Snackbar
         open={snack.open}
         autoHideDuration={3000}
