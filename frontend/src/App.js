@@ -16,7 +16,6 @@ import Notices from "./Notices";
 import Complaints from "./Complaints";
 import Payments from "./Payments";
 import SOS from "./SOS";
-import Dashboard from "./Dashboard"; // (not used yet, but ok to keep)
 import ResidentHome from "./ResidentHome";
 import ResidentProfile from "./ResidentProfile";
 
@@ -144,8 +143,9 @@ function GuardHome() {
   });
 
   useEffect(() => {
-    fetchStats();
-  }, []);
+  fetchStats();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 
   async function fetchStats() {
     try {
