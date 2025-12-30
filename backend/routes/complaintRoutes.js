@@ -3,42 +3,42 @@ const express = require("express");
 const router = express.Router();
 const Complaint = require("../models/Complaint");
 
-// GET all complaints
+// ================= GET ALL COMPLAINTS =================
 router.get("/", async (req, res) => {
   try {
     console.log("GET /api/complaints");
     const list = await Complaint.find().sort({ createdAt: -1 });
     res.json(list);
   } catch (err) {
-    console.error("Error fetching complaints:", err && err.stack ? err.stack : err);
+    console.error("Error fetching complaints:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-// POST create complaint (robust: accepts complaintText OR details)
+// ================= CREATE COMPLAINT =================
 router.post("/", async (req, res) => {
   try {
     console.log("POST /api/complaints payload:", req.body);
 
-    // accept both shapes from frontend:
-    // { name, flatNumber, details }  OR  { name, flatNumber, complaintText }
     const { name, flatNumber } = req.body;
     let { details, complaintText, status } = req.body;
 
-    // normalize: prefer details, otherwise use complaintText
-    const finalText = (details && details.trim()) ? details.trim() : (complaintText && complaintText.trim() ? complaintText.trim() : "");
+    const finalText =
+      details?.trim() ||
+      complaintText?.trim() ||
+      "";
 
-    // Basic server-side validation
     if (!name || !flatNumber || !finalText) {
-      return res.status(400).json({ error: "Missing required fields: name, flatNumber, complaint text (details or complaintText)" });
+      return res.status(400).json({
+        error: "Missing required fields",
+      });
     }
 
-    // Create document using both fields so both legacy and new clients work
     const c = new Complaint({
       name: name.trim(),
       flatNumber: flatNumber.trim(),
-      details: details ? details.trim() : undefined,
-      complaintText: (!details && complaintText) ? complaintText.trim() : undefined,
+      details: details?.trim(),
+      complaintText: complaintText?.trim(),
       status: status || "Pending",
     });
 
@@ -46,29 +46,17 @@ router.post("/", async (req, res) => {
     console.log("Complaint saved:", saved._id);
     res.status(201).json(saved);
   } catch (err) {
-    console.error("Error creating complaint:", err && err.stack ? err.stack : err);
-    res.status(500).json({ error: "Server error", message: err && err.message ? err.message : "" });
+    console.error("Error creating complaint:", err);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-// UPDATE complaint (name / flatNumber / details / status)
+// ================= UPDATE COMPLAINT (FULL) =================
 router.put("/:id", async (req, res) => {
   try {
-    const id = req.params.id;
-
-    const { name, flatNumber, details, complaintText, status } = req.body;
-
-    const updateData = {};
-
-    if (name) updateData.name = name.trim();
-    if (flatNumber) updateData.flatNumber = flatNumber.trim();
-    if (details) updateData.details = details.trim();
-    if (complaintText) updateData.complaintText = complaintText.trim();
-    if (status) updateData.status = status;
-
     const updated = await Complaint.findByIdAndUpdate(
-      id,
-      { $set: updateData },
+      req.params.id,
+      req.body,
       { new: true }
     );
 
@@ -76,7 +64,6 @@ router.put("/:id", async (req, res) => {
       return res.status(404).json({ error: "Complaint not found" });
     }
 
-    console.log("Complaint updated:", id);
     res.json(updated);
   } catch (err) {
     console.error("Error updating complaint:", err);
@@ -84,18 +71,44 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// DELETE
+// ================= ✅ UPDATE STATUS (THIS FIXES YOUR BUG) =================
+router.put("/:id/status", async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ error: "Status is required" });
+    }
+
+    const updated = await Complaint.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ error: "Complaint not found" });
+    }
+
+    console.log("Status updated:", req.params.id, status);
+    res.json(updated);
+  } catch (err) {
+    console.error("Error updating status:", err);
+    res.status(500).json({ error: "Status update failed" });
+  }
+});
+
+// ================= DELETE COMPLAINT =================
 router.delete("/:id", async (req, res) => {
   try {
-    console.log("DELETE /api/complaints/:id called for id:", req.params.id);
-    const id = req.params.id;
-    const d = await Complaint.findByIdAndDelete(id);
-    if (!d) return res.status(404).json({ error: "Not found" });
-    console.log("Complaint deleted:", id);
+    const deleted = await Complaint.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ error: "Complaint not found" });
+    }
     res.json({ success: true });
   } catch (err) {
-    console.error("Error deleting complaint:", err && err.stack ? err.stack : err);
-    res.status(500).json({ error: "Server error", message: err && err.message ? err.message : "" });
+    console.error("Error deleting complaint:", err);
+    res.status(500).json({ error: "Delete failed" });
   }
 });
 

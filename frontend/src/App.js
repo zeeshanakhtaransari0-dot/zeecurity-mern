@@ -18,6 +18,8 @@ import Payments from "./Payments";
 import SOS from "./SOS";
 import ResidentHome from "./ResidentHome";
 import ResidentProfile from "./ResidentProfile";
+import ResidentComplaints from "./pages/ResidentComplaints";
+import GuardComplaints from "./pages/GuardComplaints"; 
 
 import axios from "axios";
 import {
@@ -258,7 +260,7 @@ export default function App() {
                   <Sidebar />
                   <div style={{ marginLeft: 220, flex: 1 }}>
                     {path === "/visitors" && <Visitors />}
-                    {path === "/complaints" && <Complaints />}
+                   {path === "/complaints" && <GuardComplaints />}
                     {path === "/payments" && <Payments />}
                     {path === "/notices" && <Notices />}
                     {path === "/sos" && <SOS />}
@@ -292,7 +294,7 @@ export default function App() {
                   <ResidentSidebar />
                   <div style={{ marginLeft: 220, flex: 1 }}>
                     {page === "notices" && <Notices />}
-                    {page === "complaints" && <Complaints />}
+                  {page === "complaints" && <ResidentComplaints />}
                     {page === "payments" && <Payments />}
                     {page === "sos" && <SOS />}
                     {page === "profile" && <ResidentProfile />}

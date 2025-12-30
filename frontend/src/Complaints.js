@@ -113,7 +113,10 @@ export default function Complaints() {
   }
 
   async function updateStatus(id, status) {
-    await axios.put(`${API_BASE}/complaints/${id}/status`, { status });
+  await axios.put(
+  `${API_BASE}/complaints/${id}/status`,
+  { status }
+);
     fetchComplaints();
   }
 
