@@ -1,6 +1,6 @@
 // server.js
 // Zeecurity backend entrypoint
-console.log("Server starting...");
+console.log("🚀 Server starting...");
 
 const express = require("express");
 const cors = require("cors");
@@ -9,68 +9,102 @@ const path = require("path");
 require("dotenv").config();
 
 const app = express();
-const residentRoutes = require("./routes/residentRoutes");
-app.use("/api/residents", residentRoutes);
 
-// ---------- CONFIG / LOGGING ----------
-console.log("Loaded MONGO_URI =", process.env.MONGO_URI ? "FOUND" : "MISSING");
+/* =========================
+   CONFIG / LOGGING
+========================= */
+console.log(
+  "Loaded MONGO_URI =",
+  process.env.MONGO_URI ? "FOUND" : "MISSING"
+);
 
-// Simple request logger (shows method + url)
+// Simple request logger
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} → ${req.method} ${req.originalUrl}`);
+  console.log(
+    `${new Date().toISOString()} → ${req.method} ${req.originalUrl}`
+  );
   next();
 });
 
-// ---------- MIDDLEWARE ----------
-app.use(cors());
-// Allow large payloads (QR images are base64 strings)
+/* =========================
+   CORS (VERY IMPORTANT)
+========================= */
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://zeecurity-mern.vercel.app",
+      "https://zeecurity-mern-3ylgji7u-zeeshan-ansaris-projects-03aa24f8.vercel.app"
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+  })
+);
+
+/* =========================
+   MIDDLEWARE
+========================= */
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
-// ---------- STATIC FILES (public) ----------
-// Serve any static file placed in backend/public at root (including favicon.ico)
+/* =========================
+   STATIC FILES
+========================= */
 app.use(express.static(path.join(__dirname, "public")));
 
-// ---------- ROUTES (import) ----------
+/* =========================
+   ROUTES
+========================= */
+const residentRoutes = require("./routes/residentRoutes");
 const visitorRoutes = require("./routes/visitorRoutes");
 const noticeRoutes = require("./routes/noticeRoutes");
 const complaintRoutes = require("./routes/complaintRoutes");
 const maintenanceRoutes = require("./routes/maintenanceRoutes");
 const sosRoutes = require("./routes/sosRoutes");
 
-// optional dashboard route — wrapped in try/catch if file missing
-try {
-  const dashboardRoutes = require("./routes/dashboardRoutes");
-  app.use("/api/dashboard", dashboardRoutes);
-} catch (err) {
-  console.warn("Dashboard route not found — skipping /api/dashboard mount.");
-}
-
-// mount main routes
+app.use("/api/residents", residentRoutes);
 app.use("/api/visitors", visitorRoutes);
 app.use("/api/notices", noticeRoutes);
 app.use("/api/complaints", complaintRoutes);
 app.use("/api/maintenance", maintenanceRoutes);
 app.use("/api/sos", sosRoutes);
 
-// simple test root
+// Optional dashboard route
+try {
+  const dashboardRoutes = require("./routes/dashboardRoutes");
+  app.use("/api/dashboard", dashboardRoutes);
+} catch (err) {
+  console.warn("⚠️ Dashboard route not found — skipping.");
+}
+
+/* =========================
+   ROOT TEST
+========================= */
 app.get("/", (req, res) => {
-  res.send("Zeecurity Backend Running Successfully!");
+  res.send("✅ Zeecurity Backend Running Successfully!");
 });
 
-// ---------- SAFER 404 FOR UNKNOWN API ROUTES ----------
-// this should be after your /api routes so only unknown API paths hit it
+/* =========================
+   API 404 HANDLER
+========================= */
 app.use("/api", (req, res) => {
   res.status(404).json({ error: "API route not found" });
 });
 
-// ---------- ERROR HANDLER ----------
+/* =========================
+   ERROR HANDLER
+========================= */
 app.use((err, req, res, next) => {
-  console.error("Unhandled error:", err && (err.stack || err.message) ? (err.stack || err.message) : err);
-  res.status(err.status || 500).json({ error: "Server error", message: err.message || String(err) });
+  console.error("❌ Unhandled error:", err);
+  res.status(err.status || 500).json({
+    error: "Server error",
+    message: err.message || String(err)
+  });
 });
 
-// ---------- MONGODB CONNECTION ----------
+/* =========================
+   MONGODB CONNECTION
+========================= */
 const MONGO_URI = process.env.MONGO_URI;
 if (!MONGO_URI) {
   console.error("❌ ERROR: Missing MONGO_URI in .env file!");
@@ -82,21 +116,25 @@ mongoose
   .connect(MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch((err) => {
-    console.error("❌ MongoDB Error:", err && err.message ? err.message : err);
+    console.error("❌ MongoDB Error:", err.message || err);
   });
 
-// ---------- START SERVER ----------
+/* =========================
+   START SERVER
+========================= */
 const PORT = process.env.PORT || 5000;
 const server = app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
 
-// ---------- GRACEFUL SHUTDOWN ----------
+/* =========================
+   GRACEFUL SHUTDOWN
+========================= */
 process.on("SIGINT", () => {
-  console.log("\nGracefully shutting down...");
+  console.log("\n🛑 Shutting down...");
   server.close(() => {
     mongoose.disconnect().then(() => {
-      console.log("MongoDB disconnected. Bye!");
+      console.log("MongoDB disconnected. Bye 👋");
       process.exit(0);
     });
   });
