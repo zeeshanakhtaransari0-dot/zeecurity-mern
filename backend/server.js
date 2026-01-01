@@ -9,6 +9,8 @@ const path = require("path");
 require("dotenv").config();
 
 const app = express();
+const residentRoutes = require("./routes/residentRoutes");
+app.use("/api/residents", residentRoutes);
 
 // ---------- CONFIG / LOGGING ----------
 console.log("Loaded MONGO_URI =", process.env.MONGO_URI ? "FOUND" : "MISSING");
