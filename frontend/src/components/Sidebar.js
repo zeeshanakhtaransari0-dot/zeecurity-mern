@@ -35,16 +35,18 @@ export default function Sidebar() {
   };
 
   const menuItems = [
-    { label: "Guard Home", to: "/guard", icon: <HomeIcon /> },
-    { label: "Dashboard", to: "/dashboard", icon: <DashboardIcon /> },
-    { label: "Visitors", to: "/visitors", icon: <PeopleIcon /> },
-    { label: "Notices", to: "/notices", icon: <NotificationsIcon /> },
-    { label: "Complaints", to: "/complaints", icon: <ReportIcon /> },
-    { label: "Payments", to: "/payments", icon: <PaymentsIcon /> },
-    // NEW: Residents list for guard
-    { label: "Residents", to: "/residents", icon: <PeopleIcon /> },
-    { label: "SOS", to: "/sos", icon: <WarningIcon />, danger: true },
-  ];
+  { label: "Guard Home", to: "/guard", icon: <HomeIcon /> },
+  { label: "Dashboard", to: "/guard", icon: <DashboardIcon /> },
+  { label: "Visitors", to: "/visitors", icon: <PeopleIcon /> },
+  { label: "Notices", to: "/notices", icon: <NotificationsIcon /> },
+  { label: "Complaints", to: "/complaints", icon: <ReportIcon /> },
+  { label: "Payments", to: "/payments", icon: <PaymentsIcon /> },
+
+  // ✅ FIXED PATH
+  { label: "Residents", to: "/guard/residents", icon: <PeopleIcon /> },
+
+  { label: "SOS", to: "/sos", icon: <WarningIcon />, danger: true },
+];
 
   return (
     <Drawer
