@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Box, Typography, Card, CardContent } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  CircularProgress,
+  Alert,
+} from "@mui/material";
 
 const API_BASE =
   process.env.REACT_APP_API_BASE ||
@@ -8,6 +15,8 @@ const API_BASE =
 
 export default function ResidentsPage() {
   const [residents, setResidents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchResidents();
@@ -15,10 +24,14 @@ export default function ResidentsPage() {
 
   const fetchResidents = async () => {
     try {
+      setLoading(true);
       const res = await axios.get(`${API_BASE}/residents`);
-      setResidents(res.data);
+      setResidents(res.data || []);
     } catch (err) {
       console.error("Failed to fetch residents", err);
+      setError("Unable to load residents");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -28,17 +41,47 @@ export default function ResidentsPage() {
         Residents Logged In
       </Typography>
 
-      {residents.map((r, i) => (
-        <Card key={i} sx={{ mb: 2 }}>
-          <CardContent>
-            <Typography>Name: {r.name}</Typography>
-            <Typography>Flat: {r.flatNumber}</Typography>
-            <Typography variant="caption">
-              Logged at: {new Date(r.createdAt).toLocaleString()}
-            </Typography>
-          </CardContent>
-        </Card>
-      ))}
+      {/* 🔄 Loading */}
+      {loading && (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+          <CircularProgress />
+        </Box>
+      )}
+
+      {/* ❌ Error */}
+      {!loading && error && (
+        <Alert severity="error" sx={{ mt: 2 }}>
+          {error}
+        </Alert>
+      )}
+
+      {/* ℹ️ No Residents */}
+      {!loading && !error && residents.length === 0 && (
+        <Alert severity="info" sx={{ mt: 2 }}>
+          No residents have logged in yet.
+        </Alert>
+      )}
+
+      {/* ✅ Residents List */}
+      {!loading &&
+        !error &&
+        residents.map((r, i) => (
+          <Card key={r._id || i} sx={{ mb: 2 }}>
+            <CardContent>
+              <Typography>
+                <strong>Name:</strong> {r.name}
+              </Typography>
+              <Typography>
+                <strong>Flat:</strong> {r.flatNumber}
+              </Typography>
+              {r.createdAt && (
+                <Typography variant="caption" color="text.secondary">
+                  Logged at: {new Date(r.createdAt).toLocaleString()}
+                </Typography>
+              )}
+            </CardContent>
+          </Card>
+        ))}
     </Box>
   );
 }

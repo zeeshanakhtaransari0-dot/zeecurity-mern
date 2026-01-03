@@ -21,7 +21,7 @@ import ResidentProfile from "./ResidentProfile";
 
 import ResidentComplaints from "./pages/ResidentComplaints";
 import GuardComplaints from "./pages/GuardComplaints";
-import ResidentsPage from "./ResidentsPage"; // ✅ IMPORTANT
+import ResidentsPage from "./ResidentsPage";
 
 import axios from "axios";
 import {
@@ -49,40 +49,99 @@ function Login() {
   const [username, setUsername] = useState("");
   const [flat, setFlat] = useState("");
 
-  const handleLogin = () => {
-    if (!username.trim()) return alert("Enter username");
-    if (role === "resident" && !flat.trim()) return alert("Enter flat");
+  const handleLogin = async () => {
+    if (!username.trim()) {
+      alert("Enter username");
+      return;
+    }
 
-    if (role === "resident") {
-      localStorage.setItem("residentName", username);
-      localStorage.setItem("residentFlat", flat);
-      localStorage.setItem("role", "resident");
-      navigate("/resident");
-    } else {
+    // ===== GUARD LOGIN =====
+    if (role === "guard") {
       localStorage.setItem("role", "guard");
       navigate("/guard");
+      return;
+    }
+
+    // ===== RESIDENT LOGIN =====
+    if (!flat.trim()) {
+      alert("Enter flat number");
+      return;
+    }
+
+    try {
+      console.log("🚀 Sending resident POST");
+
+      const res = await fetch(`${API_BASE}/residents`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: username.trim(),
+          flatNumber: flat.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      console.log("✅ Resident saved:", data);
+
+      if (!res.ok) {
+        throw new Error("Failed to save resident");
+      }
+
+      localStorage.setItem("residentName", username.trim());
+      localStorage.setItem("residentFlat", flat.trim());
+      localStorage.setItem("role", "resident");
+
+      navigate("/resident");
+    } catch (err) {
+      console.error("❌ Resident login failed:", err);
+      alert("Resident login failed");
     }
   };
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+      }}
+    >
       <Paper sx={{ p: 4, width: 360, textAlign: "center" }}>
         <img src={logo} alt="logo" width={100} />
-        <Typography variant="h5" sx={{ mt: 2 }}>Login</Typography>
+        <Typography variant="h5" sx={{ mt: 2 }}>
+          Login
+        </Typography>
 
-        <TextField fullWidth label="Username" sx={{ mt: 2 }} value={username}
-          onChange={(e) => setUsername(e.target.value)} />
+        <TextField
+          fullWidth
+          label="Username"
+          sx={{ mt: 2 }}
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
 
         {role === "resident" && (
-          <TextField fullWidth label="Flat Number" sx={{ mt: 2 }}
-            value={flat} onChange={(e) => setFlat(e.target.value)} />
+          <TextField
+            fullWidth
+            label="Flat Number"
+            sx={{ mt: 2 }}
+            value={flat}
+            onChange={(e) => setFlat(e.target.value)}
+          />
         )}
 
         <Box sx={{ mt: 2, display: "flex", gap: 1, justifyContent: "center" }}>
-          <Button variant={role === "guard" ? "contained" : "outlined"} onClick={() => setRole("guard")}>
+          <Button
+            variant={role === "guard" ? "contained" : "outlined"}
+            onClick={() => setRole("guard")}
+          >
             Guard
           </Button>
-          <Button variant={role === "resident" ? "contained" : "outlined"} onClick={() => setRole("resident")}>
+          <Button
+            variant={role === "resident" ? "contained" : "outlined"}
+            onClick={() => setRole("resident")}
+          >
             Resident
           </Button>
         </Box>
@@ -131,10 +190,12 @@ function GuardHome() {
       <Grid container spacing={2} sx={{ mt: 2 }}>
         {Object.entries(stats).map(([k, v]) => (
           <Grid item xs={6} md={3} key={k}>
-            <Card><CardContent>
-              <Typography variant="caption">{k}</Typography>
-              <Typography variant="h5">{v}</Typography>
-            </CardContent></Card>
+            <Card>
+              <CardContent>
+                <Typography variant="caption">{k}</Typography>
+                <Typography variant="h5">{v}</Typography>
+              </CardContent>
+            </Card>
           </Grid>
         ))}
       </Grid>
@@ -155,82 +216,124 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Login />} />
 
-       {/* ===== GUARD ===== */}
+        {/* ===== GUARD ===== */}
+        <Route
+          path="/guard"
+          element={
+            <Layout sidebar={<Sidebar />}>
+              <GuardHome />
+            </Layout>
+          }
+        />
 
-<Route
-  path="/guard"
-  element={
-    <Layout sidebar={<Sidebar />}>
-      <GuardHome />
-    </Layout>
-  }
-/>
+        <Route
+          path="/guard/residents"
+          element={
+            <Layout sidebar={<Sidebar />}>
+              <ResidentsPage />
+            </Layout>
+          }
+        />
 
-<Route
-  path="/guard/residents"
-  element={
-    <Layout sidebar={<Sidebar />}>
-      <ResidentsPage />
-    </Layout>
-  }
-/>
+        <Route
+          path="/visitors"
+          element={
+            <Layout sidebar={<Sidebar />}>
+              <Visitors />
+            </Layout>
+          }
+        />
 
-<Route
-  path="/visitors"
-  element={
-    <Layout sidebar={<Sidebar />}>
-      <Visitors />
-    </Layout>
-  }
-/>
+        <Route
+          path="/complaints"
+          element={
+            <Layout sidebar={<Sidebar />}>
+              <GuardComplaints />
+            </Layout>
+          }
+        />
 
-<Route
-  path="/complaints"
-  element={
-    <Layout sidebar={<Sidebar />}>
-      <GuardComplaints />
-    </Layout>
-  }
-/>
+        <Route
+          path="/payments"
+          element={
+            <Layout sidebar={<Sidebar />}>
+              <Payments />
+            </Layout>
+          }
+        />
 
-<Route
-  path="/payments"
-  element={
-    <Layout sidebar={<Sidebar />}>
-      <Payments />
-    </Layout>
-  }
-/>
+        <Route
+          path="/notices"
+          element={
+            <Layout sidebar={<Sidebar />}>
+              <Notices />
+            </Layout>
+          }
+        />
 
-<Route
-  path="/notices"
-  element={
-    <Layout sidebar={<Sidebar />}>
-      <Notices />
-    </Layout>
-  }
-/>
+        <Route
+          path="/sos"
+          element={
+            <Layout sidebar={<Sidebar />}>
+              <SOS />
+            </Layout>
+          }
+        />
 
-<Route
-  path="/sos"
-  element={
-    <Layout sidebar={<Sidebar />}>
-      <SOS />
-    </Layout>
-  }
-/>
         {/* ===== RESIDENT ===== */}
-        <Route path="/resident" element={
-          <Layout sidebar={<ResidentSidebar />}>
-            <ResidentHome />
-          </Layout>
-        } />
+        <Route
+          path="/resident"
+          element={
+            <Layout sidebar={<ResidentSidebar />}>
+              <ResidentHome />
+            </Layout>
+          }
+        />
 
-        <Route path="/resident/complaints" element={<Layout sidebar={<ResidentSidebar />}><ResidentComplaints /></Layout>} />
-        <Route path="/resident/notices" element={<Layout sidebar={<ResidentSidebar />}><Notices /></Layout>} />
-        <Route path="/resident/payments" element={<Layout sidebar={<ResidentSidebar />}><Payments /></Layout>} />
-        <Route path="/resident/sos" element={<Layout sidebar={<ResidentSidebar />}><SOS /></Layout>} />
-        <Route path="/resident/profile" element={<Layout sidebar={<ResidentSidebar />}><ResidentProfile /></Layout>} />
+        <Route
+          path="/resident/complaints"
+          element={
+            <Layout sidebar={<ResidentSidebar />}>
+              <ResidentComplaints />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/resident/notices"
+          element={
+            <Layout sidebar={<ResidentSidebar />}>
+              <Notices />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/resident/payments"
+          element={
+            <Layout sidebar={<ResidentSidebar />}>
+              <Payments />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/resident/sos"
+          element={
+            <Layout sidebar={<ResidentSidebar />}>
+              <SOS />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/resident/profile"
+          element={
+            <Layout sidebar={<ResidentSidebar />}>
+              <ResidentProfile />
+            </Layout>
+          }
+        />
       </Routes>
     </Router>
   );
