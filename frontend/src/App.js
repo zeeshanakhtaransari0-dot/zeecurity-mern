@@ -94,160 +94,224 @@ function Login() {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "linear-gradient(135deg, #0f2027, #203a43, #2c5364)",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      {/* Floating bubbles */}
-      <div className="bg-bubble b1" />
-      <div className="bg-bubble b2" />
-      <div className="bg-bubble b3" />
-
-      <Paper
-        elevation={12}
-        sx={{
-          p: 4,
-          width: 360,
-          textAlign: "center",
-          borderRadius: 3,
-          animation: "fadeSlide 0.8s ease",
-          zIndex: 2,
-        }}
-      >
-        <img src={logo} alt="Zeecurity" width={90} />
-
-        <Typography variant="h5" sx={{ mt: 1, fontWeight: 600 }}>
-          Login
-        </Typography>
-
-        <Typography variant="body2" sx={{ mb: 2, color: "#607d8b" }}>
-          Smart Security for Modern Societies
-        </Typography>
-
-       <Typography
-  sx={{
-    mt: 1,
-    fontSize: "0.9rem",
-    letterSpacing: 1,
-    color: "#546e7a",
-    animation: "fadeText 1s ease",
-  }}
->
-  Secure Access •{" "}
-  <span
-    style={{
-      fontWeight: 700,
-      color: role === "guard" ? "#1e88e5" : "#43a047",
+  <Box
+    sx={{
+      minHeight: "100vh",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      background: "linear-gradient(135deg, #0f2027, #203a43, #2c5364)",
+      position: "relative",
+      overflow: "hidden",
     }}
   >
-    {role.toUpperCase()} MODE
-  </span>
-</Typography>
+    {/* ===== Animated Background Circles ===== */}
+    <Box className="bg-circle circle1" />
+    <Box className="bg-circle circle2" />
+    <Box className="bg-circle circle3" />
 
-<Typography
-  sx={{
-    mt: 0.5,
-    fontSize: "0.75rem",
-    color: "#78909c",
-    animation: "fadeText 1.2s ease",
-  }}
->
-  Protecting Your Society in Real Time
-</Typography>
-
-        <TextField
-          fullWidth
-          label="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          sx={{ mb: 2 }}
+    {/* ===== Login Card ===== */}
+    <Paper
+      elevation={12}
+      sx={{
+        p: 4,
+        width: 380,
+        textAlign: "center",
+        borderRadius: 4,
+        position: "relative",
+        zIndex: 2,
+        animation: "fadeSlide 0.9s ease",
+      }}
+    >
+      {/* ===== Logo ===== */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          mb: 1,
+        }}
+      >
+        <img
+          src={logo}
+          alt="Zeecurity"
+          width={90}
+          className="logo-animate"
         />
+      </Box>
 
-        {role === "resident" && (
-          <TextField
-            fullWidth
-            label="Flat Number"
-            value={flat}
-            onChange={(e) => setFlat(e.target.value)}
-            sx={{ mb: 2 }}
-          />
-        )}
+      <Typography variant="h5" sx={{ fontWeight: 700 }}>
+        Login
+      </Typography>
 
-        <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
-          <Button
-            fullWidth
-            variant={role === "guard" ? "contained" : "outlined"}
-            onClick={() => setRole("guard")}
-          >
-            Guard
-          </Button>
-
-          <Button
-            fullWidth
-            variant={role === "resident" ? "contained" : "outlined"}
-            onClick={() => setRole("resident")}
-          >
-            Resident
-          </Button>
-        </Box>
-
-        <Button
-          fullWidth
-          size="large"
-          variant="contained"
-          disabled={loading}
-          onClick={async () => {
-            setLoading(true);
-            await handleLogin();
-            setLoading(false);
-          }}
-          sx={{
-            py: 1.2,
-            fontWeight: 600,
-            background: "linear-gradient(90deg, #1e88e5, #42a5f5)",
-            "&:hover": {
-              transform: "scale(1.03)",
-            },
-          }}
-        >
-          {loading ? "Please wait..." : "Continue"}
-        </Button>
-      </Paper>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 2,
+          transition: "0.3s",
+        }}
+      >
+        Smart Security for Modern Societies
+      </Typography>
 
       <Typography
         variant="caption"
         sx={{
-          position: "absolute",
-          bottom: 16,
-          color: "rgba(255,255,255,0.6)",
+          display: "block",
+          mb: 2,
+          fontWeight: 600,
+          color: role === "guard" ? "#1e88e5" : "#43a047",
+          animation: "roleFade 0.4s ease",
         }}
       >
-        © 2026 Zeecurity
+        Logging in as <b>{role.toUpperCase()}</b>
       </Typography>
 
-     <style>
-{`
-@keyframes fadeText {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-`}
-</style>
-    </Box>
-  );
+      {/* ===== Inputs ===== */}
+      <TextField
+        fullWidth
+        label="Username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        sx={{ mb: 2 }}
+      />
+
+      {role === "resident" && (
+        <TextField
+          fullWidth
+          label="Flat Number"
+          value={flat}
+          onChange={(e) => setFlat(e.target.value)}
+          sx={{ mb: 2 }}
+        />
+      )}
+
+      {/* ===== Role Buttons ===== */}
+      <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+        <Button
+          fullWidth
+          variant={role === "guard" ? "contained" : "outlined"}
+          onClick={() => setRole("guard")}
+          sx={{
+            backgroundColor: role === "guard" ? "#1e88e5" : "transparent",
+          }}
+        >
+          Guard
+        </Button>
+
+        <Button
+          fullWidth
+          variant={role === "resident" ? "contained" : "outlined"}
+          onClick={() => setRole("resident")}
+          sx={{
+            backgroundColor: role === "resident" ? "#43a047" : "transparent",
+          }}
+        >
+          Resident
+        </Button>
+      </Box>
+
+      {/* ===== Continue Button ===== */}
+      <Button
+        fullWidth
+        size="large"
+        variant="contained"
+        onClick={handleLogin}
+        sx={{
+          py: 1.3,
+          fontWeight: 600,
+          background: "linear-gradient(90deg, #1e88e5, #42a5f5)",
+          transition: "0.3s",
+          "&:hover": {
+            transform: "scale(1.04)",
+            background: "linear-gradient(90deg, #1565c0, #1e88e5)",
+          },
+        }}
+      >
+        Continue
+      </Button>
+    </Paper>
+
+    {/* ===== Animations CSS ===== */}
+    <style>
+      {`
+        @keyframes fadeSlide {
+          from {
+            opacity: 0;
+            transform: translateY(40px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes roleFade {
+          from {
+            opacity: 0;
+            transform: translateY(5px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .logo-animate {
+          animation: logoPulse 2.5s infinite ease-in-out;
+          filter: drop-shadow(0 0 10px rgba(0, 200, 255, 0.4));
+        }
+
+        @keyframes logoPulse {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.08); }
+          100% { transform: scale(1); }
+        }
+
+        .bg-circle {
+          position: absolute;
+          border-radius: 50%;
+          filter: blur(60px);
+          opacity: 0.35;
+          animation: float 10s infinite alternate ease-in-out;
+        }
+
+        .circle1 {
+          width: 260px;
+          height: 260px;
+          background: #42a5f5;
+          top: 10%;
+          left: 10%;
+        }
+
+        .circle2 {
+          width: 320px;
+          height: 320px;
+          background: #26c6da;
+          bottom: 10%;
+          right: 15%;
+        }
+
+        .circle3 {
+          width: 200px;
+          height: 200px;
+          background: #66bb6a;
+          top: 50%;
+          right: 40%;
+        }
+
+        @keyframes float {
+          from {
+            transform: translateY(0px);
+          }
+          to {
+            transform: translateY(-40px);
+          }
+        }
+      `}
+    </style>
+  </Box>
+);
 }
 
 /* ================= GUARD HOME ================= */
