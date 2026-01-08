@@ -38,7 +38,9 @@ import {
 
 import logo from "./assets/zeecurity_logo.png";
 
-const API_BASE = "https://zeecurity-backend.onrender.com/api";
+const API_BASE =
+  process.env.REACT_APP_API_BASE ||
+  "https://zeecurity-backend.onrender.com/api";
 
 /* ================= LOGIN ================= */
 function Login() {
@@ -46,11 +48,18 @@ function Login() {
   const [role, setRole] = useState("guard");
   const [username, setUsername] = useState("");
   const [flat, setFlat] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!username.trim()) return alert("Enter username");
-    if (role === "resident" && !flat.trim())
-      return alert("Enter flat number");
+    if (!username.trim()) {
+      alert("Enter username");
+      return;
+    }
+
+    if (role === "resident" && !flat.trim()) {
+      alert("Enter flat number");
+      return;
+    }
 
     // ===== RESIDENT LOGIN =====
     if (role === "resident") {
@@ -74,7 +83,6 @@ function Login() {
 
         navigate("/resident");
       } catch (err) {
-        console.error(err);
         alert("Resident login failed");
       }
       return;
@@ -92,28 +100,67 @@ function Login() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        background:
-          "linear-gradient(135deg, #0f2027, #203a43, #2c5364)",
+        background: "linear-gradient(135deg, #0f2027, #203a43, #2c5364)",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
+      {/* Floating bubbles */}
+      <div className="bg-bubble b1" />
+      <div className="bg-bubble b2" />
+      <div className="bg-bubble b3" />
+
       <Paper
         elevation={12}
         sx={{
           p: 4,
-          width: { xs: "90%", sm: 360 },
+          width: 360,
           textAlign: "center",
           borderRadius: 3,
-          animation: "fadeSlide 0.7s ease",
+          animation: "fadeSlide 0.8s ease",
+          zIndex: 2,
         }}
       >
-        <img src={logo} alt="Zeecurity" width={80} />
+        <img src={logo} alt="Zeecurity" width={90} />
 
-        <Typography
-          variant="h5"
-          sx={{ mt: 2, mb: 2, fontWeight: 600 }}
-        >
+        <Typography variant="h5" sx={{ mt: 1, fontWeight: 600 }}>
           Login
         </Typography>
+
+        <Typography variant="body2" sx={{ mb: 2, color: "#607d8b" }}>
+          Smart Security for Modern Societies
+        </Typography>
+
+       <Typography
+  sx={{
+    mt: 1,
+    fontSize: "0.9rem",
+    letterSpacing: 1,
+    color: "#546e7a",
+    animation: "fadeText 1s ease",
+  }}
+>
+  Secure Access •{" "}
+  <span
+    style={{
+      fontWeight: 700,
+      color: role === "guard" ? "#1e88e5" : "#43a047",
+    }}
+  >
+    {role.toUpperCase()} MODE
+  </span>
+</Typography>
+
+<Typography
+  sx={{
+    mt: 0.5,
+    fontSize: "0.75rem",
+    color: "#78909c",
+    animation: "fadeText 1.2s ease",
+  }}
+>
+  Protecting Your Society in Real Time
+</Typography>
 
         <TextField
           fullWidth
@@ -141,6 +188,7 @@ function Login() {
           >
             Guard
           </Button>
+
           <Button
             fullWidth
             variant={role === "resident" ? "contained" : "outlined"}
@@ -153,35 +201,51 @@ function Login() {
         <Button
           fullWidth
           size="large"
-          onClick={handleLogin}
+          variant="contained"
+          disabled={loading}
+          onClick={async () => {
+            setLoading(true);
+            await handleLogin();
+            setLoading(false);
+          }}
           sx={{
             py: 1.2,
             fontWeight: 600,
-            background:
-              "linear-gradient(90deg, #1e88e5, #42a5f5)",
+            background: "linear-gradient(90deg, #1e88e5, #42a5f5)",
             "&:hover": {
               transform: "scale(1.03)",
             },
           }}
         >
-          Continue
+          {loading ? "Please wait..." : "Continue"}
         </Button>
       </Paper>
 
-      <style>
-        {`
-          @keyframes fadeSlide {
-            from {
-              opacity: 0;
-              transform: translateY(25px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-        `}
-      </style>
+      <Typography
+        variant="caption"
+        sx={{
+          position: "absolute",
+          bottom: 16,
+          color: "rgba(255,255,255,0.6)",
+        }}
+      >
+        © 2026 Zeecurity
+      </Typography>
+
+     <style>
+{`
+@keyframes fadeText {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+`}
+</style>
     </Box>
   );
 }
@@ -196,29 +260,24 @@ function GuardHome() {
   });
 
   useEffect(() => {
-    fetchStats();
-  }, []);
-
-  const fetchStats = async () => {
-    const [v, c, s, n] = await Promise.all([
+    Promise.all([
       axios.get(`${API_BASE}/visitors`),
       axios.get(`${API_BASE}/complaints`),
       axios.get(`${API_BASE}/sos`),
       axios.get(`${API_BASE}/notices`),
-    ]);
-
-    setStats({
-      visitors: v.data.length,
-      complaints: c.data.length,
-      sos: s.data.length,
-      notices: n.data.length,
-    });
-  };
+    ]).then(([v, c, s, n]) =>
+      setStats({
+        visitors: v.data.length,
+        complaints: c.data.length,
+        sos: s.data.length,
+        notices: n.data.length,
+      })
+    );
+  }, []);
 
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4">Guard Dashboard</Typography>
-
       <Grid container spacing={2} sx={{ mt: 2 }}>
         {Object.entries(stats).map(([k, v]) => (
           <Grid item xs={6} md={3} key={k}>
@@ -231,9 +290,7 @@ function GuardHome() {
           </Grid>
         ))}
       </Grid>
-
       <Divider sx={{ my: 3 }} />
-
       <Button component={RouterLink} to="/guard/residents" variant="contained">
         View Residents
       </Button>
@@ -241,14 +298,13 @@ function GuardHome() {
   );
 }
 
-/* ================= APP ROUTES ================= */
+/* ================= APP ================= */
 export default function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
 
-        {/* GUARD */}
         <Route
           path="/guard"
           element={
@@ -268,52 +324,6 @@ export default function App() {
         />
 
         <Route
-          path="/visitors"
-          element={
-            <Layout sidebar={<Sidebar />}>
-              <Visitors />
-            </Layout>
-          }
-        />
-
-        <Route
-          path="/complaints"
-          element={
-            <Layout sidebar={<Sidebar />}>
-              <GuardComplaints />
-            </Layout>
-          }
-        />
-
-        <Route
-          path="/payments"
-          element={
-            <Layout sidebar={<Sidebar />}>
-              <Payments />
-            </Layout>
-          }
-        />
-
-        <Route
-          path="/notices"
-          element={
-            <Layout sidebar={<Sidebar />}>
-              <Notices />
-            </Layout>
-          }
-        />
-
-        <Route
-          path="/sos"
-          element={
-            <Layout sidebar={<Sidebar />}>
-              <SOS />
-            </Layout>
-          }
-        />
-
-        {/* RESIDENT */}
-        <Route
           path="/resident"
           element={
             <Layout sidebar={<ResidentSidebar />}>
@@ -323,46 +333,19 @@ export default function App() {
         />
 
         <Route
-          path="/resident/complaints"
-          element={
-            <Layout sidebar={<ResidentSidebar />}>
-              <ResidentComplaints />
-            </Layout>
-          }
-        />
-
-        <Route
-          path="/resident/notices"
-          element={
-            <Layout sidebar={<ResidentSidebar />}>
-              <Notices />
-            </Layout>
-          }
-        />
-
-        <Route
-          path="/resident/payments"
-          element={
-            <Layout sidebar={<ResidentSidebar />}>
-              <Payments />
-            </Layout>
-          }
-        />
-
-        <Route
-          path="/resident/sos"
-          element={
-            <Layout sidebar={<ResidentSidebar />}>
-              <SOS />
-            </Layout>
-          }
-        />
-
-        <Route
           path="/resident/profile"
           element={
             <Layout sidebar={<ResidentSidebar />}>
               <ResidentProfile />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/resident/complaints"
+          element={
+            <Layout sidebar={<ResidentSidebar />}>
+              <ResidentComplaints />
             </Layout>
           }
         />
