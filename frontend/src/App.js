@@ -65,18 +65,14 @@ function Login() {
       try {
         const res = await fetch(`${API_BASE}/residents`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             name: username.trim(),
             flatNumber: flat.trim(),
           }),
         });
 
-        if (!res.ok) {
-          throw new Error("Resident save failed");
-        }
+        if (!res.ok) throw new Error("Resident save failed");
 
         const data = await res.json();
         console.log("✅ Resident saved:", data);
@@ -90,8 +86,7 @@ function Login() {
         console.error("❌ Resident login error:", error);
         alert("Resident login failed");
       }
-
-      return; // 🔥 VERY IMPORTANT
+      return;
     }
 
     // ===== GUARD LOGIN =====
@@ -102,46 +97,74 @@ function Login() {
   return (
     <Box
       sx={{
+        minHeight: "100vh",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        height: "100vh",
+        background: "linear-gradient(135deg, #0f2027, #203a43, #2c5364)",
       }}
     >
-      <Paper sx={{ p: 4, width: 360, textAlign: "center" }}>
-        <img src={logo} alt="logo" width={100} />
-        <Typography variant="h5" sx={{ mt: 2 }}>
+      <Paper
+        elevation={12}
+        sx={{
+          p: 4,
+          width: 360,
+          textAlign: "center",
+          borderRadius: 3,
+          animation: "fadeSlide 0.8s ease",
+        }}
+      >
+        <img
+          src={logo}
+          alt="Zeecurity"
+          width={90}
+          style={{ marginBottom: 12 }}
+        />
+
+        <Typography
+          variant="h5"
+          sx={{ mb: 2, fontWeight: 600, color: "#203a43" }}
+        >
           Login
         </Typography>
 
         <TextField
           fullWidth
           label="Username"
-          sx={{ mt: 2 }}
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          sx={{ mb: 2 }}
         />
 
         {role === "resident" && (
           <TextField
             fullWidth
             label="Flat Number"
-            sx={{ mt: 2 }}
             value={flat}
             onChange={(e) => setFlat(e.target.value)}
+            sx={{ mb: 2 }}
           />
         )}
 
-        <Box sx={{ mt: 2, display: "flex", gap: 1, justifyContent: "center" }}>
+        <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
           <Button
+            fullWidth
             variant={role === "guard" ? "contained" : "outlined"}
             onClick={() => setRole("guard")}
+            sx={{
+              backgroundColor: role === "guard" ? "#1e88e5" : "transparent",
+            }}
           >
             Guard
           </Button>
+
           <Button
+            fullWidth
             variant={role === "resident" ? "contained" : "outlined"}
             onClick={() => setRole("resident")}
+            sx={{
+              backgroundColor: role === "resident" ? "#43a047" : "transparent",
+            }}
           >
             Resident
           </Button>
@@ -149,13 +172,39 @@ function Login() {
 
         <Button
           fullWidth
-          sx={{ mt: 3 }}
+          size="large"
           variant="contained"
           onClick={handleLogin}
+          sx={{
+            py: 1.2,
+            fontWeight: 600,
+            background: "linear-gradient(90deg, #1e88e5, #42a5f5)",
+            transition: "0.3s",
+            "&:hover": {
+              transform: "scale(1.03)",
+              background: "linear-gradient(90deg, #1565c0, #1e88e5)",
+            },
+          }}
         >
           Continue
         </Button>
       </Paper>
+
+      {/* Animation */}
+      <style>
+        {`
+          @keyframes fadeSlide {
+            from {
+              opacity: 0;
+              transform: translateY(30px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+        `}
+      </style>
     </Box>
   );
 }
