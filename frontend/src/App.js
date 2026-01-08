@@ -38,9 +38,7 @@ import {
 
 import logo from "./assets/zeecurity_logo.png";
 
-const API_BASE =
-  process.env.REACT_APP_API_BASE ||
-  "https://zeecurity-backend.onrender.com/api";
+const API_BASE = "https://zeecurity-backend.onrender.com/api";
 
 /* ================= LOGIN ================= */
 function Login() {
@@ -48,18 +46,11 @@ function Login() {
   const [role, setRole] = useState("guard");
   const [username, setUsername] = useState("");
   const [flat, setFlat] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!username.trim()) {
-      alert("Enter username");
-      return;
-    }
-
-    if (role === "resident" && !flat.trim()) {
-      alert("Enter flat number");
-      return;
-    }
+    if (!username.trim()) return alert("Enter username");
+    if (role === "resident" && !flat.trim())
+      return alert("Enter flat number");
 
     // ===== RESIDENT LOGIN =====
     if (role === "resident") {
@@ -83,6 +74,7 @@ function Login() {
 
         navigate("/resident");
       } catch (err) {
+        console.error(err);
         alert("Resident login failed");
       }
       return;
@@ -100,39 +92,27 @@ function Login() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        background: "linear-gradient(135deg, #0f2027, #203a43, #2c5364)",
-        position: "relative",
-        overflow: "hidden",
+        background:
+          "linear-gradient(135deg, #0f2027, #203a43, #2c5364)",
       }}
     >
-      {/* Floating bubbles */}
-      <div className="bg-bubble b1" />
-      <div className="bg-bubble b2" />
-      <div className="bg-bubble b3" />
-
       <Paper
         elevation={12}
         sx={{
           p: 4,
-          width: 360,
+          width: { xs: "90%", sm: 360 },
           textAlign: "center",
           borderRadius: 3,
-          animation: "fadeSlide 0.8s ease",
-          zIndex: 2,
+          animation: "fadeSlide 0.7s ease",
         }}
       >
-        <img src={logo} alt="Zeecurity" width={90} />
+        <img src={logo} alt="Zeecurity" width={80} />
 
-        <Typography variant="h5" sx={{ mt: 1, fontWeight: 600 }}>
+        <Typography
+          variant="h5"
+          sx={{ mt: 2, mb: 2, fontWeight: 600 }}
+        >
           Login
-        </Typography>
-
-        <Typography variant="body2" sx={{ mb: 2, color: "#607d8b" }}>
-          Smart Security for Modern Societies
-        </Typography>
-
-        <Typography variant="caption" sx={{ mb: 1, display: "block" }}>
-          Logging in as <b>{role.toUpperCase()}</b>
         </Typography>
 
         <TextField
@@ -161,7 +141,6 @@ function Login() {
           >
             Guard
           </Button>
-
           <Button
             fullWidth
             variant={role === "resident" ? "contained" : "outlined"}
@@ -174,59 +153,32 @@ function Login() {
         <Button
           fullWidth
           size="large"
-          variant="contained"
-          disabled={loading}
-          onClick={async () => {
-            setLoading(true);
-            await handleLogin();
-            setLoading(false);
-          }}
+          onClick={handleLogin}
           sx={{
             py: 1.2,
             fontWeight: 600,
-            background: "linear-gradient(90deg, #1e88e5, #42a5f5)",
+            background:
+              "linear-gradient(90deg, #1e88e5, #42a5f5)",
             "&:hover": {
               transform: "scale(1.03)",
             },
           }}
         >
-          {loading ? "Please wait..." : "Continue"}
+          Continue
         </Button>
       </Paper>
-
-      <Typography
-        variant="caption"
-        sx={{
-          position: "absolute",
-          bottom: 16,
-          color: "rgba(255,255,255,0.6)",
-        }}
-      >
-        © 2026 Zeecurity
-      </Typography>
 
       <style>
         {`
           @keyframes fadeSlide {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          .bg-bubble {
-            position: absolute;
-            bottom: -150px;
-            width: 220px;
-            height: 220px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 50%;
-            animation: float 16s infinite;
-          }
-          .b1 { left: 10%; }
-          .b2 { left: 50%; width: 300px; height: 300px; animation-duration: 20s; }
-          .b3 { left: 80%; animation-duration: 22s; }
-          @keyframes float {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-350px); }
-            100% { transform: translateY(0); }
+            from {
+              opacity: 0;
+              transform: translateY(25px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
           }
         `}
       </style>
@@ -244,24 +196,29 @@ function GuardHome() {
   });
 
   useEffect(() => {
-    Promise.all([
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    const [v, c, s, n] = await Promise.all([
       axios.get(`${API_BASE}/visitors`),
       axios.get(`${API_BASE}/complaints`),
       axios.get(`${API_BASE}/sos`),
       axios.get(`${API_BASE}/notices`),
-    ]).then(([v, c, s, n]) =>
-      setStats({
-        visitors: v.data.length,
-        complaints: c.data.length,
-        sos: s.data.length,
-        notices: n.data.length,
-      })
-    );
-  }, []);
+    ]);
+
+    setStats({
+      visitors: v.data.length,
+      complaints: c.data.length,
+      sos: s.data.length,
+      notices: n.data.length,
+    });
+  };
 
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4">Guard Dashboard</Typography>
+
       <Grid container spacing={2} sx={{ mt: 2 }}>
         {Object.entries(stats).map(([k, v]) => (
           <Grid item xs={6} md={3} key={k}>
@@ -274,7 +231,9 @@ function GuardHome() {
           </Grid>
         ))}
       </Grid>
+
       <Divider sx={{ my: 3 }} />
+
       <Button component={RouterLink} to="/guard/residents" variant="contained">
         View Residents
       </Button>
@@ -282,13 +241,14 @@ function GuardHome() {
   );
 }
 
-/* ================= APP ================= */
+/* ================= APP ROUTES ================= */
 export default function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
 
+        {/* GUARD */}
         <Route
           path="/guard"
           element={
@@ -308,6 +268,52 @@ export default function App() {
         />
 
         <Route
+          path="/visitors"
+          element={
+            <Layout sidebar={<Sidebar />}>
+              <Visitors />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/complaints"
+          element={
+            <Layout sidebar={<Sidebar />}>
+              <GuardComplaints />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/payments"
+          element={
+            <Layout sidebar={<Sidebar />}>
+              <Payments />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/notices"
+          element={
+            <Layout sidebar={<Sidebar />}>
+              <Notices />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/sos"
+          element={
+            <Layout sidebar={<Sidebar />}>
+              <SOS />
+            </Layout>
+          }
+        />
+
+        {/* RESIDENT */}
+        <Route
           path="/resident"
           element={
             <Layout sidebar={<ResidentSidebar />}>
@@ -317,19 +323,46 @@ export default function App() {
         />
 
         <Route
-          path="/resident/profile"
+          path="/resident/complaints"
           element={
             <Layout sidebar={<ResidentSidebar />}>
-              <ResidentProfile />
+              <ResidentComplaints />
             </Layout>
           }
         />
 
         <Route
-          path="/resident/complaints"
+          path="/resident/notices"
           element={
             <Layout sidebar={<ResidentSidebar />}>
-              <ResidentComplaints />
+              <Notices />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/resident/payments"
+          element={
+            <Layout sidebar={<ResidentSidebar />}>
+              <Payments />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/resident/sos"
+          element={
+            <Layout sidebar={<ResidentSidebar />}>
+              <SOS />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/resident/profile"
+          element={
+            <Layout sidebar={<ResidentSidebar />}>
+              <ResidentProfile />
             </Layout>
           }
         />
