@@ -48,7 +48,6 @@ function Login() {
   const [role, setRole] = useState("guard");
   const [username, setUsername] = useState("");
   const [flat, setFlat] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!username.trim()) {
@@ -61,7 +60,6 @@ function Login() {
       return;
     }
 
-    // ===== RESIDENT LOGIN =====
     if (role === "resident") {
       try {
         const res = await fetch(`${API_BASE}/residents`, {
@@ -76,11 +74,9 @@ function Login() {
         if (!res.ok) throw new Error("Resident save failed");
 
         const data = await res.json();
-
         localStorage.setItem("residentName", data.name);
         localStorage.setItem("residentFlat", data.flatNumber);
         localStorage.setItem("role", "resident");
-
         navigate("/resident");
       } catch (err) {
         alert("Resident login failed");
@@ -88,7 +84,6 @@ function Login() {
       return;
     }
 
-    // ===== GUARD LOGIN =====
     localStorage.setItem("role", "guard");
     navigate("/guard");
   };
@@ -100,85 +95,60 @@ function Login() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        background: "linear-gradient(135deg, #0f2027, #203a43, #2c5364)",
         position: "relative",
         overflow: "hidden",
+        backgroundColor: "#0b1d26",
       }}
     >
-      {/* Floating bubbles */}
-      <div className="bg-bubble b1" />
-      <div className="bg-bubble b2" />
-      <div className="bg-bubble b3" />
+      {/* ===== Animated Background ===== */}
+      <div className="animated-bg" />
 
+      {/* ===== Login Card ===== */}
       <Paper
-        elevation={12}
+        elevation={10}
         sx={{
           p: 4,
           width: 360,
           textAlign: "center",
           borderRadius: 3,
+          zIndex: 1,
           animation: "fadeSlide 0.8s ease",
-          zIndex: 2,
         }}
       >
-        <img src={logo} alt="Zeecurity" width={90} />
+        <img src={logo} alt="logo" width={90} style={{ marginBottom: 12 }} />
 
-        <Typography variant="h5" sx={{ mt: 1, fontWeight: 600 }}>
+        <Typography variant="h5" sx={{ fontWeight: 600 }}>
           Login
         </Typography>
 
-        <Typography variant="body2" sx={{ mb: 2, color: "#607d8b" }}>
+        <Typography
+          variant="caption"
+          sx={{ color: "text.secondary", mb: 2, display: "block" }}
+        >
           Smart Security for Modern Societies
         </Typography>
-
-       <Typography
-  sx={{
-    mt: 1,
-    fontSize: "0.9rem",
-    letterSpacing: 1,
-    color: "#546e7a",
-    animation: "fadeText 1s ease",
-  }}
->
-  Secure Access •{" "}
-  <span
-    style={{
-      fontWeight: 700,
-      color: role === "guard" ? "#1e88e5" : "#43a047",
-    }}
-  >
-    {role.toUpperCase()} MODE
-  </span>
-</Typography>
-
-<Typography
-  sx={{
-    mt: 0.5,
-    fontSize: "0.75rem",
-    color: "#78909c",
-    animation: "fadeText 1.2s ease",
-  }}
->
-  Protecting Your Society in Real Time
-</Typography>
 
         <TextField
           fullWidth
           label="Username"
+          sx={{ mb: 2 }}
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          sx={{ mb: 2 }}
         />
 
         {role === "resident" && (
           <TextField
             fullWidth
             label="Flat Number"
+            sx={{ mb: 2 }}
             value={flat}
             onChange={(e) => setFlat(e.target.value)}
-            sx={{ mb: 2 }}
           />
         )}
+
+        <Typography variant="caption" sx={{ mb: 1, display: "block" }}>
+          Logging in as <b>{role.toUpperCase()}</b>
+        </Typography>
 
         <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
           <Button
@@ -188,7 +158,6 @@ function Login() {
           >
             Guard
           </Button>
-
           <Button
             fullWidth
             variant={role === "resident" ? "contained" : "outlined"}
@@ -202,50 +171,63 @@ function Login() {
           fullWidth
           size="large"
           variant="contained"
-          disabled={loading}
-          onClick={async () => {
-            setLoading(true);
-            await handleLogin();
-            setLoading(false);
-          }}
+          onClick={handleLogin}
           sx={{
             py: 1.2,
             fontWeight: 600,
-            background: "linear-gradient(90deg, #1e88e5, #42a5f5)",
-            "&:hover": {
-              transform: "scale(1.03)",
-            },
           }}
         >
-          {loading ? "Please wait..." : "Continue"}
+          Continue
         </Button>
       </Paper>
 
-      <Typography
-        variant="caption"
-        sx={{
-          position: "absolute",
-          bottom: 16,
-          color: "rgba(255,255,255,0.6)",
-        }}
-      >
-        © 2026 Zeecurity
-      </Typography>
+      {/* ===== Animations ===== */}
+      <style>
+        {`
+        .animated-bg {
+          position: absolute;
+          inset: 0;
+          background:
+            linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px),
+            linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+          background-size: 60px 60px;
+          animation: gridMove 22s linear infinite;
+          z-index: 0;
+        }
 
-     <style>
-{`
-@keyframes fadeText {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-`}
-</style>
+        .animated-bg::before,
+        .animated-bg::after {
+          content: "";
+          position: absolute;
+          width: 400px;
+          height: 400px;
+          background: radial-gradient(circle, rgba(0,200,255,0.18), transparent 70%);
+          animation: floatGlow 18s ease-in-out infinite;
+        }
+
+        .animated-bg::after {
+          top: 60%;
+          left: 60%;
+          animation-delay: 8s;
+        }
+
+        @keyframes gridMove {
+          from { background-position: 0 0; }
+          to { background-position: 120px 120px; }
+        }
+
+        @keyframes floatGlow {
+          0% { transform: translate(-100px, -100px); }
+          50% { transform: translate(100px, 100px); }
+          100% { transform: translate(-100px, -100px); }
+        }
+
+        @keyframes fadeSlide {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}
+      </style>
     </Box>
   );
 }
@@ -260,51 +242,36 @@ function GuardHome() {
   });
 
   useEffect(() => {
-    Promise.all([
-      axios.get(`${API_BASE}/visitors`),
-      axios.get(`${API_BASE}/complaints`),
-      axios.get(`${API_BASE}/sos`),
-      axios.get(`${API_BASE}/notices`),
-    ]).then(([v, c, s, n]) =>
+    const fetchStats = async () => {
+      const [v, c, s, n] = await Promise.all([
+        axios.get(`${API_BASE}/visitors`),
+        axios.get(`${API_BASE}/complaints`),
+        axios.get(`${API_BASE}/sos`),
+        axios.get(`${API_BASE}/notices`),
+      ]);
       setStats({
         visitors: v.data.length,
         complaints: c.data.length,
         sos: s.data.length,
         notices: n.data.length,
-      })
-    );
+      });
+    };
+    fetchStats();
   }, []);
 
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4">Guard Dashboard</Typography>
-      <Grid container spacing={2} sx={{ mt: 2 }}>
-        {Object.entries(stats).map(([k, v]) => (
-          <Grid item xs={6} md={3} key={k}>
-            <Card>
-              <CardContent>
-                <Typography variant="caption">{k}</Typography>
-                <Typography variant="h5">{v}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-      <Divider sx={{ my: 3 }} />
-      <Button component={RouterLink} to="/guard/residents" variant="contained">
-        View Residents
-      </Button>
     </Box>
   );
 }
 
-/* ================= APP ================= */
+/* ================= APP ROUTES ================= */
 export default function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
-
         <Route
           path="/guard"
           element={
@@ -313,7 +280,6 @@ export default function App() {
             </Layout>
           }
         />
-
         <Route
           path="/guard/residents"
           element={
@@ -322,30 +288,11 @@ export default function App() {
             </Layout>
           }
         />
-
         <Route
           path="/resident"
           element={
             <Layout sidebar={<ResidentSidebar />}>
               <ResidentHome />
-            </Layout>
-          }
-        />
-
-        <Route
-          path="/resident/profile"
-          element={
-            <Layout sidebar={<ResidentSidebar />}>
-              <ResidentProfile />
-            </Layout>
-          }
-        />
-
-        <Route
-          path="/resident/complaints"
-          element={
-            <Layout sidebar={<ResidentSidebar />}>
-              <ResidentComplaints />
             </Layout>
           }
         />
