@@ -5,33 +5,17 @@ require("dotenv").config();
 
 const app = express();
 
-/* ===================== CORS (FINAL FIX) ===================== */
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://zeecurity-mern.vercel.app",
-  /^https:\/\/zeecurity-mern-.*\.vercel\.app$/ // ✅ allow ALL preview URLs
-];
+/* ===================== 🔓 DISABLE AUTH ===================== */
+app.use((req, res, next) => next());
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // allow Postman / curl
-
-    const allowed = allowedOrigins.some(o =>
-      typeof o === "string" ? o === origin : o.test(origin)
-    );
-
-    if (allowed) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  credentials: true
-}));
-
-// ✅ IMPORTANT: preflight support
-app.options("*", cors());
+/* ===================== CORS (OPEN FOR NOW) ===================== */
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 /* ===================== BODY PARSER ===================== */
 app.use(express.json({ limit: "10mb" }));
