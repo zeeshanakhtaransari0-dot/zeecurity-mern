@@ -55,47 +55,48 @@ function Login() {
       return;
     }
 
-    // ===== GUARD LOGIN =====
-    if (role === "guard") {
-      localStorage.setItem("role", "guard");
-      navigate("/guard");
-      return;
-    }
-
-    // ===== RESIDENT LOGIN =====
-    if (!flat.trim()) {
+    if (role === "resident" && !flat.trim()) {
       alert("Enter flat number");
       return;
     }
 
-    try {
-      console.log("🚀 Sending resident POST");
+    // ===== RESIDENT LOGIN =====
+    if (role === "resident") {
+      try {
+        const res = await fetch(`${API_BASE}/residents`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: username.trim(),
+            flatNumber: flat.trim(),
+          }),
+        });
 
-      const res = await fetch(`${API_BASE}/residents`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: username.trim(),
-          flatNumber: flat.trim(),
-        }),
-      });
+        if (!res.ok) {
+          throw new Error("Resident save failed");
+        }
 
-      const data = await res.json();
-      console.log("✅ Resident saved:", data);
+        const data = await res.json();
+        console.log("✅ Resident saved:", data);
 
-      if (!res.ok) {
-        throw new Error("Failed to save resident");
+        localStorage.setItem("residentName", data.name);
+        localStorage.setItem("residentFlat", data.flatNumber);
+        localStorage.setItem("role", "resident");
+
+        navigate("/resident");
+      } catch (error) {
+        console.error("❌ Resident login error:", error);
+        alert("Resident login failed");
       }
 
-      localStorage.setItem("residentName", username.trim());
-      localStorage.setItem("residentFlat", flat.trim());
-      localStorage.setItem("role", "resident");
-
-      navigate("/resident");
-    } catch (err) {
-      console.error("❌ Resident login failed:", err);
-      alert("Resident login failed");
+      return; // 🔥 VERY IMPORTANT
     }
+
+    // ===== GUARD LOGIN =====
+    localStorage.setItem("role", "guard");
+    navigate("/guard");
   };
 
   return (
@@ -146,7 +147,12 @@ function Login() {
           </Button>
         </Box>
 
-        <Button fullWidth sx={{ mt: 3 }} variant="contained" onClick={handleLogin}>
+        <Button
+          fullWidth
+          sx={{ mt: 3 }}
+          variant="contained"
+          onClick={handleLogin}
+        >
           Continue
         </Button>
       </Paper>
@@ -339,7 +345,7 @@ export default function App() {
   );
 }
 
-/* ================= LAYOUT HELPER ================= */
+/* ================= LAYOUT ================= */
 function Layout({ sidebar, children }) {
   return (
     <div style={{ display: "flex" }}>

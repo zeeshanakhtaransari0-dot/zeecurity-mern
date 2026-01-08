@@ -18,23 +18,29 @@ export default function ResidentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    fetchResidents();
-  }, []);
+ useEffect(() => {
+  fetchResidents();
+
+  // 🔥 auto refresh every 3 seconds
+  const interval = setInterval(fetchResidents, 60000);
+
+  return () => clearInterval(interval);
+}, []);
 
   const fetchResidents = async () => {
-    try {
-      setLoading(true);
-      const res = await axios.get(`${API_BASE}/residents`);
-      setResidents(res.data || []);
-    } catch (err) {
-      console.error("Failed to fetch residents", err);
-      setError("Unable to load residents");
-    } finally {
-      setLoading(false);
+  const res = await fetch(
+    `${API_BASE}/residents?ts=${Date.now()}`, // 🔥 cache buster
+    {
+      method: "GET",
+      headers: {
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+      },
     }
-  };
-
+  );
+  const data = await res.json();
+  setResidents(data);
+};
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h5" sx={{ mb: 2, fontWeight: 700 }}>
