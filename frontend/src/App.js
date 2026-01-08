@@ -50,15 +50,9 @@ function Login() {
   const [flat, setFlat] = useState("");
 
   const handleLogin = async () => {
-    if (!username.trim()) {
-      alert("Enter username");
-      return;
-    }
-
-    if (role === "resident" && !flat.trim()) {
-      alert("Enter flat number");
-      return;
-    }
+    if (!username.trim()) return alert("Enter username");
+    if (role === "resident" && !flat.trim())
+      return alert("Enter flat number");
 
     if (role === "resident") {
       try {
@@ -71,12 +65,13 @@ function Login() {
           }),
         });
 
+        const data = await res.json();
         if (!res.ok) throw new Error("Resident save failed");
 
-        const data = await res.json();
         localStorage.setItem("residentName", data.name);
         localStorage.setItem("residentFlat", data.flatNumber);
         localStorage.setItem("role", "resident");
+
         navigate("/resident");
       } catch (err) {
         alert("Resident login failed");
@@ -89,181 +84,148 @@ function Login() {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        position: "relative",
-        overflow: "hidden",
-        backgroundColor: "#0b1d26",
-      }}
-    >
-      {/* ===== Animated Background ===== */}
-      <div className="animated-bg" />
+    <Box sx={{ minHeight: "100vh", position: "relative", overflow: "hidden" }}>
+      {/* ===== RADAR BACKGROUND ===== */}
+      <div className="radar-bg">
+        <div className="radar-circle"></div>
+        <div className="radar-sweep"></div>
+      </div>
 
-      {/* ===== Login Card ===== */}
-      <Paper
-        elevation={10}
+      {/* ===== LOGIN CARD ===== */}
+      <Box
         sx={{
-          p: 4,
-          width: 360,
-          textAlign: "center",
-          borderRadius: 3,
-          zIndex: 1,
-          animation: "fadeSlide 0.8s ease",
+          position: "relative",
+          zIndex: 2,
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
         }}
       >
-        <img src={logo} alt="logo" width={90} style={{ marginBottom: 12 }} />
-
-        <Typography variant="h5" sx={{ fontWeight: 600 }}>
-          Login
-        </Typography>
-
-        <Typography
-          variant="caption"
-          sx={{ color: "text.secondary", mb: 2, display: "block" }}
-        >
-          Smart Security for Modern Societies
-        </Typography>
-
-        <TextField
-          fullWidth
-          label="Username"
-          sx={{ mb: 2 }}
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-
-        {role === "resident" && (
-          <TextField
-            fullWidth
-            label="Flat Number"
-            sx={{ mb: 2 }}
-            value={flat}
-            onChange={(e) => setFlat(e.target.value)}
-          />
-        )}
-
-        <Typography variant="caption" sx={{ mb: 1, display: "block" }}>
-          Logging in as <b>{role.toUpperCase()}</b>
-        </Typography>
-
-        <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
-          <Button
-            fullWidth
-            variant={role === "guard" ? "contained" : "outlined"}
-            onClick={() => setRole("guard")}
-          >
-            Guard
-          </Button>
-          <Button
-            fullWidth
-            variant={role === "resident" ? "contained" : "outlined"}
-            onClick={() => setRole("resident")}
-          >
-            Resident
-          </Button>
-        </Box>
-
-        <Button
-          fullWidth
-          size="large"
-          variant="contained"
-          onClick={handleLogin}
+        <Paper
+          elevation={10}
           sx={{
-            py: 1.2,
-            fontWeight: 600,
+            p: 4,
+            width: 360,
+            textAlign: "center",
+            borderRadius: 3,
+            animation: "fadeSlide 0.8s ease",
           }}
         >
-          Continue
-        </Button>
-      </Paper>
+          <img src={logo} alt="Zeecurity" width={90} />
 
-      {/* ===== Animations ===== */}
-      <style>
-        {`
-        .animated-bg {
-          position: absolute;
-          inset: 0;
-          background:
-            linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px),
-            linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
-          background-size: 60px 60px;
-          animation: gridMove 22s linear infinite;
-          z-index: 0;
-        }
+          <Typography variant="h5" sx={{ mt: 2, fontWeight: 600 }}>
+            Login
+          </Typography>
 
-        .animated-bg::before,
-        .animated-bg::after {
-          content: "";
-          position: absolute;
-          width: 400px;
-          height: 400px;
-          background: radial-gradient(circle, rgba(0,200,255,0.18), transparent 70%);
-          animation: floatGlow 18s ease-in-out infinite;
-        }
+          <Typography
+            variant="body2"
+            sx={{ mb: 2, color: "gray", fontSize: 13 }}
+          >
+            Smart Security for Modern Societies
+            <br />
+            Logging in as <b>{role.toUpperCase()}</b>
+          </Typography>
 
-        .animated-bg::after {
-          top: 60%;
-          left: 60%;
-          animation-delay: 8s;
-        }
+          <TextField
+            fullWidth
+            label="Username"
+            sx={{ mb: 2 }}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
 
-        @keyframes gridMove {
-          from { background-position: 0 0; }
-          to { background-position: 120px 120px; }
-        }
+          {role === "resident" && (
+            <TextField
+              fullWidth
+              label="Flat Number"
+              sx={{ mb: 2 }}
+              value={flat}
+              onChange={(e) => setFlat(e.target.value)}
+            />
+          )}
 
-        @keyframes floatGlow {
-          0% { transform: translate(-100px, -100px); }
-          50% { transform: translate(100px, 100px); }
-          100% { transform: translate(-100px, -100px); }
-        }
+          <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+            <Button
+              fullWidth
+              variant={role === "guard" ? "contained" : "outlined"}
+              onClick={() => setRole("guard")}
+            >
+              Guard
+            </Button>
+            <Button
+              fullWidth
+              variant={role === "resident" ? "contained" : "outlined"}
+              onClick={() => setRole("resident")}
+            >
+              Resident
+            </Button>
+          </Box>
 
+          <Button
+            fullWidth
+            size="large"
+            variant="contained"
+            onClick={handleLogin}
+          >
+            Continue
+          </Button>
+        </Paper>
+      </Box>
+
+      {/* ===== CSS ===== */}
+      <style>{`
         @keyframes fadeSlide {
           from { opacity: 0; transform: translateY(30px); }
           to { opacity: 1; transform: translateY(0); }
         }
-      `}
-      </style>
+
+        .radar-bg {
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(circle at center, #0f2027, #000);
+          overflow: hidden;
+        }
+
+        .radar-circle {
+          position: absolute;
+          width: 600px;
+          height: 600px;
+          border-radius: 50%;
+          border: 1px solid rgba(0,255,200,0.2);
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+        }
+
+        .radar-sweep {
+          position: absolute;
+          width: 600px;
+          height: 600px;
+          border-radius: 50%;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background: conic-gradient(
+            from 0deg,
+            rgba(0,255,200,0.35),
+            transparent 60%
+          );
+          animation: radarRotate 4s linear infinite;
+        }
+
+        @keyframes radarRotate {
+          from { transform: translate(-50%, -50%) rotate(0deg); }
+          to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+      `}</style>
     </Box>
   );
 }
 
 /* ================= GUARD HOME ================= */
 function GuardHome() {
-  const [stats, setStats] = useState({
-    visitors: "--",
-    complaints: "--",
-    sos: "--",
-    notices: "--",
-  });
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      const [v, c, s, n] = await Promise.all([
-        axios.get(`${API_BASE}/visitors`),
-        axios.get(`${API_BASE}/complaints`),
-        axios.get(`${API_BASE}/sos`),
-        axios.get(`${API_BASE}/notices`),
-      ]);
-      setStats({
-        visitors: v.data.length,
-        complaints: c.data.length,
-        sos: s.data.length,
-        notices: n.data.length,
-      });
-    };
-    fetchStats();
-  }, []);
-
-  return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4">Guard Dashboard</Typography>
-    </Box>
-  );
+  return <Typography sx={{ p: 3 }}>Guard Dashboard</Typography>;
 }
 
 /* ================= APP ROUTES ================= */
@@ -272,30 +234,19 @@ export default function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route
-          path="/guard"
-          element={
-            <Layout sidebar={<Sidebar />}>
-              <GuardHome />
-            </Layout>
-          }
-        />
-        <Route
-          path="/guard/residents"
-          element={
-            <Layout sidebar={<Sidebar />}>
-              <ResidentsPage />
-            </Layout>
-          }
-        />
-        <Route
-          path="/resident"
-          element={
-            <Layout sidebar={<ResidentSidebar />}>
-              <ResidentHome />
-            </Layout>
-          }
-        />
+        <Route path="/guard" element={<Layout sidebar={<Sidebar />}><GuardHome /></Layout>} />
+        <Route path="/guard/residents" element={<Layout sidebar={<Sidebar />}><ResidentsPage /></Layout>} />
+        <Route path="/visitors" element={<Layout sidebar={<Sidebar />}><Visitors /></Layout>} />
+        <Route path="/complaints" element={<Layout sidebar={<Sidebar />}><GuardComplaints /></Layout>} />
+        <Route path="/payments" element={<Layout sidebar={<Sidebar />}><Payments /></Layout>} />
+        <Route path="/notices" element={<Layout sidebar={<Sidebar />}><Notices /></Layout>} />
+        <Route path="/sos" element={<Layout sidebar={<Sidebar />}><SOS /></Layout>} />
+        <Route path="/resident" element={<Layout sidebar={<ResidentSidebar />}><ResidentHome /></Layout>} />
+        <Route path="/resident/complaints" element={<Layout sidebar={<ResidentSidebar />}><ResidentComplaints /></Layout>} />
+        <Route path="/resident/notices" element={<Layout sidebar={<ResidentSidebar />}><Notices /></Layout>} />
+        <Route path="/resident/payments" element={<Layout sidebar={<ResidentSidebar />}><Payments /></Layout>} />
+        <Route path="/resident/sos" element={<Layout sidebar={<ResidentSidebar />}><SOS /></Layout>} />
+        <Route path="/resident/profile" element={<Layout sidebar={<ResidentSidebar />}><ResidentProfile /></Layout>} />
       </Routes>
     </Router>
   );
