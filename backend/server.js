@@ -5,17 +5,23 @@ require("dotenv").config();
 
 const app = express();
 
-/* ===================== 🔓 DISABLE AUTH ===================== */
-app.use((req, res, next) => next());
-
-/* ===================== CORS (OPEN FOR NOW) ===================== */
+/* ===================== CORS (PRODUCTION SAFE FIX) ===================== */
 app.use(
   cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: true, // ✅ allow all origins (Vercel + localhost)
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "Cache-Control",
+      "Pragma",
+    ],
+    credentials: false,
   })
 );
+
+// ✅ VERY IMPORTANT: handle preflight
+app.options("*", cors());
 
 /* ===================== BODY PARSER ===================== */
 app.use(express.json({ limit: "10mb" }));
