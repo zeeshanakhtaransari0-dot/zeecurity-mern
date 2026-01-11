@@ -4,9 +4,24 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  useNavigate,
   Link as RouterLink,
+  useNavigate,
 } from "react-router-dom";
+
+import Sidebar from "./components/Sidebar";
+import ResidentSidebar from "./components/ResidentSidebar";
+
+import Visitors from "./Visitors";
+import Notices from "./Notices";
+import Payments from "./Payments";
+import SOS from "./SOS";
+
+import ResidentHome from "./ResidentHome";
+import ResidentProfile from "./ResidentProfile";
+
+import ResidentComplaints from "./pages/ResidentComplaints";
+import GuardComplaints from "./pages/GuardComplaints";
+import ResidentsPage from "./ResidentsPage";
 
 import axios from "axios";
 import {
@@ -21,47 +36,21 @@ import {
   Paper,
 } from "@mui/material";
 
-import Sidebar from "./components/Sidebar";
-import ResidentSidebar from "./components/ResidentSidebar";
-
-import Visitors from "./Visitors";
-import Notices from "./Notices";
-import Payments from "./Payments";
-import SOS from "./SOS";
-
-import ResidentHome from "./ResidentHome";
-import ResidentProfile from "./ResidentProfile";
-import ResidentComplaints from "./pages/ResidentComplaints";
-import GuardComplaints from "./pages/GuardComplaints";
-import ResidentsPage from "./ResidentsPage";
-import Payments from "./resident/Payments";
-import SOS from "./resident/SOS";
-import Notices from "./resident/Notices";
-
 import logo from "./assets/zeecurity_logo.png";
 
-const API_BASE =
-  process.env.REACT_APP_API_BASE ||
-  "https://zeecurity-backend.onrender.com/api";
+const API_BASE = "https://zeecurity-backend.onrender.com/api";
 
 /* ================= LOGIN ================= */
 function Login() {
   const navigate = useNavigate();
-
   const [role, setRole] = useState("guard");
   const [username, setUsername] = useState("");
   const [flat, setFlat] = useState("");
 
   const handleLogin = async () => {
-    if (!username.trim()) {
-      alert("Enter username");
-      return;
-    }
-
-    if (role === "resident" && !flat.trim()) {
-      alert("Enter flat number");
-      return;
-    }
+    if (!username.trim()) return alert("Enter username");
+    if (role === "resident" && !flat.trim())
+      return alert("Enter flat number");
 
     // ===== RESIDENT LOGIN =====
     if (role === "resident") {
@@ -79,19 +68,16 @@ function Login() {
 
         const data = await res.json();
 
-        // 🔥 CRITICAL FIX
-        localStorage.setItem("residentId", data._id);
         localStorage.setItem("residentName", data.name);
         localStorage.setItem("residentFlat", data.flatNumber);
         localStorage.setItem("role", "resident");
 
         navigate("/resident");
-        return;
       } catch (err) {
-        console.error("Resident login error:", err);
+        console.error(err);
         alert("Resident login failed");
-        return;
       }
+      return;
     }
 
     // ===== GUARD LOGIN =====
@@ -106,35 +92,44 @@ function Login() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "#0b1d26",
+        background:
+          "linear-gradient(135deg, #0f2027, #203a43, #2c5364)",
       }}
     >
-      <Paper sx={{ p: 4, width: 360, textAlign: "center" }} elevation={6}>
-        <img src={logo} alt="Zeecurity" width={90} />
+      <Paper
+        elevation={12}
+        sx={{
+          p: 4,
+          width: { xs: "90%", sm: 360 },
+          textAlign: "center",
+          borderRadius: 3,
+          animation: "fadeSlide 0.7s ease",
+        }}
+      >
+        <img src={logo} alt="Zeecurity" width={80} />
 
-        <Typography variant="h5" sx={{ mt: 2, fontWeight: 700 }}>
+        <Typography
+          variant="h5"
+          sx={{ mt: 2, mb: 2, fontWeight: 600 }}
+        >
           Login
-        </Typography>
-
-        <Typography variant="caption" sx={{ display: "block", mb: 2 }}>
-          Logging in as <b>{role.toUpperCase()}</b>
         </Typography>
 
         <TextField
           fullWidth
           label="Username"
-          sx={{ mb: 2 }}
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          sx={{ mb: 2 }}
         />
 
         {role === "resident" && (
           <TextField
             fullWidth
             label="Flat Number"
-            sx={{ mb: 2 }}
             value={flat}
             onChange={(e) => setFlat(e.target.value)}
+            sx={{ mb: 2 }}
           />
         )}
 
@@ -155,10 +150,38 @@ function Login() {
           </Button>
         </Box>
 
-        <Button fullWidth variant="contained" onClick={handleLogin}>
+        <Button
+          fullWidth
+          size="large"
+          onClick={handleLogin}
+          sx={{
+            py: 1.2,
+            fontWeight: 600,
+            background:
+              "linear-gradient(90deg, #1e88e5, #42a5f5)",
+            "&:hover": {
+              transform: "scale(1.03)",
+            },
+          }}
+        >
           Continue
         </Button>
       </Paper>
+
+      <style>
+        {`
+          @keyframes fadeSlide {
+            from {
+              opacity: 0;
+              transform: translateY(25px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+        `}
+      </style>
     </Box>
   );
 }
@@ -166,41 +189,35 @@ function Login() {
 /* ================= GUARD HOME ================= */
 function GuardHome() {
   const [stats, setStats] = useState({
-    visitors: 0,
-    complaints: 0,
-    sos: 0,
-    notices: 0,
+    visitors: "--",
+    complaints: "--",
+    sos: "--",
+    notices: "--",
   });
 
   useEffect(() => {
     fetchStats();
   }, []);
 
-  async function fetchStats() {
-    try {
-      const [v, c, s, n] = await Promise.all([
-        axios.get(`${API_BASE}/visitors`),
-        axios.get(`${API_BASE}/complaints`),
-        axios.get(`${API_BASE}/sos`),
-        axios.get(`${API_BASE}/notices`),
-      ]);
+  const fetchStats = async () => {
+    const [v, c, s, n] = await Promise.all([
+      axios.get(`${API_BASE}/visitors`),
+      axios.get(`${API_BASE}/complaints`),
+      axios.get(`${API_BASE}/sos`),
+      axios.get(`${API_BASE}/notices`),
+    ]);
 
-      setStats({
-        visitors: v.data.length,
-        complaints: c.data.length,
-        sos: s.data.length,
-        notices: n.data.length,
-      });
-    } catch (err) {
-      console.error("Dashboard error:", err);
-    }
-  }
+    setStats({
+      visitors: v.data.length,
+      complaints: c.data.length,
+      sos: s.data.length,
+      notices: n.data.length,
+    });
+  };
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" sx={{ fontWeight: 700 }}>
-        Guard Dashboard
-      </Typography>
+      <Typography variant="h4">Guard Dashboard</Typography>
 
       <Grid container spacing={2} sx={{ mt: 2 }}>
         {Object.entries(stats).map(([k, v]) => (
@@ -269,19 +286,19 @@ export default function App() {
         />
 
         <Route
-          path="/notices"
+          path="/payments"
           element={
             <Layout sidebar={<Sidebar />}>
-              <Notices />
+              <Payments />
             </Layout>
           }
         />
 
         <Route
-          path="/payments"
+          path="/notices"
           element={
             <Layout sidebar={<Sidebar />}>
-              <Payments />
+              <Notices />
             </Layout>
           }
         />
@@ -315,6 +332,33 @@ export default function App() {
         />
 
         <Route
+          path="/resident/notices"
+          element={
+            <Layout sidebar={<ResidentSidebar />}>
+              <Notices />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/resident/payments"
+          element={
+            <Layout sidebar={<ResidentSidebar />}>
+              <Payments />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/resident/sos"
+          element={
+            <Layout sidebar={<ResidentSidebar />}>
+              <SOS />
+            </Layout>
+          }
+        />
+
+        <Route
           path="/resident/profile"
           element={
             <Layout sidebar={<ResidentSidebar />}>
@@ -322,9 +366,6 @@ export default function App() {
             </Layout>
           }
         />
-        <Route path="/resident/payments" element={<Payments />} />
-<Route path="/resident/sos" element={<SOS />} />
-<Route path="/resident/notices" element={<Notices />} />
       </Routes>
     </Router>
   );
@@ -333,9 +374,9 @@ export default function App() {
 /* ================= LAYOUT ================= */
 function Layout({ sidebar, children }) {
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
+    <div style={{ display: "flex" }}>
       {sidebar}
-      <div style={{ flex: 1, padding: 24 }}>{children}</div>
+      <div style={{ marginLeft: 220, flex: 1 }}>{children}</div>
     </div>
   );
 }
