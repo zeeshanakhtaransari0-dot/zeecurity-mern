@@ -1,4 +1,3 @@
-// src/ResidentProfile.js
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
@@ -19,17 +18,20 @@ const API_BASE =
   "https://zeecurity-backend.onrender.com/api";
 
 export default function ResidentProfile() {
-  // 🔹 Read from localStorage (fallback to defaults)
-  const residentName = localStorage.getItem("residentName") || "Mr. Resident";
-  const residentFlat = localStorage.getItem("residentFlat") || "A-101";
+  /* ================= BASIC INFO (FIXED) ================= */
 
-  // simple fake email using name (optional)
-  const email =
-    residentName === "Mr. Resident"
-      ? "resident@example.com"
-      : `${residentName.toLowerCase().replace(/\s+/g, ".")}@example.com`;
+  const [residentName, setResidentName] = useState("");
+  const [residentFlat, setResidentFlat] = useState("");
 
-  const phone = "+91-98765 43210";
+  useEffect(() => {
+    const name = localStorage.getItem("residentName");
+    const flat = localStorage.getItem("residentFlat");
+
+    if (name) setResidentName(name);
+    if (flat) setResidentFlat(flat);
+  }, []);
+
+  /* ================= SUMMARY DATA ================= */
 
   const [summary, setSummary] = useState({
     totalComplaints: 0,
@@ -41,15 +43,25 @@ export default function ResidentProfile() {
   const [loading, setLoading] = useState(true);
 
   const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-    residentName
+    residentName || "Resident"
   )}&background=0D8ABC&color=fff`;
+
+  const email = residentName
+    ? `${residentName.toLowerCase().replace(/\s+/g, ".")}@example.com`
+    : "resident@example.com";
+
+  const phone = "+91-98765 43210";
+
+  /* ================= LOAD DATA ================= */
 
   useEffect(() => {
     loadResidentData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [residentFlat]);
 
   async function loadResidentData() {
+    if (!residentFlat) return;
+
     try {
       setLoading(true);
 
@@ -59,62 +71,57 @@ export default function ResidentProfile() {
         axios.get(`${API_BASE}/sos`),
       ]);
 
-      // --- Complaints for this flat ---
-      let complaints = Array.isArray(complaintsRes.data)
+      /* ----- Complaints ----- */
+      const complaints = Array.isArray(complaintsRes.data)
         ? complaintsRes.data
         : complaintsRes.data?.complaints || [];
 
-      const myComplaints = complaints.filter((c) => {
-        const flat = (c.flatNumber || c.flat || "").toString().toLowerCase();
-        return flat === residentFlat.toLowerCase();
-      });
+      const myComplaints = complaints.filter(
+        (c) =>
+          (c.flatNumber || "").toString().toLowerCase() ===
+          residentFlat.toLowerCase()
+      );
 
       const totalComplaints = myComplaints.length;
       const resolvedComplaints = myComplaints.filter(
         (c) => (c.status || "").toLowerCase() === "resolved"
       ).length;
 
-      // --- Payments for this flat ---
-      let paymentsData = paymentsRes.data;
+      /* ----- Payments ----- */
       let payments = [];
-      if (Array.isArray(paymentsData)) payments = paymentsData;
-      else if (paymentsData?.success && Array.isArray(paymentsData.payments))
-        payments = paymentsData.payments;
-      else if (Array.isArray(paymentsData?.payments))
-        payments = paymentsData.payments;
-      else payments = paymentsData?.payments || paymentsData?.data || [];
+      const pData = paymentsRes.data;
+
+      if (Array.isArray(pData)) payments = pData;
+      else if (pData?.payments) payments = pData.payments;
 
       const myPayments = payments
-        .map((p) => ({
-          flatNumber: p.flatNumber || p.flat || p.flatNo || "",
-          month: p.month || p.forMonth || "",
-          amount: p.amount || p.amt || 0,
-          date: p.date || p.createdAt || p.timestamp,
-        }))
         .filter(
           (p) =>
-            p.flatNumber &&
-            p.flatNumber.toString().toLowerCase() ===
-              residentFlat.toLowerCase()
+            (p.flatNumber || "").toString().toLowerCase() ===
+            residentFlat.toLowerCase()
         )
         .sort(
-          (a, b) => new Date(b.date || 0) - new Date(a.date || 0)
+          (a, b) =>
+            new Date(b.date || b.createdAt || 0) -
+            new Date(a.date || a.createdAt || 0)
         );
 
-      const lastPayment = myPayments[0] || null;
+      /* ----- SOS ----- */
+      const sos = Array.isArray(sosRes.data)
+        ? sosRes.data
+        : sosRes.data?.sos || [];
 
-      // --- SOS for this flat ---
-      let sos = Array.isArray(sosRes.data) ? sosRes.data : sosRes.data?.sos || [];
-      const mySos = sos.filter((s) => {
-        const flat = (s.flatNumber || s.flat || "").toString().toLowerCase();
-        return flat === residentFlat.toLowerCase();
-      });
+      const mySos = sos.filter(
+        (s) =>
+          (s.flatNumber || "").toString().toLowerCase() ===
+          residentFlat.toLowerCase()
+      );
 
       setSummary({
         totalComplaints,
         resolvedComplaints,
         totalSOS: mySos.length,
-        lastPayment,
+        lastPayment: myPayments[0] || null,
       });
     } catch (err) {
       console.error("ResidentProfile load error:", err);
@@ -123,9 +130,11 @@ export default function ResidentProfile() {
     }
   }
 
+  /* ================= UI ================= */
+
   return (
     <Box sx={{ p: 3 }}>
-      <Paper sx={{ p: 3, maxWidth: 900, margin: "0 auto" }} elevation={4}>
+      <Paper sx={{ p: 3, maxWidth: 900, mx: "auto" }} elevation={4}>
         <Grid container spacing={3} alignItems="center">
           {/* Avatar */}
           <Grid item>
@@ -135,13 +144,13 @@ export default function ResidentProfile() {
             />
           </Grid>
 
-          {/* Basic info */}
+          {/* Basic Info */}
           <Grid item xs>
             <Typography variant="h5" sx={{ fontWeight: 700 }}>
-              {residentName}
+              {residentName || "Resident"}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Flat: {residentFlat}
+              Flat: {residentFlat || "—"}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Member since: 2024
@@ -172,7 +181,7 @@ export default function ResidentProfile() {
           </Grid>
         </Grid>
 
-        {/* Contact info */}
+        {/* Contact Info */}
         <Box sx={{ mt: 3 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
             Contact details
@@ -187,15 +196,13 @@ export default function ResidentProfile() {
 
         <Divider sx={{ my: 3 }} />
 
-        {/* Summary cards */}
+        {/* Summary Cards */}
         <Grid container spacing={2}>
           <Grid item xs={12} md={4}>
-            <Card elevation={2}>
+            <Card>
               <CardContent>
-                <Typography variant="caption" color="text.secondary">
-                  Total Complaints
-                </Typography>
-                <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                <Typography variant="caption">Total Complaints</Typography>
+                <Typography variant="h5" fontWeight={700}>
                   {summary.totalComplaints}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
@@ -206,30 +213,23 @@ export default function ResidentProfile() {
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <Card elevation={2}>
+            <Card>
               <CardContent>
-                <Typography variant="caption" color="text.secondary">
-                  SOS Alerts Raised
-                </Typography>
-                <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                <Typography variant="caption">SOS Alerts</Typography>
+                <Typography variant="h5" fontWeight={700}>
                   {summary.totalSOS}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  (for flat {residentFlat})
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
 
           <Grid item xs={12} md={4}>
-            <Card elevation={2}>
+            <Card>
               <CardContent>
-                <Typography variant="caption" color="text.secondary">
-                  Last Maintenance Payment
-                </Typography>
+                <Typography variant="caption">Last Maintenance</Typography>
                 {summary.lastPayment ? (
                   <>
-                    <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    <Typography variant="h6" fontWeight={700}>
                       ₹
                       {Number(
                         summary.lastPayment.amount || 0
@@ -241,7 +241,7 @@ export default function ResidentProfile() {
                   </>
                 ) : (
                   <Typography variant="body2" color="text.secondary">
-                    No payment record found.
+                    No payment record
                   </Typography>
                 )}
               </CardContent>
