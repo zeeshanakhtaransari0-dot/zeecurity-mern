@@ -4,25 +4,9 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Link as RouterLink,
   useNavigate,
+  Link as RouterLink,
 } from "react-router-dom";
-
-import Sidebar from "./components/Sidebar";
-import ResidentSidebar from "./components/ResidentSidebar";
-
-import Visitors from "./Visitors";
-import Notices from "./Notices";
-import Payments from "./Payments";
-import SOS from "./SOS";
-import Complaints from "./Complaints";
-
-import ResidentHome from "./ResidentHome";
-import ResidentProfile from "./ResidentProfile";
-
-import ResidentComplaints from "./pages/ResidentComplaints";
-import GuardComplaints from "./pages/GuardComplaints";
-import ResidentsPage from "./ResidentsPage";
 
 import axios from "axios";
 import {
@@ -32,9 +16,27 @@ import {
   Card,
   CardContent,
   Button,
+  Divider,
   TextField,
   Paper,
 } from "@mui/material";
+
+import Sidebar from "./components/Sidebar";
+import ResidentSidebar from "./components/ResidentSidebar";
+
+import Visitors from "./Visitors";
+import Notices from "./Notices";
+import Payments from "./Payments";
+import SOS from "./SOS";
+
+import ResidentHome from "./ResidentHome";
+import ResidentProfile from "./ResidentProfile";
+import ResidentComplaints from "./pages/ResidentComplaints";
+import GuardComplaints from "./pages/GuardComplaints";
+import ResidentsPage from "./ResidentsPage";
+import Payments from "./resident/Payments";
+import SOS from "./resident/SOS";
+import Notices from "./resident/Notices";
 
 import logo from "./assets/zeecurity_logo.png";
 
@@ -45,15 +47,23 @@ const API_BASE =
 /* ================= LOGIN ================= */
 function Login() {
   const navigate = useNavigate();
+
   const [role, setRole] = useState("guard");
   const [username, setUsername] = useState("");
   const [flat, setFlat] = useState("");
 
   const handleLogin = async () => {
-    if (!username.trim()) return alert("Enter username");
-    if (role === "resident" && !flat.trim())
-      return alert("Enter flat number");
+    if (!username.trim()) {
+      alert("Enter username");
+      return;
+    }
 
+    if (role === "resident" && !flat.trim()) {
+      alert("Enter flat number");
+      return;
+    }
+
+    // ===== RESIDENT LOGIN =====
     if (role === "resident") {
       try {
         const res = await fetch(`${API_BASE}/residents`, {
@@ -65,15 +75,26 @@ function Login() {
           }),
         });
 
+        if (!res.ok) throw new Error("Resident save failed");
+
         const data = await res.json();
+
+        // 🔥 CRITICAL FIX
+        localStorage.setItem("residentId", data._id);
+        localStorage.setItem("residentName", data.name);
+        localStorage.setItem("residentFlat", data.flatNumber);
         localStorage.setItem("role", "resident");
+
         navigate("/resident");
-      } catch {
+        return;
+      } catch (err) {
+        console.error("Resident login error:", err);
         alert("Resident login failed");
+        return;
       }
-      return;
     }
 
+    // ===== GUARD LOGIN =====
     localStorage.setItem("role", "guard");
     navigate("/guard");
   };
@@ -85,32 +106,18 @@ function Login() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        position: "relative",
-        overflow: "hidden",
         backgroundColor: "#0b1d26",
       }}
     >
-      <div className="animated-bg" />
+      <Paper sx={{ p: 4, width: 360, textAlign: "center" }} elevation={6}>
+        <img src={logo} alt="Zeecurity" width={90} />
 
-      <Paper
-        elevation={10}
-        sx={{
-          p: 4,
-          width: 360,
-          textAlign: "center",
-          borderRadius: 3,
-          zIndex: 1,
-          animation: "fadeSlide 0.8s ease",
-        }}
-      >
-        <img src={logo} alt="logo" width={90} style={{ marginBottom: 12 }} />
-
-        <Typography variant="h5" sx={{ fontWeight: 600 }}>
+        <Typography variant="h5" sx={{ mt: 2, fontWeight: 700 }}>
           Login
         </Typography>
 
-        <Typography variant="caption" sx={{ mb: 2, display: "block" }}>
-          Smart Security for Modern Societies
+        <Typography variant="caption" sx={{ display: "block", mb: 2 }}>
+          Logging in as <b>{role.toUpperCase()}</b>
         </Typography>
 
         <TextField
@@ -130,10 +137,6 @@ function Login() {
             onChange={(e) => setFlat(e.target.value)}
           />
         )}
-
-        <Typography variant="caption" sx={{ mb: 1, display: "block" }}>
-          Logging in as <b>{role.toUpperCase()}</b>
-        </Typography>
 
         <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
           <Button
@@ -156,28 +159,6 @@ function Login() {
           Continue
         </Button>
       </Paper>
-
-      <style>{`
-        .animated-bg {
-          position: absolute;
-          inset: 0;
-          background:
-            linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px),
-            linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
-          background-size: 60px 60px;
-          animation: gridMove 22s linear infinite;
-        }
-
-        @keyframes gridMove {
-          from { background-position: 0 0; }
-          to { background-position: 120px 120px; }
-        }
-
-        @keyframes fadeSlide {
-          from { opacity: 0; transform: translateY(30px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </Box>
   );
 }
@@ -192,51 +173,53 @@ function GuardHome() {
   });
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const [v, c, s, n] = await Promise.all([
-          axios.get(`${API_BASE}/visitors`),
-          axios.get(`${API_BASE}/complaints`),
-          axios.get(`${API_BASE}/sos`),
-          axios.get(`${API_BASE}/notices`),
-        ]);
-
-        setStats({
-          visitors: v.data.length,
-          complaints: c.data.length,
-          sos: s.data.length,
-          notices: n.data.length,
-        });
-      } catch (err) {
-        console.error("Dashboard error", err);
-      }
-    };
-
     fetchStats();
   }, []);
 
+  async function fetchStats() {
+    try {
+      const [v, c, s, n] = await Promise.all([
+        axios.get(`${API_BASE}/visitors`),
+        axios.get(`${API_BASE}/complaints`),
+        axios.get(`${API_BASE}/sos`),
+        axios.get(`${API_BASE}/notices`),
+      ]);
+
+      setStats({
+        visitors: v.data.length,
+        complaints: c.data.length,
+        sos: s.data.length,
+        notices: n.data.length,
+      });
+    } catch (err) {
+      console.error("Dashboard error:", err);
+    }
+  }
+
   return (
-    <Box>
-      <Typography variant="h4" sx={{ mb: 3 }}>
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" sx={{ fontWeight: 700 }}>
         Guard Dashboard
       </Typography>
 
-      <Grid container spacing={3}>
-        {Object.entries(stats).map(([key, value]) => (
-          <Grid item xs={12} sm={6} md={3} key={key}>
-            <Card sx={{ height: 120 }}>
-              <CardContent sx={{ textAlign: "center" }}>
-                <Typography variant="subtitle2">
-                  {key.toUpperCase()}
-                </Typography>
-                <Typography variant="h4" sx={{ fontWeight: 600 }}>
-                  {value}
-                </Typography>
+      <Grid container spacing={2} sx={{ mt: 2 }}>
+        {Object.entries(stats).map(([k, v]) => (
+          <Grid item xs={6} md={3} key={k}>
+            <Card>
+              <CardContent>
+                <Typography variant="caption">{k}</Typography>
+                <Typography variant="h5">{v}</Typography>
               </CardContent>
             </Card>
           </Grid>
         ))}
       </Grid>
+
+      <Divider sx={{ my: 3 }} />
+
+      <Button component={RouterLink} to="/guard/residents" variant="contained">
+        View Residents
+      </Button>
     </Box>
   );
 }
@@ -248,6 +231,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Login />} />
 
+        {/* GUARD */}
         <Route
           path="/guard"
           element={
@@ -267,6 +251,52 @@ export default function App() {
         />
 
         <Route
+          path="/visitors"
+          element={
+            <Layout sidebar={<Sidebar />}>
+              <Visitors />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/complaints"
+          element={
+            <Layout sidebar={<Sidebar />}>
+              <GuardComplaints />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/notices"
+          element={
+            <Layout sidebar={<Sidebar />}>
+              <Notices />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/payments"
+          element={
+            <Layout sidebar={<Sidebar />}>
+              <Payments />
+            </Layout>
+          }
+        />
+
+        <Route
+          path="/sos"
+          element={
+            <Layout sidebar={<Sidebar />}>
+              <SOS />
+            </Layout>
+          }
+        />
+
+        {/* RESIDENT */}
+        <Route
           path="/resident"
           element={
             <Layout sidebar={<ResidentSidebar />}>
@@ -274,92 +304,27 @@ export default function App() {
             </Layout>
           }
         />
+
         <Route
-  path="/visitors"
-  element={
-    <Layout sidebar={<Sidebar />}>
-      <Visitors />
-    </Layout>
-  }
-/>
-<Route
-  path="/notices"
-  element={
-    <Layout sidebar={<Sidebar />}>
-      <Notices />
-    </Layout>
-  }
-/>
-<Route
-  path="/complaints"
-  element={
-    <Layout sidebar={<Sidebar />}>
-      <Complaints />
-    </Layout>
-  }
-/>
-<Route
-  path="/payments"
-  element={
-    <Layout sidebar={<Sidebar />}>
-      <Payments />
-    </Layout>
-  }
-/>
-<Route
-  path="/sos"
-  element={
-    <Layout sidebar={<Sidebar />}>
-      <SOS />
-    </Layout>
-  }
-/>
-{/* ===== RESIDENT ROUTES ===== */}
+          path="/resident/complaints"
+          element={
+            <Layout sidebar={<ResidentSidebar />}>
+              <ResidentComplaints />
+            </Layout>
+          }
+        />
 
-<Route
-  path="/resident/notices"
-  element={
-    <Layout sidebar={<ResidentSidebar />}>
-      <Notices />
-    </Layout>
-  }
-/>
-
-<Route
-  path="/resident/complaints"
-  element={
-    <Layout sidebar={<ResidentSidebar />}>
-      <ResidentComplaints />
-    </Layout>
-  }
-/>
-
-<Route
-  path="/resident/payments"
-  element={
-    <Layout sidebar={<ResidentSidebar />}>
-      <Payments />
-    </Layout>
-  }
-/>
-
-<Route
-  path="/resident/sos"
-  element={
-    <Layout sidebar={<ResidentSidebar />}>
-      <SOS />
-    </Layout>
-  }
-/>
-
-<Route
-  path="/resident/profile"
-  element={
-    <Layout sidebar={<ResidentSidebar />}>
-      <ResidentProfile />
-    </Layout>
-  }
-/>
+        <Route
+          path="/resident/profile"
+          element={
+            <Layout sidebar={<ResidentSidebar />}>
+              <ResidentProfile />
+            </Layout>
+          }
+        />
+        <Route path="/resident/payments" element={<Payments />} />
+<Route path="/resident/sos" element={<SOS />} />
+<Route path="/resident/notices" element={<Notices />} />
       </Routes>
     </Router>
   );
@@ -368,19 +333,9 @@ export default function App() {
 /* ================= LAYOUT ================= */
 function Layout({ sidebar, children }) {
   return (
-    <div style={{ minHeight: "100vh" }}>
+    <div style={{ display: "flex", minHeight: "100vh" }}>
       {sidebar}
-
-      <div
-        style={{
-          marginLeft: 220,   // ✅ IMPORTANT FIX
-          padding: 24,
-          background: "#f5f7fb",
-          minHeight: "100vh",
-        }}
-      >
-        {children}
-      </div>
+      <div style={{ flex: 1, padding: 24 }}>{children}</div>
     </div>
   );
 }
