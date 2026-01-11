@@ -24,6 +24,14 @@ export default function ResidentProfile() {
   const [residentFlat, setResidentFlat] = useState("");
 
   useEffect(() => {
+  const storedName = localStorage.getItem("residentName");
+  const storedFlat = localStorage.getItem("residentFlat");
+
+  if (storedName) setName(storedName);
+  if (storedFlat) setFlat(storedFlat);
+}, []);
+
+  useEffect(() => {
     const name = localStorage.getItem("residentName");
     const flat = localStorage.getItem("residentFlat");
 
