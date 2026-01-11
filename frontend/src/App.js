@@ -15,6 +15,7 @@ import Visitors from "./Visitors";
 import Notices from "./Notices";
 import Payments from "./Payments";
 import SOS from "./SOS";
+import Complaints from "./Complaints";
 
 import ResidentHome from "./ResidentHome";
 import ResidentProfile from "./ResidentProfile";
@@ -273,6 +274,46 @@ export default function App() {
             </Layout>
           }
         />
+        <Route
+  path="/visitors"
+  element={
+    <Layout sidebar={<Sidebar />}>
+      <Visitors />
+    </Layout>
+  }
+/>
+<Route
+  path="/notices"
+  element={
+    <Layout sidebar={<Sidebar />}>
+      <Notices />
+    </Layout>
+  }
+/>
+<Route
+  path="/complaints"
+  element={
+    <Layout sidebar={<Sidebar />}>
+      <Complaints />
+    </Layout>
+  }
+/>
+<Route
+  path="/payments"
+  element={
+    <Layout sidebar={<Sidebar />}>
+      <Payments />
+    </Layout>
+  }
+/>
+<Route
+  path="/sos"
+  element={
+    <Layout sidebar={<Sidebar />}>
+      <SOS />
+    </Layout>
+  }
+/>
       </Routes>
     </Router>
   );

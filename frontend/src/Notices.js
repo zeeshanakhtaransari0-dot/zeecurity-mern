@@ -42,27 +42,39 @@ export default function Notices() {
     fetchNotices();
   }, []);
 
-  async function fetchNotices() {
-    setLoading(true);
-    try {
-      const res = await axios.get(`${API_BASE}/notices`);
-      const data = res.data;
+ async function fetchNotices() {
+  setLoading(true);
+  try {
+    const res = await axios.get(`${API_BASE}/notices`);
+    const data = res.data;
+    console.log("📦 Notices API response:", data);
 
-      if (Array.isArray(data)) setNotices(data);
-      else if (Array.isArray(data.notices)) setNotices(data.notices);
-      else setNotices([]);
-    } catch (err) {
-      console.error("Failed to fetch notices:", err);
-      setSnack({
-        open: true,
-        severity: "error",
-        text: "Failed to fetch notices",
-      });
-      setNotices([]);
-    } finally {
-      setLoading(false);
+    let list = [];
+
+    if (Array.isArray(data)) {
+      list = data;
+    } else if (data && Array.isArray(data.notices)) {
+      list = data.notices;
+    } else if (data && Array.isArray(data.data)) {
+      list = data.data;
+    } else if (data && typeof data === "object") {
+      const arr = Object.values(data).find((v) => Array.isArray(v));
+      list = arr || [];
     }
+
+    setNotices(list);
+  } catch (err) {
+    console.error("Failed to fetch notices:", err);
+    setSnack({
+      open: true,
+      severity: "error",
+      text: "Failed to fetch notices",
+    });
+    setNotices([]);
+  } finally {
+    setLoading(false);
   }
+}
 
   async function handleAdd(e) {
     e.preventDefault();
