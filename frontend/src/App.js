@@ -314,6 +314,52 @@ export default function App() {
     </Layout>
   }
 />
+{/* ===== RESIDENT ROUTES ===== */}
+
+<Route
+  path="/resident/notices"
+  element={
+    <Layout sidebar={<ResidentSidebar />}>
+      <Notices />
+    </Layout>
+  }
+/>
+
+<Route
+  path="/resident/complaints"
+  element={
+    <Layout sidebar={<ResidentSidebar />}>
+      <ResidentComplaints />
+    </Layout>
+  }
+/>
+
+<Route
+  path="/resident/payments"
+  element={
+    <Layout sidebar={<ResidentSidebar />}>
+      <Payments />
+    </Layout>
+  }
+/>
+
+<Route
+  path="/resident/sos"
+  element={
+    <Layout sidebar={<ResidentSidebar />}>
+      <SOS />
+    </Layout>
+  }
+/>
+
+<Route
+  path="/resident/profile"
+  element={
+    <Layout sidebar={<ResidentSidebar />}>
+      <ResidentProfile />
+    </Layout>
+  }
+/>
       </Routes>
     </Router>
   );
