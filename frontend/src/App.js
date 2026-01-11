@@ -31,7 +31,6 @@ import {
   Card,
   CardContent,
   Button,
-  Divider,
   TextField,
   Paper,
 } from "@mui/material";
@@ -50,15 +49,9 @@ function Login() {
   const [flat, setFlat] = useState("");
 
   const handleLogin = async () => {
-    if (!username.trim()) {
-      alert("Enter username");
-      return;
-    }
-
-    if (role === "resident" && !flat.trim()) {
-      alert("Enter flat number");
-      return;
-    }
+    if (!username.trim()) return alert("Enter username");
+    if (role === "resident" && !flat.trim())
+      return alert("Enter flat number");
 
     if (role === "resident") {
       try {
@@ -71,14 +64,10 @@ function Login() {
           }),
         });
 
-        if (!res.ok) throw new Error("Resident save failed");
-
         const data = await res.json();
-        localStorage.setItem("residentName", data.name);
-        localStorage.setItem("residentFlat", data.flatNumber);
         localStorage.setItem("role", "resident");
         navigate("/resident");
-      } catch (err) {
+      } catch {
         alert("Resident login failed");
       }
       return;
@@ -100,10 +89,8 @@ function Login() {
         backgroundColor: "#0b1d26",
       }}
     >
-      {/* ===== Animated Background ===== */}
       <div className="animated-bg" />
 
-      {/* ===== Login Card ===== */}
       <Paper
         elevation={10}
         sx={{
@@ -121,10 +108,7 @@ function Login() {
           Login
         </Typography>
 
-        <Typography
-          variant="caption"
-          sx={{ color: "text.secondary", mb: 2, display: "block" }}
-        >
+        <Typography variant="caption" sx={{ mb: 2, display: "block" }}>
           Smart Security for Modern Societies
         </Typography>
 
@@ -167,23 +151,12 @@ function Login() {
           </Button>
         </Box>
 
-        <Button
-          fullWidth
-          size="large"
-          variant="contained"
-          onClick={handleLogin}
-          sx={{
-            py: 1.2,
-            fontWeight: 600,
-          }}
-        >
+        <Button fullWidth variant="contained" onClick={handleLogin}>
           Continue
         </Button>
       </Paper>
 
-      {/* ===== Animations ===== */}
-      <style>
-        {`
+      <style>{`
         .animated-bg {
           position: absolute;
           inset: 0;
@@ -192,23 +165,6 @@ function Login() {
             linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
           background-size: 60px 60px;
           animation: gridMove 22s linear infinite;
-          z-index: 0;
-        }
-
-        .animated-bg::before,
-        .animated-bg::after {
-          content: "";
-          position: absolute;
-          width: 400px;
-          height: 400px;
-          background: radial-gradient(circle, rgba(0,200,255,0.18), transparent 70%);
-          animation: floatGlow 18s ease-in-out infinite;
-        }
-
-        .animated-bg::after {
-          top: 60%;
-          left: 60%;
-          animation-delay: 8s;
         }
 
         @keyframes gridMove {
@@ -216,18 +172,11 @@ function Login() {
           to { background-position: 120px 120px; }
         }
 
-        @keyframes floatGlow {
-          0% { transform: translate(-100px, -100px); }
-          50% { transform: translate(100px, 100px); }
-          100% { transform: translate(-100px, -100px); }
-        }
-
         @keyframes fadeSlide {
           from { opacity: 0; transform: translateY(30px); }
           to { opacity: 1; transform: translateY(0); }
         }
-      `}
-      </style>
+      `}</style>
     </Box>
   );
 }
@@ -235,33 +184,58 @@ function Login() {
 /* ================= GUARD HOME ================= */
 function GuardHome() {
   const [stats, setStats] = useState({
-    visitors: "--",
-    complaints: "--",
-    sos: "--",
-    notices: "--",
+    visitors: 0,
+    complaints: 0,
+    sos: 0,
+    notices: 0,
   });
 
   useEffect(() => {
     const fetchStats = async () => {
-      const [v, c, s, n] = await Promise.all([
-        axios.get(`${API_BASE}/visitors`),
-        axios.get(`${API_BASE}/complaints`),
-        axios.get(`${API_BASE}/sos`),
-        axios.get(`${API_BASE}/notices`),
-      ]);
-      setStats({
-        visitors: v.data.length,
-        complaints: c.data.length,
-        sos: s.data.length,
-        notices: n.data.length,
-      });
+      try {
+        const [v, c, s, n] = await Promise.all([
+          axios.get(`${API_BASE}/visitors`),
+          axios.get(`${API_BASE}/complaints`),
+          axios.get(`${API_BASE}/sos`),
+          axios.get(`${API_BASE}/notices`),
+        ]);
+
+        setStats({
+          visitors: v.data.length,
+          complaints: c.data.length,
+          sos: s.data.length,
+          notices: n.data.length,
+        });
+      } catch (err) {
+        console.error("Dashboard error", err);
+      }
     };
+
     fetchStats();
   }, []);
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4">Guard Dashboard</Typography>
+    <Box>
+      <Typography variant="h4" sx={{ mb: 3 }}>
+        Guard Dashboard
+      </Typography>
+
+      <Grid container spacing={3}>
+        {Object.entries(stats).map(([key, value]) => (
+          <Grid item xs={12} sm={6} md={3} key={key}>
+            <Card sx={{ height: 120 }}>
+              <CardContent sx={{ textAlign: "center" }}>
+                <Typography variant="subtitle2">
+                  {key.toUpperCase()}
+                </Typography>
+                <Typography variant="h4" sx={{ fontWeight: 600 }}>
+                  {value}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
     </Box>
   );
 }
@@ -272,6 +246,7 @@ export default function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
+
         <Route
           path="/guard"
           element={
@@ -280,6 +255,7 @@ export default function App() {
             </Layout>
           }
         />
+
         <Route
           path="/guard/residents"
           element={
@@ -288,6 +264,7 @@ export default function App() {
             </Layout>
           }
         />
+
         <Route
           path="/resident"
           element={
@@ -304,9 +281,19 @@ export default function App() {
 /* ================= LAYOUT ================= */
 function Layout({ sidebar, children }) {
   return (
-    <div style={{ display: "flex" }}>
+    <div style={{ minHeight: "100vh" }}>
       {sidebar}
-      <div style={{ marginLeft: 220, flex: 1 }}>{children}</div>
+
+      <div
+        style={{
+          marginLeft: 220,   // ✅ IMPORTANT FIX
+          padding: 24,
+          background: "#f5f7fb",
+          minHeight: "100vh",
+        }}
+      >
+        {children}
+      </div>
     </div>
   );
 }
