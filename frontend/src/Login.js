@@ -36,7 +36,7 @@ export default function Login() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "radial-gradient(circle at top, #0f2027, #203a43, #2c5364)",
+       background: "radial-gradient(circle at top, #2a3f47, #3b5b66, #4f7d8b)",
       }}
     >
       <Paper elevation={10} sx={{ p: 4, width: 360 }}>
@@ -60,14 +60,25 @@ export default function Login() {
           onChange={(e) => setFlat(e.target.value)}
         />
 
-        <Button
-          variant="contained"
-          fullWidth
-          sx={{ mt: 2 }}
-          onClick={handleResidentLogin}
-        >
-          Resident Login
-        </Button>
+       <Button
+  variant="contained"
+  fullWidth
+  disabled
+  sx={{
+    mt: 2,
+    backgroundColor: "#ffffff",
+    color: "#1976d2",          // MUI blue
+    fontWeight: 600,
+    opacity: 1,
+    "&.Mui-disabled": {
+      backgroundColor: "#ffffff",
+      color: "#1976d2",
+      opacity: 1,
+    },
+  }}
+>
+  CONTINUE
+</Button>
 
         <Button
           variant="outlined"
@@ -81,3 +92,7 @@ export default function Login() {
     </Box>
   );
 }
+
+
+
+

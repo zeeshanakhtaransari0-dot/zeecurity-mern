@@ -42,10 +42,12 @@ const API_BASE = "https://zeecurity-backend.onrender.com/api";
 
 /* ================= LOGIN ================= */
 function Login() {
+  
   const navigate = useNavigate();
-  const [role, setRole] = useState("guard");
+  const [role, setRole] = useState("Guard");
   const [username, setUsername] = useState("");
   const [flat, setFlat] = useState("");
+  
 
   const handleLogin = async () => {
     if (!username.trim()) return alert("Enter username");
@@ -114,24 +116,49 @@ function Login() {
         >
           Login
         </Typography>
+        <Typography
+  sx={{
+    fontSize: "14px",
+    color: "#2e7d32", // green
+    letterSpacing: "0.6px",
+    mb: 0.5,
+  }}
+>
+  Smart Security for Modern Societies
+</Typography>
 
-        <TextField
-          fullWidth
-          label="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          sx={{ mb: 2 }}
-        />
+<Typography
+  sx={{
+    mb: 2,
+    fontSize: "14px",
+    color: "#546e7a",
+    letterSpacing: "0.5px",
+  }}
+>
+  Logging in as{" "}
+  <span style={{ fontWeight: 600, color: "#000" }}>
+    {role.toUpperCase()}
+  </span>
+</Typography>
 
-        {role === "resident" && (
-          <TextField
-            fullWidth
-            label="Flat Number"
-            value={flat}
-            onChange={(e) => setFlat(e.target.value)}
-            sx={{ mb: 2 }}
-          />
-        )}
+       <TextField
+  fullWidth
+  label="Username"
+  value={username}
+  onChange={(e) => setUsername(e.target.value)}
+  sx={{ mb: 1 }}
+/>
+
+
+{role === "resident" && (
+  <TextField
+    fullWidth
+    label="Flat Number"
+    value={flat}
+    onChange={(e) => setFlat(e.target.value)}
+    sx={{ mb: 2 }}
+  />
+)}
 
         <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
           <Button
@@ -151,21 +178,21 @@ function Login() {
         </Box>
 
         <Button
-          fullWidth
-          size="large"
-          onClick={handleLogin}
-          sx={{
-            py: 1.2,
-            fontWeight: 600,
-            background:
-              "linear-gradient(90deg, #1e88e5, #42a5f5)",
-            "&:hover": {
-              transform: "scale(1.03)",
-            },
-          }}
-        >
-          Continue
-        </Button>
+  fullWidth
+  size="large"
+  onClick={handleLogin}
+  sx={{
+    py: 1.2,
+    fontWeight: 600,
+    background: "#ffffff",          // white background
+    border: "2px solid #1e88e5",     // ✅ border restored
+    "&:hover": {
+      transform: "scale(1.03)",
+    },
+  }}
+>
+  Continue
+</Button>
       </Paper>
 
       <style>
