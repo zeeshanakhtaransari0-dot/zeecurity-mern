@@ -1,12 +1,8 @@
-// src/pages/GuardComplaints.js
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
   Box,
   Typography,
-  Grid,
-  Card,
-  CardContent,
   Button,
   Dialog,
   DialogTitle,
@@ -14,6 +10,9 @@ import {
   DialogActions,
   Snackbar,
   Alert,
+  Paper,
+  Stack,
+  Divider,
 } from "@mui/material";
 
 const API_BASE =
@@ -51,53 +50,89 @@ export default function GuardComplaints() {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>
+      <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
         Complaints (Guard Panel)
       </Typography>
 
-      <Grid container spacing={2}>
-        {complaints.map((c) => (
-          <Grid item xs={12} md={6} key={c._id}>
-            <Card>
-              <CardContent>
-                <Typography fontWeight={700}>
-                  {c.name} — {c.flatNumber}
-                </Typography>
-                <Typography sx={{ mt: 1 }}>{c.details}</Typography>
-                <Typography sx={{ mt: 1 }}>
-                  Status: {c.status}
-                </Typography>
+      {/* LOG STYLE LIST */}
+      {complaints.map((c) => (
+        <Paper
+          key={c._id}
+          elevation={0}
+          sx={{
+            mb: 2,
+            p: 2,
+            border: "1px solid #e5e7eb",
+            borderRadius: 2,
+            background: "#ffffff",
+          }}
+        >
+          {/* NAME */}
+          <Typography sx={{ fontWeight: 700, fontSize: 15 }}>
+            {c.name} — {c.flatNumber}
+          </Typography>
 
-                <Box sx={{ mt: 1, display: "flex", gap: 1 }}>
-                  <Button size="small" onClick={() => updateStatus(c._id, "Pending")}>
-                    Pending
-                  </Button>
-                  <Button size="small" onClick={() => updateStatus(c._id, "In Progress")}>
-                    In Progress
-                  </Button>
-                  <Button size="small" onClick={() => updateStatus(c._id, "Resolved")}>
-                    Resolved
-                  </Button>
-                </Box>
+          {/* MESSAGE */}
+          <Typography sx={{ mt: 0.5, color: "#374151", fontSize: 14 }}>
+            {c.details}
+          </Typography>
 
-                <Box sx={{ mt: 1, display: "flex", gap: 1 }}>
-                  <Button size="small" onClick={() => setPreview(c)}>
-                    Preview
-                  </Button>
-                  <Button
-                    size="small"
-                    color="error"
-                    onClick={() => deleteComplaint(c._id)}
-                  >
-                    Delete
-                  </Button>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+          {/* STATUS */}
+          <Typography sx={{ mt: 0.5, fontSize: 13, color: "#6b7280" }}>
+            Status: <strong>{c.status}</strong>
+          </Typography>
 
+          <Divider sx={{ my: 1.5 }} />
+
+          {/* ACTION BUTTONS */}
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ flexWrap: "wrap", rowGap: 1 }}
+          >
+            <Button
+              size="small"
+              variant={c.status === "Pending" ? "contained" : "outlined"}
+              onClick={() => updateStatus(c._id, "Pending")}
+            >
+              Pending
+            </Button>
+
+            <Button
+              size="small"
+              variant={c.status === "In Progress" ? "contained" : "outlined"}
+              onClick={() => updateStatus(c._id, "In Progress")}
+            >
+              In Progress
+            </Button>
+
+            <Button
+              size="small"
+              color="success"
+              variant={c.status === "Resolved" ? "contained" : "outlined"}
+              onClick={() => updateStatus(c._id, "Resolved")}
+            >
+              Resolved
+            </Button>
+
+            <Box sx={{ flexGrow: 1 }} />
+
+            <Button size="small" onClick={() => setPreview(c)}>
+              Preview
+            </Button>
+
+            <Button
+              size="small"
+              color="error"
+              onClick={() => deleteComplaint(c._id)}
+            >
+              Delete
+            </Button>
+          </Stack>
+        </Paper>
+      ))}
+
+      {/* PREVIEW DIALOG */}
       <Dialog open={!!preview} onClose={() => setPreview(null)}>
         <DialogTitle>Complaint Preview</DialogTitle>
         <DialogContent>
@@ -114,6 +149,7 @@ export default function GuardComplaints() {
         </DialogActions>
       </Dialog>
 
+      {/* SNACKBAR */}
       <Snackbar
         open={snack.open}
         autoHideDuration={3000}

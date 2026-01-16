@@ -21,6 +21,37 @@ const API_BASE =
   process.env.REACT_APP_API_BASE ||
   "https://zeecurity-backend.onrender.com/api";
 
+/* 🎨 CARD COLOR STYLES (ONLY UI) */
+const cardBase = {
+  height: "100%",
+  borderRadius: 3,
+  boxShadow: "0 10px 28px rgba(0,0,0,0.08)",
+  transition: "all 0.25s ease",
+  "&:hover": {
+    transform: "translateY(-4px)",
+    boxShadow: "0 18px 40px rgba(0,0,0,0.14)",
+  },
+};
+
+const cardStyles = {
+  notices: {
+    borderLeft: "5px solid #2563eb",
+    background: "linear-gradient(180deg,#eff6ff,#ffffff)",
+  },
+  complaints: {
+    borderLeft: "5px solid #f97316",
+    background: "linear-gradient(180deg,#fff7ed,#ffffff)",
+  },
+  sos: {
+    borderLeft: "5px solid #dc2626",
+    background: "linear-gradient(180deg,#fef2f2,#ffffff)",
+  },
+  payments: {
+    borderLeft: "5px solid #16a34a",
+    background: "linear-gradient(180deg,#f0fdf4,#ffffff)",
+  },
+};
+
 export default function ResidentHome() {
   const [flat, setFlat] = useState(
     () => localStorage.getItem("zeec_flat") || ""
@@ -33,7 +64,6 @@ export default function ResidentHome() {
   const [mySos, setMySos] = useState([]);
   const [notices, setNotices] = useState([]);
 
-  // when flat changes, load data
   useEffect(() => {
     if (!flat) return;
     loadResidentData();
@@ -52,7 +82,6 @@ export default function ResidentHome() {
           axios.get(`${API_BASE}/notices`),
         ]);
 
-      // Complaints (filter by flat)
       let complaints = Array.isArray(complaintsRes.data)
         ? complaintsRes.data
         : complaintsRes.data?.complaints || [];
@@ -61,63 +90,28 @@ export default function ResidentHome() {
           (c.flatNumber || c.flat || "").toLowerCase() ===
           flat.toLowerCase()
       );
-      complaints.sort(
-        (a, b) =>
-          new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
-      );
       setMyComplaints(complaints.slice(0, 3));
 
-      // Payments
-      let pData = paymentsRes.data;
-      let payments = [];
-      if (Array.isArray(pData)) payments = pData;
-      else if (pData?.success && Array.isArray(pData.payments))
-        payments = pData.payments;
-      else payments = pData?.payments || [];
+      let payments = paymentsRes.data?.payments || paymentsRes.data || [];
       payments = payments.filter(
         (p) =>
-          (p.flatNumber || p.flat || p.flatNo || "").toLowerCase() ===
+          (p.flatNumber || p.flat || "").toLowerCase() ===
           flat.toLowerCase()
-      );
-      payments = payments.map((p) => ({
-        name: p.name || p.payer || "",
-        flatNumber: p.flatNumber || p.flat || p.flatNo || "",
-        amount: p.amount || p.amt || 0,
-        month: p.month || p.forMonth || "",
-        date: p.date || p.createdAt || p.timestamp,
-      }));
-      payments.sort(
-        (a, b) => new Date(b.date || 0) - new Date(a.date || 0)
       );
       setMyPayments(payments.slice(0, 3));
 
-      // SOS
-      let sData = sosRes.data;
-      let sosList = Array.isArray(sData) ? sData : sData?.sos || [];
+      let sosList = sosRes.data?.sos || sosRes.data || [];
       sosList = sosList.filter(
         (s) =>
           (s.flatNumber || s.flat || "").toLowerCase() ===
           flat.toLowerCase()
       );
-      sosList.sort(
-        (a, b) =>
-          new Date(b.createdAt || b.date || 0) -
-          new Date(a.createdAt || a.date || 0)
-      );
       setMySos(sosList.slice(0, 3));
 
-      // Notices (no filter)
-      let nData = noticesRes.data;
-      let noticesList = Array.isArray(nData)
-        ? nData
-        : nData?.notices || [];
-      noticesList.sort(
-        (a, b) =>
-          new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
-      );
+      let noticesList = noticesRes.data?.notices || noticesRes.data || [];
       setNotices(noticesList.slice(0, 4));
     } catch (err) {
-      console.error("ResidentHome load error:", err);
+      console.error("ResidentHome error:", err);
     } finally {
       setLoading(false);
     }
@@ -131,284 +125,148 @@ export default function ResidentHome() {
 
   return (
     <Box sx={{ p: 3 }}>
-      {/* Header */}
+      {/* HEADER */}
       <Box
         sx={{
           mb: 3,
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "flex-end",
           flexWrap: "wrap",
           gap: 2,
         }}
       >
         <Box>
-          <Typography variant="overline" sx={{ letterSpacing: 2 }}>
-            Resident Panel
-          </Typography>
+          <Typography variant="overline">Resident Panel</Typography>
           <Typography variant="h4" sx={{ fontWeight: 800 }}>
             Welcome to Zeecurity
           </Typography>
-          <Typography variant="body2" sx={{ color: "text.secondary" }}>
-            View your notices, complaints, payments and SOS alerts in one
-            place.
+          <Typography variant="body2" color="text.secondary">
+            View your notices, complaints, payments and SOS alerts in one place.
           </Typography>
         </Box>
 
-        {/* Flat selector */}
-        <Box
-          sx={{
-            display: "flex",
-            gap: 1,
-            alignItems: "center",
-            minWidth: 260,
-          }}
-        >
+        <Box sx={{ display: "flex", gap: 1 }}>
           <TextField
             size="small"
             label="Your Flat (e.g. A-101)"
             value={inputFlat}
             onChange={(e) => setInputFlat(e.target.value)}
           />
-          <Button variant="contained" onClick={handleSaveFlat}>
-            Save
-          </Button>
+         <Button
+  variant="contained"
+  onClick={handleSaveFlat}
+  sx={{
+    height: 40,
+    px: 3,
+    textTransform: "none",
+    fontWeight: 500,
+    borderRadius: 2,
+  }}
+>
+  Save
+</Button>
         </Box>
       </Box>
 
-      {!flat && (
-        <Card sx={{ mb: 3 }}>
-          <CardContent>
-            <Typography variant="body2">
-              Please enter your <strong>Flat Number</strong> above and
-              click <strong>Save</strong> to see your personal data.
-            </Typography>
-          </CardContent>
-        </Card>
-      )}
-
       {loading && (
-        <Box sx={{ py: 4, display: "flex", justifyContent: "center" }}>
+        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
           <CircularProgress />
         </Box>
       )}
 
-      {/* Cards row */}
       <Grid container spacing={2.5}>
-        {/* Notices */}
+        {/* 🟦 NOTICES */}
         <Grid item xs={12} md={6}>
-          <Card sx={{ height: "100%" }}>
+          <Card sx={{ ...cardBase, ...cardStyles.notices }}>
             <CardContent>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  mb: 1,
-                }}
-              >
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                  Society Notices
-                </Typography>
-                <Button
-                  component={RouterLink}
-                  to="/resident/notices"
-                  size="small"
-                >
+              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                <Typography fontWeight={700}>Society Notices</Typography>
+                <Button component={RouterLink} to="/resident/notices" size="small">
                   View all
                 </Button>
               </Box>
-              {notices.length === 0 ? (
-                <Typography variant="body2" color="text.secondary">
-                  No notices yet.
-                </Typography>
-              ) : (
-                <List dense>
-                  {notices.map((n) => (
-                    <ListItem key={n._id} sx={{ px: 0 }}>
-                      <ListItemText
-                        primary={
-                          <Typography
-                            variant="subtitle2"
-                            sx={{ fontWeight: 600 }}
-                          >
-                            {n.title}
-                          </Typography>
-                        }
-                        secondary={
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                          >
-                            {n.message?.length > 70
-                              ? n.message.slice(0, 70) + "..."
-                              : n.message}
-                          </Typography>
-                        }
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              )}
+              <List dense>
+                {notices.map((n) => (
+                  <ListItem key={n._id} sx={{ px: 0 }}>
+                    <ListItemText
+                      primary={n.title}
+                      secondary={n.message}
+                    />
+                  </ListItem>
+                ))}
+              </List>
             </CardContent>
           </Card>
         </Grid>
 
-        {/* Complaints */}
+        {/* 🟧 COMPLAINTS */}
         <Grid item xs={12} md={6}>
-          <Card sx={{ height: "100%" }}>
+          <Card sx={{ ...cardBase, ...cardStyles.complaints }}>
             <CardContent>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  mb: 1,
-                }}
-              >
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                  My Complaints
-                </Typography>
-                <Button
-                  component={RouterLink}
-                  to="/resident/complaints"
-                  size="small"
-                >
+              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                <Typography fontWeight={700}>My Complaints</Typography>
+                <Button component={RouterLink} to="/resident/complaints" size="small">
                   View all
                 </Button>
               </Box>
-              {flat && myComplaints.length === 0 ? (
-                <Typography variant="body2" color="text.secondary">
-                  No complaints found for flat <strong>{flat}</strong>.
-                </Typography>
-              ) : (
-                <List dense>
-                  {myComplaints.map((c) => (
-                    <ListItem key={c._id} sx={{ px: 0 }}>
-                      <ListItemText
-                        primary={
-                          <Typography variant="body2">
-                            {c.details}
-                          </Typography>
-                        }
-                        secondary={
-                          <Chip
-                            size="small"
-                            label={c.status || "Pending"}
-                            sx={{ mt: 0.5 }}
-                          />
-                        }
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              )}
+              <List dense>
+                {myComplaints.map((c) => (
+                  <ListItem key={c._id} sx={{ px: 0 }}>
+                    <ListItemText
+                      primary={c.details}
+                      secondary={<Chip size="small" label={c.status} />}
+                    />
+                  </ListItem>
+                ))}
+              </List>
             </CardContent>
           </Card>
         </Grid>
 
-        {/* SOS */}
+        {/* 🟥 SOS */}
         <Grid item xs={12} md={6}>
-          <Card sx={{ height: "100%" }}>
+          <Card sx={{ ...cardBase, ...cardStyles.sos }}>
             <CardContent>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  mb: 1,
-                }}
-              >
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                  My SOS Alerts
-                </Typography>
-                <Button
-                  component={RouterLink}
-                  to="/resident/sos"
-                  size="small"
-                >
+              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                <Typography fontWeight={700}>My SOS Alerts</Typography>
+                <Button component={RouterLink} to="/resident/sos" size="small">
                   View all
                 </Button>
               </Box>
-              {flat && mySos.length === 0 ? (
-                <Typography variant="body2" color="text.secondary">
-                  No SOS alerts for flat <strong>{flat}</strong>.
-                </Typography>
-              ) : (
-                <List dense>
-                  {mySos.map((s) => (
-                    <ListItem key={s._id} sx={{ px: 0 }}>
-                      <ListItemText
-                        primary={
-                          <Typography variant="body2">
-                            {s.type} • {s.details}
-                          </Typography>
-                        }
-                        secondary={
-                          <Chip
-                            size="small"
-                            label={s.status || "Pending"}
-                            sx={{ mt: 0.5 }}
-                          />
-                        }
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              )}
+              <List dense>
+                {mySos.map((s) => (
+                  <ListItem key={s._id} sx={{ px: 0 }}>
+                    <ListItemText
+                      primary={s.details}
+                      secondary={<Chip size="small" label={s.status} />}
+                    />
+                  </ListItem>
+                ))}
+              </List>
             </CardContent>
           </Card>
         </Grid>
 
-        {/* Payments */}
+        {/* 🟩 PAYMENTS */}
         <Grid item xs={12} md={6}>
-          <Card sx={{ height: "100%" }}>
+          <Card sx={{ ...cardBase, ...cardStyles.payments }}>
             <CardContent>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  mb: 1,
-                }}
-              >
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                  My Maintenance Payments
-                </Typography>
-                <Button
-                  component={RouterLink}
-                  to="/resident/payments"
-                  size="small"
-                >
+              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                <Typography fontWeight={700}>My Maintenance Payments</Typography>
+                <Button component={RouterLink} to="/resident/payments" size="small">
                   View all
                 </Button>
               </Box>
-              {flat && myPayments.length === 0 ? (
-                <Typography variant="body2" color="text.secondary">
-                  No payment records for flat <strong>{flat}</strong>.
-                </Typography>
-              ) : (
-                <List dense>
-                  {myPayments.map((p, i) => (
-                    <ListItem key={i} sx={{ px: 0 }}>
-                      <ListItemText
-                        primary={
-                          <Typography variant="body2">
-                            {p.month || "Month"} • ₹
-                            {Number(p.amount || 0).toLocaleString()}
-                          </Typography>
-                        }
-                        secondary={
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                          >
-                            {p.date
-                              ? new Date(p.date).toLocaleDateString()
-                              : ""}
-                          </Typography>
-                        }
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              )}
+              <List dense>
+                {myPayments.map((p, i) => (
+                  <ListItem key={i} sx={{ px: 0 }}>
+                    <ListItemText
+                      primary={`₹${p.amount}`}
+                      secondary={p.month}
+                    />
+                  </ListItem>
+                ))}
+              </List>
             </CardContent>
           </Card>
         </Grid>

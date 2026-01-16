@@ -83,8 +83,10 @@ function Login() {
     }
 
     // ===== GUARD LOGIN =====
-    localStorage.setItem("role", "guard");
-    navigate("/guard");
+   // ===== GUARD LOGIN =====
+localStorage.setItem("role", "guard");
+localStorage.setItem("guardName", username.trim()); // ✅ save guard name
+navigate("/guard");
   };
 
   return (
@@ -215,14 +217,14 @@ function Login() {
 
 /* ================= GUARD HOME ================= */
 function GuardHome() {
-  const [stats, setStats] = useState({
+  const [stats, setStats] = React.useState({
     visitors: "--",
     complaints: "--",
     sos: "--",
     notices: "--",
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     fetchStats();
   }, []);
 
@@ -242,28 +244,124 @@ function GuardHome() {
     });
   };
 
+  const guardName = "admin"; // or fetch later
+  const time = new Date().toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4">Guard Dashboard</Typography>
+  {/* Heading */}
+  <Box sx={{ mb: 2 }}>
+   <Typography
+  variant="h4"
+  sx={{
+    fontWeight: 500,   // bold heading
+    color: "#000000",  // pure black
+    mb: 1,
+  }}
+>
+  Guard Dashboard
+</Typography>
+  </Box>
+      {/* ===== INSTRUCTIONS (UNCHANGED) ===== */}
+      <Box
+        sx={{
+          mb: 3,
+          p: 2,
+          borderRadius: 2,
+          background: "#e3f2fd",
+          borderLeft: "6px solid #1e88e5",
+        }}
+      >
+        <Typography sx={{ fontWeight: 600, color: "#0d47a1" }}>
+          Guard Instructions
+        </Typography>
+        <Typography variant="body2" sx={{ mt: 0.5 }}>
+          Please regularly monitor visitor entries, complaints, SOS alerts
+          and notices to ensure society safety.
+        </Typography>
+      </Box>
 
-      <Grid container spacing={2} sx={{ mt: 2 }}>
-        {Object.entries(stats).map(([k, v]) => (
-          <Grid item xs={6} md={3} key={k}>
-            <Card>
-              <CardContent>
-                <Typography variant="caption">{k}</Typography>
-                <Typography variant="h5">{v}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
+      {/* ===== STATS CARDS (UNCHANGED STYLE) ===== */}
+      <Grid container spacing={2}>
+        <Grid item xs={6} md={3}>
+          <Card sx={{ borderRadius: 3 }}>
+            <CardContent>
+              <Typography variant="caption">VISITORS</Typography>
+              <Typography variant="h4" color="#1e88e5">
+                {stats.visitors}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={6} md={3}>
+          <Card sx={{ borderRadius: 3 }}>
+            <CardContent>
+              <Typography variant="caption">COMPLAINTS</Typography>
+              <Typography variant="h4" color="#fb8c00">
+                {stats.complaints}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={6} md={3}>
+          <Card sx={{ borderRadius: 3 }}>
+            <CardContent>
+              <Typography variant="caption">SOS</Typography>
+              <Typography variant="h4" color="#e53935">
+                {stats.sos}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        <Grid item xs={6} md={3}>
+          <Card sx={{ borderRadius: 3 }}>
+            <CardContent>
+              <Typography variant="caption">NOTICES</Typography>
+              <Typography variant="h4" color="#2e7d32">
+                {stats.notices}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
       </Grid>
 
-      <Divider sx={{ my: 3 }} />
+      {/* ===== GREETING CARD (UNCHANGED) ===== */}
+      <Box
+        sx={{
+          mt: 3,
+          p: 2,
+          borderRadius: 2,
+          background: "#e3f2fd",
+          borderLeft: "6px solid #1e88e5",
+        }}
+      >
+        <Typography sx={{ fontWeight: 600, color: "#0d47a1" }}>
+          Good Morning 👋
+        </Typography>
+        <Typography variant="body2">
+          Hello {guardName}, hope you're having a great shift.
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          Current time: {time}
+        </Typography>
+      </Box>
 
-      <Button component={RouterLink} to="/guard/residents" variant="contained">
-        View Residents
-      </Button>
+      {/* ===== BUTTON ===== */}
+      <Box sx={{ mt: 3 }}>
+        <Button
+          component={RouterLink}
+          to="/guard/residents"
+          variant="contained"
+        >
+          VIEW RESIDENTS
+        </Button>
+      </Box>
     </Box>
   );
 }

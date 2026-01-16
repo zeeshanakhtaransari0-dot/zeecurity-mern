@@ -12,11 +12,13 @@ import {
 } from "@mui/material";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import ReportIcon from "@mui/icons-material/Report";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import WarningIcon from "@mui/icons-material/Warning";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+
 import logo from "../assets/zeecurity_logo.png";
 
 const drawerWidth = 220;
@@ -25,7 +27,14 @@ export default function ResidentSidebar() {
   const location = useLocation();
   const path = location.pathname;
 
+  // ✅ SAME ACTIVE LOGIC AS GUARD (NO ERRORS)
+  const isActive = (to) => {
+    if (to === "/resident") return path === "/resident";
+    return path.startsWith(to);
+  };
+
   const menu = [
+    { label: "Dashboard", to: "/resident", icon: <DashboardIcon /> },
     { label: "Notices", to: "/resident/notices", icon: <NotificationsIcon /> },
     { label: "Complaints", to: "/resident/complaints", icon: <ReportIcon /> },
     { label: "Payments", to: "/resident/payments", icon: <PaymentsIcon /> },
@@ -39,24 +48,39 @@ export default function ResidentSidebar() {
       PaperProps={{
         sx: {
           width: drawerWidth,
-          background: "#ffffff",
-          borderRight: "1px solid #e5e7eb",
-          color: "#111827",
+          background:
+            "radial-gradient(circle at 0 0,#0ea5e9 0,transparent 45%), #020617",
+          color: "#e5e7eb",
+          borderRight: "1px solid rgba(148,163,184,0.25)",
         },
       }}
     >
+      {/* LOGO */}
       <Toolbar sx={{ minHeight: 80, px: 2 }}>
         <Box sx={{ textAlign: "center", width: "100%" }}>
-          <img src={logo} alt="logo" style={{ width: 110 }} />
-          <Typography variant="caption" sx={{ color: "#6b7280", display: "block", mt: 0.5 }}>
+          <img src={logo} alt="logo" style={{ width: 120 }} />
+          <Typography
+            variant="caption"
+            sx={{
+              color: "rgba(148,163,184,0.9)",
+              textTransform: "uppercase",
+              letterSpacing: 1.5,
+              fontSize: 11,
+              mt: 0.5,
+              display: "block",
+            }}
+          >
             Resident Panel
           </Typography>
         </Box>
       </Toolbar>
 
-      <List>
+      {/* MENU */}
+      <List sx={{ mt: 1 }}>
         {menu.map((item) => {
-          const active = path === item.to;
+          const active = isActive(item.to);
+          const isDanger = item.danger;
+
           return (
             <ListItem disablePadding key={item.label}>
               <ListItemButton
@@ -67,9 +91,24 @@ export default function ResidentSidebar() {
                   mx: 1,
                   mb: 0.5,
                   borderRadius: 2,
-                  background: active ? "#e0f2fe" : "transparent",
+                  color: active ? "#0f172a" : "#e5e7eb",
+                  background: active
+                    ? "linear-gradient(135deg,#e0f2fe,#bae6fd)"
+                    : "transparent",
+                  transition: "all 0.2s ease",
                   "& .MuiListItemIcon-root": {
-                    color: active ? "#0284c7" : item.danger ? "#dc2626" : "#6b7280",
+                    color: active
+                      ? "#0f172a"
+                      : isDanger
+                      ? "#f97373"
+                      : "#7dd3fc",
+                    minWidth: 40,
+                  },
+                  "&:hover": {
+                    background: active
+                      ? "linear-gradient(135deg,#e0f2fe,#bae6fd)"
+                      : "rgba(148,163,184,0.15)",
+                    transform: "translateX(3px)",
                   },
                 }}
               >
@@ -77,7 +116,7 @@ export default function ResidentSidebar() {
                 <ListItemText
                   primary={item.label}
                   primaryTypographyProps={{
-                    sx: { fontWeight: active ? 700 : 500 },
+                    sx: { fontSize: 15, fontWeight: active ? 700 : 500 },
                   }}
                 />
               </ListItemButton>
@@ -85,6 +124,14 @@ export default function ResidentSidebar() {
           );
         })}
       </List>
+      <Box sx={{ px: 2, pb: 2 }}>
+              <Typography
+                variant="caption"
+                sx={{ color: "rgba(148,163,184,0.7)", fontSize: 10 }}
+              >
+                Zeecurity • Society Security System
+              </Typography>
+            </Box>
     </Drawer>
   );
 }
