@@ -1,3 +1,4 @@
+// src/pages/ResidentProfile.js
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
@@ -18,7 +19,7 @@ const API_BASE =
   "https://zeecurity-backend.onrender.com/api";
 
 export default function ResidentProfile() {
-  /* ================= BASIC INFO (FROM LOCALSTORAGE) ================= */
+  /* ================= BASIC INFO ================= */
 
   const [residentName, setResidentName] = useState("");
   const [residentFlat, setResidentFlat] = useState("");
@@ -43,12 +44,6 @@ export default function ResidentProfile() {
     residentName || "Resident"
   )}&background=0D8ABC&color=fff`;
 
-  const email = residentName
-    ? `${residentName.toLowerCase().replace(/\s+/g, ".")}@example.com`
-    : "resident@example.com";
-
-  const phone = "+91-98765 43210";
-
   /* ================= LOAD DATA ================= */
 
   useEffect(() => {
@@ -66,7 +61,6 @@ export default function ResidentProfile() {
         axios.get(`${API_BASE}/sos`),
       ]);
 
-      /* ----- Complaints ----- */
       const complaints = Array.isArray(complaintsRes.data)
         ? complaintsRes.data
         : [];
@@ -81,7 +75,6 @@ export default function ResidentProfile() {
         (c) => (c.status || "").toLowerCase() === "resolved"
       ).length;
 
-      /* ----- Payments ----- */
       const payments = Array.isArray(paymentsRes.data)
         ? paymentsRes.data
         : paymentsRes.data?.payments || [];
@@ -98,7 +91,6 @@ export default function ResidentProfile() {
             new Date(a.createdAt || 0)
         );
 
-      /* ----- SOS ----- */
       const sos = Array.isArray(sosRes.data) ? sosRes.data : [];
 
       const mySos = sos.filter(
