@@ -1,5 +1,5 @@
 // src/pages/ResidentComplaints.js
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import {
   Box,
@@ -20,7 +20,8 @@ export default function ResidentComplaints() {
   const [details, setDetails] = useState("");
   const [complaints, setComplaints] = useState([]);
 
-  const fetchComplaints = async () => {
+  // ✅ wrapped with useCallback (FIX)
+  const fetchComplaints = useCallback(async () => {
     try {
       const res = await axios.get(`${API_BASE}/complaints`);
       const mine = res.data.filter(
@@ -30,11 +31,12 @@ export default function ResidentComplaints() {
     } catch (err) {
       console.error("Failed to load complaints", err);
     }
-  };
+  }, [residentFlat]);
 
+  // ✅ dependency fixed
   useEffect(() => {
     fetchComplaints();
-  }, [residentFlat]);
+  }, [fetchComplaints]);
 
   const submitComplaint = async (e) => {
     e.preventDefault();
@@ -89,25 +91,6 @@ export default function ResidentComplaints() {
           </Grid>
         </Grid>
       </Box>
-
-      <Typography variant="h6" sx={{ mb: 2 }}>
-        My Complaints
-      </Typography>
-
-      <Grid container spacing={2}>
-        {complaints.map((c) => (
-          <Grid item xs={12} md={6} key={c._id}>
-            <Card>
-              <CardContent>
-                <Typography fontWeight={600}>
-                  Status: {c.status}
-                </Typography>
-                <Typography>{c.details}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
     </Box>
   );
 }

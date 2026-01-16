@@ -1,5 +1,5 @@
 // src/pages/ResidentProfile.js
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import {
   Box,
@@ -19,17 +19,9 @@ const API_BASE =
   "https://zeecurity-backend.onrender.com/api";
 
 export default function ResidentProfile() {
-  /* ================= BASIC INFO ================= */
-
   const [residentName, setResidentName] = useState("");
   const [residentFlat, setResidentFlat] = useState("");
-
-  useEffect(() => {
-    setResidentName(localStorage.getItem("residentName") || "");
-    setResidentFlat(localStorage.getItem("residentFlat") || "");
-  }, []);
-
-  /* ================= SUMMARY ================= */
+  const [loading, setLoading] = useState(true);
 
   const [summary, setSummary] = useState({
     totalComplaints: 0,
@@ -38,20 +30,17 @@ export default function ResidentProfile() {
     lastPayment: null,
   });
 
-  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    setResidentName(localStorage.getItem("residentName") || "");
+    setResidentFlat(localStorage.getItem("residentFlat") || "");
+  }, []);
 
   const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(
     residentName || "Resident"
   )}&background=0D8ABC&color=fff`;
 
-  /* ================= LOAD DATA ================= */
-
-  useEffect(() => {
-    if (!residentFlat) return;
-    loadResidentData();
-  }, [residentFlat]);
-
-  async function loadResidentData() {
+  // ✅ wrapped with useCallback (FIX)
+  const loadResidentData = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -110,9 +99,13 @@ export default function ResidentProfile() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [residentFlat]);
 
-  /* ================= UI ================= */
+  // ✅ dependency fixed
+  useEffect(() => {
+    if (!residentFlat) return;
+    loadResidentData();
+  }, [loadResidentData, residentFlat]);
 
   return (
     <Box sx={{ p: 3 }}>
