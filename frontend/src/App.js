@@ -1,5 +1,5 @@
 // src/App.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -217,35 +217,38 @@ navigate("/guard");
 
 /* ================= GUARD HOME ================= */
 function GuardHome() {
-  const [stats, setStats] = React.useState({
-    visitors: "--",
-    complaints: "--",
-    sos: "--",
-    notices: "--",
+  const [stats, setStats] = useState({
+    visitors: 0,
+    complaints: 0,
+    sos: 0,
+    notices: 0,
   });
 
-  React.useEffect(() => {
-  fetchComplaints();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, []);
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
   const fetchStats = async () => {
-    const [v, c, s, n] = await Promise.all([
-      axios.get(`${API_BASE}/visitors`),
-      axios.get(`${API_BASE}/complaints`),
-      axios.get(`${API_BASE}/sos`),
-      axios.get(`${API_BASE}/notices`),
-    ]);
+    try {
+      const [v, c, s, n] = await Promise.all([
+        axios.get(`${API_BASE}/visitors`),
+        axios.get(`${API_BASE}/complaints`),
+        axios.get(`${API_BASE}/sos`),
+        axios.get(`${API_BASE}/notices`),
+      ]);
 
-    setStats({
-      visitors: v.data.length,
-      complaints: c.data.length,
-      sos: s.data.length,
-      notices: n.data.length,
-    });
+      setStats({
+        visitors: v.data.length,
+        complaints: c.data.length,
+        sos: s.data.length,
+        notices: n.data.length,
+      });
+    } catch (err) {
+      console.error("Failed to load stats", err);
+    }
   };
 
-  const guardName = "admin"; // or fetch later
+  const guardName = localStorage.getItem("guardName") || "Guard";
   const time = new Date().toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
@@ -253,20 +256,11 @@ function GuardHome() {
 
   return (
     <Box sx={{ p: 3 }}>
-  {/* Heading */}
-  <Box sx={{ mb: 2 }}>
-   <Typography
-  variant="h4"
-  sx={{
-    fontWeight: 500,   // bold heading
-    color: "#000000",  // pure black
-    mb: 1,
-  }}
->
-  Guard Dashboard
-</Typography>
-  </Box>
-      {/* ===== INSTRUCTIONS (UNCHANGED) ===== */}
+      <Typography variant="h4" sx={{ fontWeight: 500, color: "#000", mb: 1 }}>
+        Guard Dashboard
+      </Typography>
+
+      {/* Instructions */}
       <Box
         sx={{
           mb: 3,
@@ -279,59 +273,52 @@ function GuardHome() {
         <Typography sx={{ fontWeight: 600, color: "#0d47a1" }}>
           Guard Instructions
         </Typography>
-        <Typography variant="body2" sx={{ mt: 0.5 }}>
-          Please regularly monitor visitor entries, complaints, SOS alerts
-          and notices to ensure society safety.
+        <Typography variant="body2">
+          Please regularly monitor visitor entries, complaints, SOS alerts and notices.
         </Typography>
       </Box>
 
-      {/* ===== STATS CARDS (UNCHANGED STYLE) ===== */}
+      {/* Stats Cards */}
       <Grid container spacing={2}>
-        <Grid item xs={6} md={3}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent>
-              <Typography variant="caption">VISITORS</Typography>
-              <Typography variant="h4" color="#1e88e5">
-                {stats.visitors}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={6} md={3}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent>
-              <Typography variant="caption">COMPLAINTS</Typography>
-              <Typography variant="h4" color="#fb8c00">
-                {stats.complaints}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={6} md={3}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent>
-              <Typography variant="caption">SOS</Typography>
-              <Typography variant="h4" color="#e53935">
-                {stats.sos}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={6} md={3}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent>
-              <Typography variant="caption">NOTICES</Typography>
-              <Typography variant="h4" color="#2e7d32">
-                {stats.notices}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+        {[
+          { label: "VISITORS", value: stats.visitors, color: "#1e88e5" },
+          { label: "COMPLAINTS", value: stats.complaints, color: "#fb8c00" },
+          { label: "SOS", value: stats.sos, color: "#e53935" },
+          { label: "NOTICES", value: stats.notices, color: "#2e7d32" },
+        ].map((item) => (
+          <Grid item xs={6} md={3} key={item.label}>
+            <Card sx={{ borderRadius: 3 }}>
+              <CardContent>
+                <Typography variant="caption">{item.label}</Typography>
+                <Typography variant="h4" sx={{ color: item.color }}>
+                  {item.value}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
       </Grid>
 
+      {/* Greeting */}
+      <Box
+        sx={{
+          mt: 3,
+          p: 2,
+          borderRadius: 2,
+          background: "#e3f2fd",
+          borderLeft: "6px solid #1e88e5",
+        }}
+      >
+        <Typography sx={{ fontWeight: 600, color: "#0d47a1" }}>
+          Good Morning 👋
+        </Typography>
+        <Typography variant="body2">
+          Hello {guardName}, hope you're having a great shift.
+        </Typography>
+        <Typography variant="caption">Current time: {time}</Typography>
+      </Box>
+
+      
       {/* ===== GREETING CARD (UNCHANGED) ===== */}
       <Box
         sx={{
