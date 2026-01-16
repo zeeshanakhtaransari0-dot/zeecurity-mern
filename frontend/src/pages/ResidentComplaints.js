@@ -5,8 +5,6 @@ import {
   Box,
   Typography,
   Grid,
-  Card,
-  CardContent,
   Button,
   TextField,
 } from "@mui/material";
@@ -18,22 +16,17 @@ export default function ResidentComplaints() {
   const residentFlat = localStorage.getItem("residentFlat") || "";
 
   const [details, setDetails] = useState("");
-  const [complaints, setComplaints] = useState([]);
 
-  // ✅ wrapped with useCallback (FIX)
+  // ✅ wrapped with useCallback
   const fetchComplaints = useCallback(async () => {
     try {
-      const res = await axios.get(`${API_BASE}/complaints`);
-      const mine = res.data.filter(
-        (c) => c.flatNumber === residentFlat
-      );
-      setComplaints(mine);
+      await axios.get(`${API_BASE}/complaints`);
+      // complaints list not used in UI → safely ignored
     } catch (err) {
       console.error("Failed to load complaints", err);
     }
-  }, [residentFlat]);
+  }, []);
 
-  // ✅ dependency fixed
   useEffect(() => {
     fetchComplaints();
   }, [fetchComplaints]);
