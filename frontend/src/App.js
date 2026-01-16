@@ -225,8 +225,9 @@ function GuardHome() {
   });
 
   React.useEffect(() => {
-    fetchStats();
-  }, []);
+  fetchComplaints();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 
   const fetchStats = async () => {
     const [v, c, s, n] = await Promise.all([
