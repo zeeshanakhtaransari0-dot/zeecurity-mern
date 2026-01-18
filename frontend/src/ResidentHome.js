@@ -15,7 +15,7 @@ import {
   Chip,
   CircularProgress,
 } from "@mui/material";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { Link as RouterLink,} from "react-router-dom";
 
 const API_BASE =
   process.env.REACT_APP_API_BASE ||
@@ -53,7 +53,8 @@ const cardStyles = {
 };
 
 export default function ResidentHome() {
-  const navigate = useNavigate();
+  
+
 
  const [flat, setFlat] = useState(
   () => localStorage.getItem("residentFlat") || ""
@@ -125,16 +126,7 @@ export default function ResidentHome() {
   localStorage.setItem("residentFlat", inputFlat.trim());
 }
 
-/* ✅ LOGOUT (ONLY ADDITION) */
-const handleLogout = () => {
-  // remove ONLY auth/session data
-  localStorage.removeItem("role");
-  localStorage.removeItem("residentName");
-  localStorage.removeItem("residentFlat");
-  localStorage.removeItem("guardName");
 
-  navigate("/");
-};
 
   return (
     <Box sx={{ p: 3 }}>
