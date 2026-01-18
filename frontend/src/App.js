@@ -31,7 +31,6 @@ import {
   Card,
   CardContent,
   Button,
-
   TextField,
   Paper,
 } from "@mui/material";
@@ -42,53 +41,94 @@ const API_BASE = "https://zeecurity-backend.onrender.com/api";
 
 /* ================= LOGIN ================= */
 function Login() {
-  
   const navigate = useNavigate();
-  const [role, setRole] = useState("Guard");
+
+  const [role, setRole] = useState("guard");
   const [username, setUsername] = useState("");
+  const [password, setPassword] = useState(""); // ✅ REQUIRED
   const [flat, setFlat] = useState("");
+
+  const handleLogin = () => {
+  // basic UI validation only
+  if (!username.trim()) {
+    alert("Enter username");
+    return;
+  }
+
+  if (!password) {
+    alert("Enter password");
+    return;
+  }
   
 
-  const handleLogin = async () => {
-    if (!username.trim()) return alert("Enter username");
-    if (role === "resident" && !flat.trim())
-      return alert("Enter flat number");
-
-    // ===== RESIDENT LOGIN =====
-    if (role === "resident") {
-      try {
-        const res = await fetch(`${API_BASE}/residents`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: username.trim(),
-            flatNumber: flat.trim(),
-          }),
-        });
-
-        if (!res.ok) throw new Error("Resident save failed");
-
-        const data = await res.json();
-
-        localStorage.setItem("residentName", data.name);
-        localStorage.setItem("residentFlat", data.flatNumber);
-        localStorage.setItem("role", "resident");
-
-        navigate("/resident");
-      } catch (err) {
-        console.error(err);
-        alert("Resident login failed");
-      }
-      return;
-    }
-
-    // ===== GUARD LOGIN =====
-   // ===== GUARD LOGIN =====
-localStorage.setItem("role", "guard");
-localStorage.setItem("guardName", username.trim()); // ✅ save guard name
-navigate("/guard");
+  // ✅ MOCK LOGIN (FOR EXAM / DEMO)
+  const user = {
+    name: username.trim(),
+    role: role.toLowerCase(), // guard / resident
+    flatNumber: flat || null,
   };
+  // ✅ SAVE RESIDENT LOGIN FOR GUARD VIEW
+if (user.role === "resident") {
+  // ✅ SAVE LOGGED RESIDENT (ONLY ON LOGIN)
+const loggedResidents =
+  JSON.parse(localStorage.getItem("loggedResidents")) || [];
 
+// prevent duplicate save
+const alreadyExists = loggedResidents.some(
+  (r) => r.name === user.name && r.flatNumber === user.flatNumber
+);
+
+if (!alreadyExists) {
+  loggedResidents.push({
+    name: user.name,
+    flatNumber: user.flatNumber || "",
+    createdAt: new Date().toISOString(),
+  });
+
+  localStorage.setItem(
+    "loggedResidents",
+    JSON.stringify(loggedResidents)
+  );
+}
+}
+
+  // save common data
+  localStorage.setItem("role", user.role);
+  localStorage.setItem("residentName", user.name);
+
+  if (user.flatNumber) {
+    localStorage.setItem("residentFlat", user.flatNumber);
+  }
+
+  if (user.role === "guard") {
+    localStorage.setItem("guardName", user.name);
+    navigate("/guard");
+  } else {
+  // ✅ SAVE LOGGED RESIDENT (THIS IS WHAT YOU ASKED ABOUT)
+  const loggedResidents =
+    JSON.parse(localStorage.getItem("loggedResidents")) || [];
+
+ const alreadyLogged = loggedResidents.some(
+  (r) =>
+    r.name === user.name &&
+    r.flatNumber === user.flatNumber
+);
+
+if (!alreadyLogged) {
+  loggedResidents.push({
+    name: user.name,
+    flatNumber: user.flatNumber,
+    createdAt: new Date().toISOString(),
+  });
+}
+  localStorage.setItem(
+    "loggedResidents",
+    JSON.stringify(loggedResidents)
+  );
+
+  navigate("/resident");
+}
+};
   return (
     <Box
       sx={{
@@ -107,60 +147,40 @@ navigate("/guard");
           width: { xs: "90%", sm: 360 },
           textAlign: "center",
           borderRadius: 3,
-          animation: "fadeSlide 0.7s ease",
         }}
       >
         <img src={logo} alt="Zeecurity" width={80} />
 
-        <Typography
-          variant="h5"
-          sx={{ mt: 2, mb: 2, fontWeight: 600 }}
-        >
+        <Typography variant="h5" sx={{ mt: 2, mb: 2, fontWeight: 600 }}>
           Login
         </Typography>
-        <Typography
-  sx={{
-    fontSize: "14px",
-    color: "#2e7d32", // green
-    letterSpacing: "0.6px",
-    mb: 0.5,
-  }}
->
-  Smart Security for Modern Societies
-</Typography>
 
-<Typography
-  sx={{
-    mb: 2,
-    fontSize: "14px",
-    color: "#546e7a",
-    letterSpacing: "0.5px",
-  }}
->
-  Logging in as{" "}
-  <span style={{ fontWeight: 600, color: "#000" }}>
-    {role.toUpperCase()}
-  </span>
-</Typography>
+        <TextField
+          fullWidth
+          label="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          sx={{ mb: 1 }}
+        />
 
-       <TextField
-  fullWidth
-  label="Username"
-  value={username}
-  onChange={(e) => setUsername(e.target.value)}
-  sx={{ mb: 1 }}
-/>
+        <TextField
+          fullWidth
+          label="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          sx={{ mb: 1 }}
+        />
 
-
-{role === "resident" && (
-  <TextField
-    fullWidth
-    label="Flat Number"
-    value={flat}
-    onChange={(e) => setFlat(e.target.value)}
-    sx={{ mb: 2 }}
-  />
-)}
+        {role === "resident" && (
+          <TextField
+            fullWidth
+            label="Flat Number"
+            value={flat}
+            onChange={(e) => setFlat(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+        )}
 
         <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
           <Button
@@ -180,37 +200,19 @@ navigate("/guard");
         </Box>
 
         <Button
-  fullWidth
-  size="large"
-  onClick={handleLogin}
-  sx={{
-    py: 1.2,
-    fontWeight: 600,
-    background: "#ffffff",          // white background
-    border: "2px solid #1e88e5",     // ✅ border restored
-    "&:hover": {
-      transform: "scale(1.03)",
-    },
-  }}
->
-  Continue
-</Button>
+          fullWidth
+          size="large"
+          onClick={handleLogin}
+          sx={{
+            py: 1.2,
+            fontWeight: 600,
+            background: "#ffffff",
+            border: "2px solid #1e88e5",
+          }}
+        >
+          Continue
+        </Button>
       </Paper>
-
-      <style>
-        {`
-          @keyframes fadeSlide {
-            from {
-              opacity: 0;
-              transform: translateY(25px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-        `}
-      </style>
     </Box>
   );
 }
@@ -244,114 +246,59 @@ function GuardHome() {
         notices: n.data.length,
       });
     } catch (err) {
-      console.error("Failed to load stats", err);
+      console.error(err);
     }
   };
-
-  const guardName = localStorage.getItem("guardName") || "Guard";
-  const time = new Date().toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" sx={{ fontWeight: 500, color: "#000", mb: 1 }}>
-        Guard Dashboard
-      </Typography>
+  <Box sx={{ p: 3 }}>
+    <Typography variant="h4" sx={{ mb: 2 }}>
+      Guard Dashboard
+    </Typography>
 
-      {/* Instructions */}
-      <Box
-        sx={{
-          mb: 3,
-          p: 2,
-          borderRadius: 2,
-          background: "#e3f2fd",
-          borderLeft: "6px solid #1e88e5",
-        }}
-      >
-        <Typography sx={{ fontWeight: 600, color: "#0d47a1" }}>
-          Guard Instructions
-        </Typography>
-        <Typography variant="body2">
-          Please regularly monitor visitor entries, complaints, SOS alerts and notices.
-        </Typography>
-      </Box>
+    {/* 👇 THIS WAS MISSING */}
+    <Grid container spacing={2}>
 
-      {/* Stats Cards */}
-      <Grid container spacing={2}>
-        {[
-          { label: "VISITORS", value: stats.visitors, color: "#1e88e5" },
-          { label: "COMPLAINTS", value: stats.complaints, color: "#fb8c00" },
-          { label: "SOS", value: stats.sos, color: "#e53935" },
-          { label: "NOTICES", value: stats.notices, color: "#2e7d32" },
-        ].map((item) => (
-          <Grid item xs={6} md={3} key={item.label}>
-            <Card sx={{ borderRadius: 3 }}>
-              <CardContent>
-                <Typography variant="caption">{item.label}</Typography>
-                <Typography variant="h4" sx={{ color: item.color }}>
-                  {item.value}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
+      <Grid item xs={12} md={3}>
+        <Card>
+          <CardContent>
+            <Typography variant="subtitle2">Visitors</Typography>
+            <Typography variant="h4">{stats.visitors}</Typography>
+          </CardContent>
+        </Card>
       </Grid>
 
-      {/* Greeting */}
-      <Box
-        sx={{
-          mt: 3,
-          p: 2,
-          borderRadius: 2,
-          background: "#e3f2fd",
-          borderLeft: "6px solid #1e88e5",
-        }}
-      >
-        <Typography sx={{ fontWeight: 600, color: "#0d47a1" }}>
-          Good Morning 👋
-        </Typography>
-        <Typography variant="body2">
-          Hello {guardName}, hope you're having a great shift.
-        </Typography>
-        <Typography variant="caption">Current time: {time}</Typography>
-      </Box>
+      <Grid item xs={12} md={3}>
+        <Card>
+          <CardContent>
+            <Typography variant="subtitle2">Complaints</Typography>
+            <Typography variant="h4">{stats.complaints}</Typography>
+          </CardContent>
+        </Card>
+      </Grid>
 
-      
-      {/* ===== GREETING CARD (UNCHANGED) ===== */}
-      <Box
-        sx={{
-          mt: 3,
-          p: 2,
-          borderRadius: 2,
-          background: "#e3f2fd",
-          borderLeft: "6px solid #1e88e5",
-        }}
-      >
-        <Typography sx={{ fontWeight: 600, color: "#0d47a1" }}>
-          Good Morning 👋
-        </Typography>
-        <Typography variant="body2">
-          Hello {guardName}, hope you're having a great shift.
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
-          Current time: {time}
-        </Typography>
-      </Box>
+      <Grid item xs={12} md={3}>
+        <Card>
+          <CardContent>
+            <Typography variant="subtitle2">SOS</Typography>
+            <Typography variant="h4">{stats.sos}</Typography>
+          </CardContent>
+        </Card>
+      </Grid>
 
-      {/* ===== BUTTON ===== */}
-      <Box sx={{ mt: 3 }}>
-        <Button
-          component={RouterLink}
-          to="/guard/residents"
-          variant="contained"
-        >
-          VIEW RESIDENTS
-        </Button>
-      </Box>
-    </Box>
-  );
+      <Grid item xs={12} md={3}>
+        <Card>
+          <CardContent>
+            <Typography variant="subtitle2">Notices</Typography>
+            <Typography variant="h4">{stats.notices}</Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+
+    </Grid>
+  </Box>
+);
 }
 
 /* ================= APP ROUTES ================= */
@@ -361,7 +308,6 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Login />} />
 
-        {/* GUARD */}
         <Route
           path="/guard"
           element={
@@ -370,6 +316,48 @@ export default function App() {
             </Layout>
           }
         />
+        <Route
+  path="/guard/complaints"
+  element={
+    <Layout sidebar={<Sidebar />}>
+      <GuardComplaints />
+    </Layout>
+  }
+/>
+<Route
+  path="/guard/visitors"
+  element={
+    <Layout sidebar={<Sidebar />}>
+      <Visitors />
+    </Layout>
+  }
+/>
+<Route
+  path="/guard/notices"
+  element={
+    <Layout sidebar={<Sidebar />}>
+      <Notices />
+    </Layout>
+  }
+/>
+
+<Route
+  path="/guard/payments"
+  element={
+    <Layout sidebar={<Sidebar />}>
+      <Payments />
+    </Layout>
+  }
+/>
+
+<Route
+  path="/guard/sos"
+  element={
+    <Layout sidebar={<Sidebar />}>
+      <SOS />
+    </Layout>
+  }
+/>
 
         <Route
           path="/guard/residents"
@@ -379,58 +367,47 @@ export default function App() {
             </Layout>
           }
         />
+        <Route
+  path="/resident/notices"
+  element={
+    <Layout sidebar={<ResidentSidebar />}>
+      <Notices />
+    </Layout>
+  }
+/>
+
+<Route
+  path="/resident/payments"
+  element={
+    <Layout sidebar={<ResidentSidebar />}>
+      <Payments />
+    </Layout>
+  }
+/>
+
+<Route
+  path="/resident/sos"
+  element={
+    <Layout sidebar={<ResidentSidebar />}>
+      <SOS />
+    </Layout>
+  }
+/>
+
+ <Route
+  path="/resident"
+  element={
+    <Layout sidebar={<ResidentSidebar />}>
+      <ResidentHome />
+    </Layout>
+  }
+/>
 
         <Route
-          path="/visitors"
-          element={
-            <Layout sidebar={<Sidebar />}>
-              <Visitors />
-            </Layout>
-          }
-        />
-
-        <Route
-          path="/complaints"
-          element={
-            <Layout sidebar={<Sidebar />}>
-              <GuardComplaints />
-            </Layout>
-          }
-        />
-
-        <Route
-          path="/payments"
-          element={
-            <Layout sidebar={<Sidebar />}>
-              <Payments />
-            </Layout>
-          }
-        />
-
-        <Route
-          path="/notices"
-          element={
-            <Layout sidebar={<Sidebar />}>
-              <Notices />
-            </Layout>
-          }
-        />
-
-        <Route
-          path="/sos"
-          element={
-            <Layout sidebar={<Sidebar />}>
-              <SOS />
-            </Layout>
-          }
-        />
-
-        {/* RESIDENT */}
-        <Route
-          path="/resident"
+          path="/resident/profile"
           element={
             <Layout sidebar={<ResidentSidebar />}>
-              <ResidentHome />
+              <ResidentProfile />
             </Layout>
           }
         />
@@ -440,42 +417,6 @@ export default function App() {
           element={
             <Layout sidebar={<ResidentSidebar />}>
               <ResidentComplaints />
-            </Layout>
-          }
-        />
-
-        <Route
-          path="/resident/notices"
-          element={
-            <Layout sidebar={<ResidentSidebar />}>
-              <Notices />
-            </Layout>
-          }
-        />
-
-        <Route
-          path="/resident/payments"
-          element={
-            <Layout sidebar={<ResidentSidebar />}>
-              <Payments />
-            </Layout>
-          }
-        />
-
-        <Route
-          path="/resident/sos"
-          element={
-            <Layout sidebar={<ResidentSidebar />}>
-              <SOS />
-            </Layout>
-          }
-        />
-
-        <Route
-          path="/resident/profile"
-          element={
-            <Layout sidebar={<ResidentSidebar />}>
-              <ResidentProfile />
             </Layout>
           }
         />
@@ -493,3 +434,4 @@ function Layout({ sidebar, children }) {
     </div>
   );
 }
+

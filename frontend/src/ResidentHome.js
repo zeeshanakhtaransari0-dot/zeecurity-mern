@@ -15,7 +15,7 @@ import {
   Chip,
   CircularProgress,
 } from "@mui/material";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 
 const API_BASE =
   process.env.REACT_APP_API_BASE ||
@@ -53,9 +53,11 @@ const cardStyles = {
 };
 
 export default function ResidentHome() {
-  const [flat, setFlat] = useState(
-    () => localStorage.getItem("zeec_flat") || ""
-  );
+  const navigate = useNavigate();
+
+ const [flat, setFlat] = useState(
+  () => localStorage.getItem("residentFlat") || ""
+);
   const [inputFlat, setInputFlat] = useState(flat);
   const [loading, setLoading] = useState(false);
 
@@ -117,14 +119,27 @@ export default function ResidentHome() {
     }
   }
 
-  function handleSaveFlat() {
-    if (!inputFlat.trim()) return;
-    setFlat(inputFlat.trim());
-    localStorage.setItem("zeec_flat", inputFlat.trim());
-  }
+ function handleSaveFlat() {
+  if (!inputFlat.trim()) return;
+  setFlat(inputFlat.trim());
+  localStorage.setItem("residentFlat", inputFlat.trim());
+}
+
+/* ✅ LOGOUT (ONLY ADDITION) */
+const handleLogout = () => {
+  // remove ONLY auth/session data
+  localStorage.removeItem("role");
+  localStorage.removeItem("residentName");
+  localStorage.removeItem("residentFlat");
+  localStorage.removeItem("guardName");
+
+  navigate("/");
+};
 
   return (
     <Box sx={{ p: 3 }}>
+    
+
       {/* HEADER */}
       <Box
         sx={{
@@ -152,19 +167,19 @@ export default function ResidentHome() {
             value={inputFlat}
             onChange={(e) => setInputFlat(e.target.value)}
           />
-         <Button
-  variant="contained"
-  onClick={handleSaveFlat}
-  sx={{
-    height: 40,
-    px: 3,
-    textTransform: "none",
-    fontWeight: 500,
-    borderRadius: 2,
-  }}
->
-  Save
-</Button>
+          <Button
+            variant="contained"
+            onClick={handleSaveFlat}
+            sx={{
+              height: 40,
+              px: 3,
+              textTransform: "none",
+              fontWeight: 400,
+              borderRadius: 2,
+            }}
+          >
+            Save
+          </Button>
         </Box>
       </Box>
 
@@ -175,7 +190,7 @@ export default function ResidentHome() {
       )}
 
       <Grid container spacing={2.5}>
-        {/* 🟦 NOTICES */}
+        {/* NOTICES */}
         <Grid item xs={12} md={6}>
           <Card sx={{ ...cardBase, ...cardStyles.notices }}>
             <CardContent>
@@ -188,10 +203,7 @@ export default function ResidentHome() {
               <List dense>
                 {notices.map((n) => (
                   <ListItem key={n._id} sx={{ px: 0 }}>
-                    <ListItemText
-                      primary={n.title}
-                      secondary={n.message}
-                    />
+                    <ListItemText primary={n.title} secondary={n.message} />
                   </ListItem>
                 ))}
               </List>
@@ -199,7 +211,7 @@ export default function ResidentHome() {
           </Card>
         </Grid>
 
-        {/* 🟧 COMPLAINTS */}
+        {/* COMPLAINTS */}
         <Grid item xs={12} md={6}>
           <Card sx={{ ...cardBase, ...cardStyles.complaints }}>
             <CardContent>
@@ -223,7 +235,7 @@ export default function ResidentHome() {
           </Card>
         </Grid>
 
-        {/* 🟥 SOS */}
+        {/* SOS */}
         <Grid item xs={12} md={6}>
           <Card sx={{ ...cardBase, ...cardStyles.sos }}>
             <CardContent>
@@ -247,7 +259,7 @@ export default function ResidentHome() {
           </Card>
         </Grid>
 
-        {/* 🟩 PAYMENTS */}
+        {/* PAYMENTS */}
         <Grid item xs={12} md={6}>
           <Card sx={{ ...cardBase, ...cardStyles.payments }}>
             <CardContent>

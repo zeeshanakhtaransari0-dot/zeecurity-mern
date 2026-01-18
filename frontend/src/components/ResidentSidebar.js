@@ -9,8 +9,9 @@ import {
   Typography,
   Box,
   ListItemButton,
+  Button,
 } from "@mui/material";
-import { Link as RouterLink, useLocation } from "react-router-dom";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import NotificationsIcon from "@mui/icons-material/Notifications";
@@ -18,6 +19,7 @@ import ReportIcon from "@mui/icons-material/Report";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import WarningIcon from "@mui/icons-material/Warning";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 import logo from "../assets/zeecurity_logo.png";
 
@@ -25,12 +27,17 @@ const drawerWidth = 220;
 
 export default function ResidentSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const path = location.pathname;
 
-  // ✅ SAME ACTIVE LOGIC AS GUARD (NO ERRORS)
   const isActive = (to) => {
     if (to === "/resident") return path === "/resident";
     return path.startsWith(to);
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
   };
 
   const menu = [
@@ -65,7 +72,7 @@ export default function ResidentSidebar() {
               color: "rgba(148,163,184,0.9)",
               textTransform: "uppercase",
               letterSpacing: 1.5,
-              fontSize: 11,
+              fontSize: 14,
               mt: 0.5,
               display: "block",
             }}
@@ -124,14 +131,32 @@ export default function ResidentSidebar() {
           );
         })}
       </List>
+
+      {/* PUSH BOTTOM */}
+      <Box sx={{ flexGrow: 1 }} />
+
+      {/* LOGOUT BUTTON */}
+      <Box sx={{ px: 2, pb: 1 }}>
+        <Button
+          fullWidth
+          variant="outlined"
+          color="error"
+          startIcon={<LogoutIcon />}
+          onClick={handleLogout}
+        >
+          Logout
+        </Button>
+      </Box>
+
+      {/* FOOTER TEXT (UNCHANGED) */}
       <Box sx={{ px: 2, pb: 2 }}>
-              <Typography
-                variant="caption"
-                sx={{ color: "rgba(148,163,184,0.7)", fontSize: 10 }}
-              >
-                Zeecurity • Society Security System
-              </Typography>
-            </Box>
+        <Typography
+          variant="caption"
+          sx={{ color: "rgba(148,163,184,0.7)", fontSize: 10 }}
+        >
+          Zeecurity • Society Security System
+        </Typography>
+      </Box>
     </Drawer>
   );
 }

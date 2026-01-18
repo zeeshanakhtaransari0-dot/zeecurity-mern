@@ -7,6 +7,7 @@ const API_BASE =
   "https://zeecurity-backend.onrender.com/api";
 
 export default function ResidentsPage() {
+  
   const [residents, setResidents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -15,29 +16,19 @@ export default function ResidentsPage() {
     fetchResidents();
   }, []);
 
-  const fetchResidents = async () => {
-    try {
-      console.log("📡 Fetching residents...");
-      const res = await axios.get(`${API_BASE}/residents`, {
-        headers: {
-          "Cache-Control": "no-cache",
-        },
-      });
+ const fetchResidents = () => {
+  try {
+    const stored =
+      JSON.parse(localStorage.getItem("loggedResidents")) || [];
 
-      console.log("✅ Residents response:", res.data);
-
-      if (!Array.isArray(res.data)) {
-        throw new Error("Invalid response format");
-      }
-
-      setResidents(res.data);
-    } catch (err) {
-      console.error("❌ Failed to fetch residents:", err);
-      setError("Failed to load residents");
-    } finally {
-      setLoading(false);
-    }
-  };
+    setResidents(stored);
+  } catch (err) {
+    console.error("❌ Failed to load residents:", err);
+    setError("Failed to load residents");
+  } finally {
+    setLoading(false);
+  }
+};
 
   /* ================= UI ================= */
 
@@ -77,7 +68,7 @@ export default function ResidentsPage() {
             <Typography><b>Name:</b> {r.name}</Typography>
             <Typography><b>Flat:</b> {r.flatNumber}</Typography>
             <Typography variant="caption">
-              Logged at: {new Date(r.createdAt).toLocaleString()}
+            Logged at: {r.createdAt ? new Date(r.createdAt).toLocaleString() : "N/A"}
             </Typography>
           </CardContent>
         </Card>

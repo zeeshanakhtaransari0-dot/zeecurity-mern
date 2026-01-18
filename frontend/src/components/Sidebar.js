@@ -11,47 +11,47 @@ import {
   Box,
   ListItemButton,
   Divider,
+  Button,
 } from "@mui/material";
-import { Link as RouterLink, useLocation } from "react-router-dom";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 
-import DashboardIcon from "@mui/icons-material/Dashboard";
 import HomeIcon from "@mui/icons-material/Home";
 import PeopleIcon from "@mui/icons-material/People";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import ReportIcon from "@mui/icons-material/Report";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import WarningIcon from "@mui/icons-material/Warning";
+import LogoutIcon from "@mui/icons-material/Logout";
+
 import logo from "../assets/zeecurity_logo.png";
 
 const drawerWidth = 220;
 
 export default function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const path = location.pathname;
 
-  const isActive = (to) => {
-    if (to === "/") return path === "/";
-    return path.startsWith(to);
+  const isActive = (to) => path.startsWith(to);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/");
   };
 
   const menuItems = [
-  { label: "Guard Home", to: "/guard", icon: <HomeIcon /> },
-  { label: "Dashboard", to: "/guard", icon: <DashboardIcon /> },
-  { label: "Visitors", to: "/visitors", icon: <PeopleIcon /> },
-  { label: "Notices", to: "/notices", icon: <NotificationsIcon /> },
-  { label: "Complaints", to: "/complaints", icon: <ReportIcon /> },
-  { label: "Payments", to: "/payments", icon: <PaymentsIcon /> },
-
-  // ✅ FIXED PATH
-  { label: "Residents", to: "/guard/residents", icon: <PeopleIcon /> },
-
-  { label: "SOS", to: "/sos", icon: <WarningIcon />, danger: true },
-];
+    { label: "Guard Home", to: "/guard", icon: <HomeIcon /> },
+    { label: "Visitors", to: "/guard/visitors", icon: <PeopleIcon /> },
+    { label: "Notices", to: "/guard/notices", icon: <NotificationsIcon /> },
+    { label: "Complaints", to: "/guard/complaints", icon: <ReportIcon /> },
+    { label: "Payments", to: "/guard/payments", icon: <PaymentsIcon /> },
+    { label: "SOS", to: "/guard/sos", icon: <WarningIcon />, danger: true },
+    { label: "Residents", to: "/guard/residents", icon: <PeopleIcon /> },
+  ];
 
   return (
     <Drawer
       variant="permanent"
-      anchor="left"
       PaperProps={{
         sx: {
           width: drawerWidth,
@@ -62,23 +62,25 @@ export default function Sidebar() {
         },
       }}
     >
-      {/* LOGO AREA */}
-      <Toolbar sx={{ minHeight: 80, px: 2 }}>
+      {/* LOGO */}
+      <Toolbar sx={{ minHeight: 80 }}>
         <Box sx={{ textAlign: "center", width: "100%" }}>
           <img
             src={logo}
-            alt="Zeecurity logo"
-            style={{ width: 120, objectFit: "contain" }}
+            alt="Zeecurity"
+            style={{
+              width: 110,
+              height: "auto",
+              objectFit: "contain",
+            }}
           />
           <Typography
             variant="caption"
             sx={{
-              color: "rgba(148,163,184,0.9)",
-              textTransform: "uppercase",
-              letterSpacing: 1.5,
-              fontSize: 11,
-              mt: 0.5,
+              color: "#94a3b8",
+              letterSpacing: 1.2,
               display: "block",
+              mt: 0.5,
             }}
           >
             Guard Panel
@@ -86,64 +88,72 @@ export default function Sidebar() {
         </Box>
       </Toolbar>
 
-      <Divider sx={{ borderColor: "rgba(51,65,85,0.8)" }} />
+      <Divider />
 
       {/* MENU */}
       <List sx={{ mt: 1 }}>
         {menuItems.map((item) => {
           const active = isActive(item.to);
-          const isDanger = item.danger;
-
-          const activeBg = isDanger
-            ? "linear-gradient(135deg,#fee2e2,#fecaca)"
-            : "linear-gradient(135deg,#e0f2fe,#bae6fd)";
-          const inactiveIconColor = isDanger ? "#f97373" : "#7dd3fc";
 
           return (
             <ListItem key={item.label} disablePadding>
               <ListItemButton
                 component={RouterLink}
                 to={item.to}
-                selected={active}
                 sx={{
                   mx: 1,
                   mb: 0.5,
                   borderRadius: 2,
+                  background: active
+                    ? "linear-gradient(135deg,#e0f2fe,#bae6fd)"
+                    : "transparent",
                   color: active ? "#0f172a" : "#e5e7eb",
-                  background: active ? activeBg : "transparent",
-                  transition: "all 0.2s ease",
                   "& .MuiListItemIcon-root": {
-                    color: active ? "#0f172a" : inactiveIconColor,
+                    color: active
+                      ? "#0f172a"
+                      : item.danger
+                      ? "#f87171"
+                      : "#7dd3fc",
                     minWidth: 40,
-                  },
-                  "&:hover": {
-                    background: active
-                      ? activeBg
-                      : "rgba(148,163,184,0.15)",
-                    transform: "translateX(3px)",
                   },
                 }}
               >
                 <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText
-                  primary={item.label}
-                  primaryTypographyProps={{
-                    sx: { fontSize: 15, fontWeight: active ? 700 : 500 },
-                  }}
-                />
+                <ListItemText primary={item.label} />
               </ListItemButton>
             </ListItem>
           );
         })}
       </List>
 
+      {/* PUSH BOTTOM */}
       <Box sx={{ flexGrow: 1 }} />
 
-      {/* FOOTER SMALL TEXT */}
-      <Box sx={{ px: 2, pb: 2 }}>
+      <Divider sx={{ mx: 2, mb: 1 }} />
+
+      {/* LOGOUT */}
+      <Box sx={{ px: 2 }}>
+        <Button
+          fullWidth
+          variant="outlined"
+          color="error"
+          startIcon={<LogoutIcon />}
+          onClick={handleLogout}
+        >
+          Logout
+        </Button>
+      </Box>
+
+      {/* FOOTER TEXT (RESTORED) */}
+      <Box sx={{ px: 2, py: 1 }}>
         <Typography
           variant="caption"
-          sx={{ color: "rgba(148,163,184,0.7)", fontSize: 10 }}
+          sx={{
+            color: "rgba(148,163,184,0.7)",
+            fontSize: 10,
+            display: "block",
+            textAlign: "center",
+          }}
         >
           Zeecurity • Society Security System
         </Typography>
