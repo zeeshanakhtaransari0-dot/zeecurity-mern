@@ -4,7 +4,6 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Link as RouterLink,
   useNavigate,
 } from "react-router-dom";
 

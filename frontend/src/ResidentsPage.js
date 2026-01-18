@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+
 import { Box, Typography, Card, CardContent, CircularProgress } from "@mui/material";
 
-const API_BASE =
-  process.env.REACT_APP_API_BASE ||
-  "https://zeecurity-backend.onrender.com/api";
+
 
 export default function ResidentsPage() {
   
