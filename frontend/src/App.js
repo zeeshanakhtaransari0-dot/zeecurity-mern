@@ -21,6 +21,10 @@ import ResidentProfile from "./ResidentProfile";
 import ResidentComplaints from "./pages/ResidentComplaints";
 import GuardComplaints from "./pages/GuardComplaints";
 import ResidentsPage from "./ResidentsPage";
+import AdminSidebar from "./components/AdminSidebar";
+import AdminDashboard from "./admin/AdminDashboard";
+import AdminLogin from "./admin/AdminLogin";
+
 
 import axios from "axios";
 import {
@@ -419,6 +423,15 @@ export default function App() {
             </Layout>
           }
         />
+        <Route
+  path="/admin"
+  element={
+    <Layout sidebar={<AdminSidebar />}>
+      <AdminDashboard />
+    </Layout>
+  }
+/>
+<Route path="/admin-login" element={<AdminLogin />} />
       </Routes>
     </Router>
   );
