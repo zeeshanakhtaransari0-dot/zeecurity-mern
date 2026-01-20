@@ -24,6 +24,8 @@ import ResidentsPage from "./ResidentsPage";
 import AdminSidebar from "./components/AdminSidebar";
 import AdminDashboard from "./admin/AdminDashboard";
 import AdminLogin from "./admin/AdminLogin";
+import AdminResidents from "./admin/AdminResidents";
+import AdminComplaints from "./admin/AdminComplaints";
 
 
 import axios from "axios";
@@ -432,6 +434,57 @@ export default function App() {
   }
 />
 <Route path="/admin-login" element={<AdminLogin />} />
+<Route
+  path="/admin/residents"
+  element={
+    <Layout sidebar={<AdminSidebar />}>
+      <ResidentsPage />
+    </Layout>
+  }
+/>
+
+<Route
+  path="/admin/complaints"
+  element={
+    <Layout sidebar={<AdminSidebar />}>
+      <GuardComplaints />
+    </Layout>
+  }
+/>
+
+<Route
+  path="/admin/sos"
+  element={
+    <Layout sidebar={<AdminSidebar />}>
+      <SOS />
+    </Layout>
+  }
+/>
+
+<Route
+  path="/admin/payments"
+  element={
+    <Layout sidebar={<AdminSidebar />}>
+      <Payments />
+    </Layout>
+  }
+/>
+<Route
+  path="/admin/residents"
+  element={
+    <Layout sidebar={<AdminSidebar />}>
+      <AdminResidents />
+    </Layout>
+  }
+/>
+<Route
+  path="/admin/complaints"
+  element={
+    <Layout sidebar={<AdminSidebar />}>
+      <AdminComplaints />
+    </Layout>
+  }
+/>
       </Routes>
     </Router>
   );
