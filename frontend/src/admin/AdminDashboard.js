@@ -19,7 +19,7 @@ const InfoCircle = ({
   colorSolved,
   colorpending,
 }) => {
-  const pending = total - solved;
+  
   const solvedPercent = Math.round((solved / total) * 100);
   const pendingPercent = 100 - solvedPercent;
 
