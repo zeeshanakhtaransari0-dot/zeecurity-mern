@@ -428,9 +428,12 @@ export default function App() {
         <Route
   path="/admin"
   element={
-    <Layout sidebar={<AdminSidebar />}>
-      <AdminDashboard />
-    </Layout>
+    <Box sx={{ display: "flex" }}>
+      <AdminSidebar />
+      <Box sx={{ flex: 1, minHeight: "100vh", bgcolor: "#f8fafc" }}>
+        <AdminDashboard />
+      </Box>
+    </Box>
   }
 />
 <Route path="/admin-login" element={<AdminLogin />} />
