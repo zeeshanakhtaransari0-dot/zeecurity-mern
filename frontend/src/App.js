@@ -26,6 +26,7 @@ import AdminDashboard from "./admin/AdminDashboard";
 import AdminLogin from "./admin/AdminLogin";
 import AdminResidents from "./admin/AdminResidents";
 import AdminComplaints from "./admin/AdminComplaints";
+import AdminNotices from "./admin/AdminNotices";
 
 
 import axios from "axios";
@@ -488,6 +489,7 @@ export default function App() {
     </Layout>
   }
 />
+<Route path="/admin/notices" element={<AdminNotices />} />
       </Routes>
     </Router>
   );
