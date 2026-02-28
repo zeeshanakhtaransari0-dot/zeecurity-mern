@@ -24,6 +24,7 @@ import WarningIcon from "@mui/icons-material/Warning";
 import LogoutIcon from "@mui/icons-material/Logout";
 
 import logo from "../assets/zeecurity_logo.png";
+import CampaignIcon from "@mui/icons-material/Campaign";
 
 const drawerWidth = 220;
 
@@ -124,6 +125,12 @@ export default function Sidebar() {
             </ListItem>
           );
         })}
+        <ListItem button onClick={() => navigate("/guard/preapproved")}>
+  <ListItemIcon>
+    <CampaignIcon sx={{ color: "#fff" }} />
+  </ListItemIcon>
+  <ListItemText primary="Pre-Approved" />
+</ListItem>
       </List>
 
       {/* PUSH BOTTOM */}

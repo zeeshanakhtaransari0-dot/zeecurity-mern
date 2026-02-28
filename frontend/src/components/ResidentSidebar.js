@@ -22,6 +22,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 
 import logo from "../assets/zeecurity_logo.png";
+import QrCodeIcon from "@mui/icons-material/QrCode";
 
 const drawerWidth = 220;
 
@@ -130,6 +131,15 @@ export default function ResidentSidebar() {
             </ListItem>
           );
         })}
+        <ListItem button onClick={() => navigate("/resident/preapproved")}>
+  <ListItemIcon>
+    <QrCodeIcon sx={{ color: "#fff" }} />
+  </ListItemIcon>
+  <ListItemText primary="Pre-Approved Visitor" />
+</ListItem>
+<ListItem button onClick={() => navigate("/resident/visitors")}>
+  <ListItemText primary="My Visitors" />
+</ListItem>
       </List>
 
       {/* PUSH BOTTOM */}

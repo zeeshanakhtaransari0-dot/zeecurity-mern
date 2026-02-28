@@ -27,6 +27,9 @@ import AdminLogin from "./admin/AdminLogin";
 import AdminResidents from "./admin/AdminResidents";
 import AdminComplaints from "./admin/AdminComplaints";
 import AdminNotices from "./admin/AdminNotices";
+import PreApprovedVisitor from "./pages/PreApprovedVisitor";
+import GuardPreApproved from "./pages/GuardPreApproved";
+import ResidentPreApproved from "./pages/ResidentPreApproved";
 
 
 import axios from "axios";
@@ -373,6 +376,7 @@ export default function App() {
             </Layout>
           }
         />
+        <Route path="/guard/preapproved" element={<GuardPreApproved />} />
         <Route
   path="/resident/notices"
   element={
@@ -426,6 +430,18 @@ export default function App() {
             </Layout>
           }
         />
+        <Route
+  path="/resident/preapproved"
+  element={
+    <Layout sidebar={<ResidentSidebar />}>
+      <PreApprovedVisitor />
+    </Layout>
+  }
+/>
+<Route
+  path="/resident/visitors"
+  element={<ResidentPreApproved />}
+/>
         <Route
   path="/admin"
   element={
