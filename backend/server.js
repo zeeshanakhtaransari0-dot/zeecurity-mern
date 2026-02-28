@@ -5,6 +5,11 @@ const cors = require("cors");
 const preApprovedVisitorRoutes = require("./routes/preApprovedVisitorRoutes");
 
 const authRoutes = require("./routes/auth");
+const complaintRoutes = require("./routes/complaintRoutes");
+const visitorRoutes = require("./routes/visitorRoutes");
+const noticeRoutes = require("./routes/noticeRoutes");
+const maintenanceRoutes = require("./routes/maintenanceRoutes");
+const sosRoutes = require("./routes/sosRoutes");
 
 dotenv.config();
 
@@ -16,6 +21,11 @@ app.use(express.json());
 
 // routes
 app.use("/api/auth", authRoutes);
+app.use("/api/complaints", complaintRoutes);
+app.use("/api/visitors", visitorRoutes);
+app.use("/api/notices", noticeRoutes);
+app.use("/api/maintenance", maintenanceRoutes);
+app.use("/api/sos", sosRoutes);
 
 // test route
 app.get("/", (req, res) => {
