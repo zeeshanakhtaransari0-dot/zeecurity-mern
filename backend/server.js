@@ -1,54 +1,37 @@
 const express = require("express");
-const cors = require("cors");
 const mongoose = require("mongoose");
-require("dotenv").config();
+const dotenv = require("dotenv");
+const cors = require("cors");
+const preApprovedVisitorRoutes = require("./routes/preApprovedVisitorRoutes");
 
-const app = express();
+const authRoutes = require("./routes/auth");
 
-/* ===================== CORS (FINAL & SAFE) ===================== */
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma"
-  );
-  res.header(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS"
-  );
+dotenv.config();
 
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
+const app = express(); // app FIRST
 
-  next();
-});
+// middleware
+app.use(cors());
+app.use(express.json());
 
-/* ===================== BODY PARSER ===================== */
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true }));
+// routes
+app.use("/api/auth", authRoutes);
 
-/* ===================== ROUTES ===================== */
-app.use("/api/residents", require("./routes/residentRoutes"));
-app.use("/api/visitors", require("./routes/visitorRoutes"));
-app.use("/api/notices", require("./routes/noticeRoutes"));
-app.use("/api/complaints", require("./routes/complaintRoutes"));
-app.use("/api/maintenance", require("./routes/maintenanceRoutes"));
-app.use("/api/sos", require("./routes/sosRoutes"));
-
-/* ===================== ROOT ===================== */
+// test route
 app.get("/", (req, res) => {
-  res.send("✅ Zeecurity Backend Running");
+  res.send("Zeecurity backend running ✅");
 });
+app.use("/api/preapproved", require("./routes/preApprovedVisitorRoutes"));
 
-/* ===================== DB ===================== */
+// db + server
+const PORT = process.env.PORT || 5000;
+
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch((err) => console.error("❌ MongoDB Error:", err.message));
-
-/* ===================== SERVER ===================== */
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+  .then(() => {
+    console.log("MongoDB connected");
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
+  .catch((err) => console.error(err));
