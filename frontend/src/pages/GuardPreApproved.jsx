@@ -25,6 +25,7 @@ export default function GuardPreApproved() {
       `https://zeecurity-backend.onrender.com/api/preapproved/${codeToUse}`
     );
     setVisitor(res.data);
+    console.log(visitor);
   } catch (err) {
     alert("Visitor not found");
     setVisitor(null);
@@ -90,6 +91,10 @@ export default function GuardPreApproved() {
             </Typography>
             <Typography>Flat: {visitor.flatNumber}</Typography>
             <Typography>Work: {visitor.workType}</Typography>
+            <Typography><strong>Age:</strong> {visitor.age}</Typography>
+            <Typography><strong>Phone:</strong> {visitor.phone}</Typography>
+            <Typography><strong>Resident:</strong> {visitor.residentName}</Typography>
+            <Typography><strong>Resident Phone:</strong> {visitor.residentPhone}</Typography>
             <Typography>Status: {visitor.status}</Typography>
 
             {visitor.status === "pending" && (
