@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import Sidebar from "../components/Sidebar";
+import QRScanner from "../components/QRScanner";
 
 export default function GuardPreApproved() {
   const [code, setCode] = useState("");
@@ -16,19 +17,20 @@ export default function GuardPreApproved() {
   const [history, setHistory] = useState([]);
 
   // 🔎 Search Visitor
-  const fetchVisitor = async () => {
-    if (!code) return;
+  const fetchVisitor = async (scannedCode) => {
+  const codeToUse = scannedCode || code;
+  if (!codeToUse) return;
 
-    try {
-      const res = await axios.get(
-       `https://zeecurity-backend.onrender.com/api/preapproved/${code}`
-      );
-      setVisitor(res.data);
-    } catch (err) {
-      alert("Visitor not found");
-      setVisitor(null);
-    }
-  };
+  try {
+    const res = await axios.get(
+      `https://zeecurity-backend.onrender.com/api/preapproved/${codeToUse}`
+    );
+    setVisitor(res.data);
+  } catch (err) {
+    alert("Visitor not found");
+    setVisitor(null);
+  }
+};
 
   // ✅ Approve
   const approveVisitor = async () => {
@@ -70,19 +72,16 @@ export default function GuardPreApproved() {
         </Typography>
 
         {/* 🔍 Search Section */}
-        <Card sx={{ p: 3, mb: 3 }}>
-          <TextField
-            fullWidth
-            label="Enter Unique Code"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            sx={{ mb: 2 }}
-          />
-
-          <Button variant="contained" onClick={fetchVisitor}>
-            Search
-          </Button>
-        </Card>
+        {/* 📷 QR Scanner Section */}
+<Card sx={{ p: 3, mb: 3 }}>
+  <QRScanner
+    onScan={(decodedText) => {
+      const extractedCode = decodedText.split("/").pop();
+      setCode(extractedCode);
+      fetchVisitor(extractedCode);
+    }}
+  />
+</Card>
 
         {/* 👤 Visitor Details */}
         {visitor && (
