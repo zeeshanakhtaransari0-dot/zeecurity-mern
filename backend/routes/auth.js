@@ -39,14 +39,15 @@ router.post("/login/resident", async (req, res) => {
       status: "online",
     });
 
-    res.json({
-      success: true,
-      user: {
-        name: resident.name,
-        flatNumber: resident.flatNumber,
-        role: "resident",
-      },
-    });
+    return res.json({
+  success: true,
+  user: {
+    _id: resident._id,   // ⭐ ADD THIS LINE
+    name: resident.name,
+    role: "resident",
+    flatNumber: resident.flatNumber,
+  },
+});
 
   } catch (err) {
     console.error("Resident Login Error:", err);
