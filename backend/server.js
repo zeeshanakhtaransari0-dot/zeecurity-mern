@@ -11,6 +11,7 @@ const noticeRoutes = require("./routes/noticeRoutes");
 const maintenanceRoutes = require("./routes/maintenanceRoutes");
 const sosRoutes = require("./routes/sosRoutes");
 const residentRoutes = require("./routes/residentRoutes");
+const residentSessionRoutes = require("./routes/residentSessionRoutes");
 dotenv.config();
 
 const app = express(); // app FIRST
@@ -27,6 +28,7 @@ app.use("/api/notices", noticeRoutes);
 app.use("/api/maintenance", maintenanceRoutes);
 app.use("/api/sos", sosRoutes);
 app.use("/api/residents", residentRoutes);
+app.use("/api/residentsessions", residentSessionRoutes);
 
 // test route
 app.get("/", (req, res) => {
