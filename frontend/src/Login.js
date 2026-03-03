@@ -12,18 +12,43 @@ export default function Login() {
   const [name, setName] = useState("");
   const [flat, setFlat] = useState("");
   const navigate = useNavigate();
+const handleResidentLogin = async () => {
+  if (!name || !flat) {
+    alert("Please enter name and flat number");
+    return;
+  }
 
-  const handleResidentLogin = () => {
-    if (!name || !flat) {
-      alert("Please enter name and flat number");
+  try {
+    const response = await fetch(`${process.env.REACT_APP_API_BASE || "http://localhost:5000/api"}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+     body: JSON.stringify({
+  username: name,
+  flatNumber: flat,
+  role: "resident",
+      
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || "Login failed");
       return;
     }
 
-    localStorage.setItem("residentName", name);
-    localStorage.setItem("residentFlat", flat);
+    localStorage.setItem("residentName", data.user.name);
+    localStorage.setItem("residentFlat", data.user.flatNumber);
 
     navigate("/resident");
-  };
+
+  } catch (error) {
+    console.error(error);
+    alert("Server error");
+  }
+};
 
   const handleGuardLogin = () => {
     navigate("/guard");
@@ -60,20 +85,17 @@ export default function Login() {
           onChange={(e) => setFlat(e.target.value)}
         />
 
-       <Button
+      <Button
   variant="contained"
   fullWidth
-  disabled
+  onClick={handleResidentLogin}
   sx={{
     mt: 2,
     backgroundColor: "#ffffff",
-    color: "#1976d2",          // MUI blue
+    color: "#1976d2",
     fontWeight: 600,
-    opacity: 1,
-    "&.Mui-disabled": {
-      backgroundColor: "#ffffff",
-      color: "#1976d2",
-      opacity: 1,
+    "&:hover": {
+      backgroundColor: "#f5f5f5",
     },
   }}
 >

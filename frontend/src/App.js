@@ -57,85 +57,57 @@ function Login() {
   const [password, setPassword] = useState(""); // ✅ REQUIRED
   const [flat, setFlat] = useState("");
 
-  const handleLogin = () => {
-  // basic UI validation only
-  if (!username.trim()) {
-    alert("Enter username");
+const handleLogin = async () => {
+  try {
+    if (!username.trim()) {
+      alert("Enter username");
+      return;
+    }
+
+   // ================= RESIDENT LOGIN =================
+if (role === "resident") {
+
+  if (!flat.trim()) {
+    alert("Enter flat number");
     return;
   }
 
-  if (!password) {
-    alert("Enter password");
-    return;
-  }
-  
-
-  // ✅ MOCK LOGIN (FOR EXAM / DEMO)
-  const user = {
-    name: username.trim(),
-    role: role.toLowerCase(), // guard / resident
-    flatNumber: flat || null,
-  };
-  // ✅ SAVE RESIDENT LOGIN FOR GUARD VIEW
-if (user.role === "resident") {
-  // ✅ SAVE LOGGED RESIDENT (ONLY ON LOGIN)
-const loggedResidents =
-  JSON.parse(localStorage.getItem("loggedResidents")) || [];
-
-// prevent duplicate save
-const alreadyExists = loggedResidents.some(
-  (r) => r.name === user.name && r.flatNumber === user.flatNumber
-);
-
-if (!alreadyExists) {
-  loggedResidents.push({
-    name: user.name,
-    flatNumber: user.flatNumber || "",
-    createdAt: new Date().toISOString(),
+  const res = await axios.post(`${API_BASE}/auth/login/resident`, {
+    username,
+    flatNumber: flat,
   });
+  console.log("LOGIN RESPONSE:", res.data);
 
-  localStorage.setItem(
-    "loggedResidents",
-    JSON.stringify(loggedResidents)
-  );
-}
-}
-
-  // save common data
-  localStorage.setItem("role", user.role);
-  localStorage.setItem("residentName", user.name);
-
-  if (user.flatNumber) {
-    localStorage.setItem("residentFlat", user.flatNumber);
-  }
-
-  if (user.role === "guard") {
-    localStorage.setItem("guardName", user.name);
-    navigate("/guard");
-  } else {
-  // ✅ SAVE LOGGED RESIDENT (THIS IS WHAT YOU ASKED ABOUT)
-  const loggedResidents =
-    JSON.parse(localStorage.getItem("loggedResidents")) || [];
-
- const alreadyLogged = loggedResidents.some(
-  (r) =>
-    r.name === user.name &&
-    r.flatNumber === user.flatNumber
-);
-
-if (!alreadyLogged) {
-  loggedResidents.push({
-    name: user.name,
-    flatNumber: user.flatNumber,
-    createdAt: new Date().toISOString(),
-  });
-}
-  localStorage.setItem(
-    "loggedResidents",
-    JSON.stringify(loggedResidents)
-  );
+  localStorage.setItem("residentId", res.data.user._id); // ⭐ IMPORTANT
+  localStorage.setItem("residentName", res.data.user.name);
+  localStorage.setItem("residentFlat", res.data.user.flatNumber);
 
   navigate("/resident");
+}
+
+    // ================= GUARD LOGIN =================
+    else if (role === "guard") {
+
+      if (!password) {
+        alert("Enter password");
+        return;
+      }
+
+      const res = await axios.post(`${API_BASE}/auth/login/guard`, {
+        username,
+        password,
+      });
+
+      localStorage.setItem("guardName", res.data.user.name);
+
+      navigate("/guard");
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("Login failed");
+  
+
 }
 };
   return (

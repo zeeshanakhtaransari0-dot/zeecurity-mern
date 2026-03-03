@@ -23,6 +23,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 
 import logo from "../assets/zeecurity_logo.png";
 import QrCodeIcon from "@mui/icons-material/QrCode";
+import axios from "axios";
 
 const drawerWidth = 220;
 
@@ -36,10 +37,30 @@ export default function ResidentSidebar() {
     return path.startsWith(to);
   };
 
-  const handleLogout = () => {
-    localStorage.clear();
+ const API_BASE = "https://zeecurity-backend.onrender.com/api";
+
+const handleLogout = async () => {
+ 
+  try {
+    const residentId = localStorage.getItem("residentId");
+      console.log("Resident ID:", residentId);
+
+    if (residentId) {
+      await axios.put(
+        `${API_BASE}/residentsessions/logout/${residentId}`
+      );
+    }
+
+    localStorage.removeItem("role");
+    localStorage.removeItem("residentName");
+    localStorage.removeItem("residentFlat");
+    localStorage.removeItem("residentId");
+
     navigate("/");
-  };
+  } catch (err) {
+    console.error("Logout failed:", err);
+  }
+};
 
   const menu = [
     { label: "Dashboard", to: "/resident", icon: <DashboardIcon /> },

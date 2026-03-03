@@ -13,11 +13,11 @@ import CampaignIcon from "@mui/icons-material/Campaign";
 export default function AdminSidebar() {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    localStorage.removeItem("role");
-    localStorage.removeItem("adminName");
-    navigate("/");
-  };
+ const handleLogout = () => {
+  localStorage.removeItem("role");
+  localStorage.removeItem("adminName");
+  navigate("/");
+};
 
   return (
     <Box

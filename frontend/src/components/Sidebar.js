@@ -35,10 +35,11 @@ export default function Sidebar() {
 
   const isActive = (to) => path.startsWith(to);
 
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/");
-  };
+ const handleLogout = () => {
+  localStorage.removeItem("role");
+  localStorage.removeItem("guardName");
+  navigate("/");
+};
 
   const menuItems = [
     { label: "Guard Home", to: "/guard", icon: <HomeIcon /> },

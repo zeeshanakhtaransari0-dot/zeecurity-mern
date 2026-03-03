@@ -86,16 +86,16 @@ export default function GuardPreApproved() {
         {/* 👤 Visitor Details */}
         {visitor && (
           <Card sx={{ p: 3, mb: 3 }}>
-            <Typography fontWeight={600}>
-              Name: {visitor.visitorName}
+            <Typography fontWeight={600}><strong>
+              Name:</strong> {visitor.visitorName}
             </Typography>
-            <Typography>Flat: {visitor.flatNumber}</Typography>
-            <Typography>Work: {visitor.workType}</Typography>
+            <Typography><strong>Flat:</strong> {visitor.flatNumber}</Typography>
+            <Typography><strong>Work:</strong> {visitor.workType}</Typography>
             <Typography><strong>Age:</strong> {visitor.age}</Typography>
             <Typography><strong>Phone:</strong> {visitor.phone}</Typography>
             <Typography><strong>Resident:</strong> {visitor.residentName}</Typography>
             <Typography><strong>Resident Phone:</strong> {visitor.residentPhone}</Typography>
-            <Typography>Status: {visitor.status}</Typography>
+            <Typography><strong>Status:</strong> {visitor.status}</Typography>
 
             {visitor.status === "pending" && (
               <Box sx={{ mt: 2 }}>

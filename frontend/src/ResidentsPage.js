@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-
+import axios from "axios";
 import { Box, Typography, Card, CardContent, CircularProgress } from "@mui/material";
 
-
+const API_BASE = "https://zeecurity-backend.onrender.com/api";
 
 export default function ResidentsPage() {
-  
   const [residents, setResidents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -14,19 +13,17 @@ export default function ResidentsPage() {
     fetchResidents();
   }, []);
 
- const fetchResidents = () => {
-  try {
-    const stored =
-      JSON.parse(localStorage.getItem("loggedResidents")) || [];
-
-    setResidents(stored);
-  } catch (err) {
-    console.error("❌ Failed to load residents:", err);
-    setError("Failed to load residents");
-  } finally {
-    setLoading(false);
-  }
-};
+  const fetchResidents = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/residentsessions`);
+      setResidents(res.data);
+    } catch (err) {
+      console.error("❌ Failed to load residents:", err);
+      setError("Failed to load residents");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   /* ================= UI ================= */
 
@@ -65,8 +62,12 @@ export default function ResidentsPage() {
           <CardContent>
             <Typography><b>Name:</b> {r.name}</Typography>
             <Typography><b>Flat:</b> {r.flatNumber}</Typography>
+            <Typography>
+              <b>Status:</b>{" "}
+              {r.status === "online" ? "🟢 Online" : "🔴 Offline"}
+            </Typography>
             <Typography variant="caption">
-            Logged at: {r.createdAt ? new Date(r.createdAt).toLocaleString() : "N/A"}
+              Logged at: {r.loginTime ? new Date(r.loginTime).toLocaleString() : "N/A"}
             </Typography>
           </CardContent>
         </Card>

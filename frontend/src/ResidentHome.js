@@ -216,10 +216,11 @@ export default function ResidentHome() {
               <List dense>
                 {myComplaints.map((c) => (
                   <ListItem key={c._id} sx={{ px: 0 }}>
-                    <ListItemText
-                      primary={c.details}
-                      secondary={<Chip size="small" label={c.status} />}
-                    />
+                   <ListItemText
+  primary={c.details}
+  secondary={<Chip size="small" label={c.status} />}
+  secondaryTypographyProps={{ component: "span" }}
+/>
                   </ListItem>
                 ))}
               </List>
@@ -243,6 +244,8 @@ export default function ResidentHome() {
                     <ListItemText
                       primary={s.details}
                       secondary={<Chip size="small" label={s.status} />}
+                       
+  secondaryTypographyProps={{ component: "span" }}
                     />
                   </ListItem>
                 ))}
