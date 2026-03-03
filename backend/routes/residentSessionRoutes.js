@@ -20,21 +20,21 @@ router.put("/logout/:residentId", async (req, res) => {
     const { residentId } = req.params;
 
     const session = await ResidentSession.findOneAndUpdate(
-      { residentId, status: "online" }, // find active session
+      { residentId: residentId, status: "online" }, // ONLY active session
       {
         status: "offline",
         logoutTime: new Date(),
       },
-      { new: true }
+      { sort: { createdAt: -1 }, new: true } // 🔥 latest one
     );
 
     if (!session) {
       return res.status(404).json({ message: "Active session not found" });
     }
 
-    res.json({ message: "Logged out successfully", session });
+    res.json({ success: true });
   } catch (err) {
-    console.error(err);
+    console.error("Logout error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
