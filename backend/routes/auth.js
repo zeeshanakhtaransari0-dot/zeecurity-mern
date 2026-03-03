@@ -39,10 +39,10 @@ router.post("/login/resident", async (req, res) => {
       status: "online",
     });
 
-    return res.json({
+   return res.json({
   success: true,
   user: {
-    _id: resident._id,   // ⭐ ADD THIS LINE
+    _id: resident._id,   // ⭐ MUST BE HERE
     name: resident.name,
     role: "resident",
     flatNumber: resident.flatNumber,
