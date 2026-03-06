@@ -219,11 +219,6 @@ function GuardHome() {
     notices: 0,
   });
 
-
-const guardName = localStorage.getItem("guardName") || "Guard";
-
-
-
  useEffect(() => {
   fetchStats();
 }, []);
@@ -380,6 +375,7 @@ const guardName = localStorage.getItem("guardName") || "Guard";
   <Grid item xs={12} md={3}>
     <Card
   sx={{
+     height: "80%",
     p: 2,
     borderRadius: 3,
     background: "linear-gradient(135deg,#1e3a8a,#2563eb)",
@@ -390,7 +386,7 @@ const guardName = localStorage.getItem("guardName") || "Guard";
     <Box>
       <Typography variant="subtitle2">Guard Information</Typography>
       <Typography variant="h6">
-        {localStorage.getItem("guardName") || "Guard"}
+       
       </Typography>
       <Typography variant="body2">
         Status: Active
