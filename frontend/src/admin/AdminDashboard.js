@@ -200,7 +200,7 @@ const systemHealth = calculateHealth();
   }
 
   fetchStats();
-  fetchMessages();
+  
 
 }, [navigate]);
 
