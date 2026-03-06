@@ -5,8 +5,6 @@ import {
   Grid,
   Card,
   CardContent,
-  TextField,
-  Button,
   CircularProgress,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -177,7 +175,7 @@ export default function AdminDashboard() {
     sos: 0,
     payments: 0,
   });
-  const [messages, setMessages] = React.useState([]);
+ // const [messages, setMessages] = React.useState([]);
 const [text, setText] = React.useState("");
 const adminName = "Admin";
 const fetchMessages = async () => {

@@ -217,8 +217,8 @@ function GuardHome() {
     sos: 0,
     notices: 0,
   });
-  const [messages, setMessages] = useState([]);
-const [text, setText] = useState("");
+  //const [messages, setMessages] = useState([]);
+//const [text, setText] = useState("");
 
 const guardName = localStorage.getItem("guardName") || "Guard";
 const fetchMessages = async () => {
