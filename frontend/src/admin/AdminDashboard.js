@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-const API_BASE = "https://zeecurity-backend.onrender.com/api";
+
 
 /* ===============================
    Reusable Circular Infographic
