@@ -176,19 +176,6 @@ export default function AdminDashboard() {
     payments: 0,
   });
 
-const [text, setText] = React.useState("");
-const adminName = "Admin";
-const fetchMessages = async () => {
-  try {
-    const res = await axios.get(`${API_BASE}/messages`);
-    setMessages(res.data);
-  } catch (err) {
-    console.error("Message fetch error:", err);
-  }
-};
-
-
-
   const calculateHealth = () => {
   const complaintScore = Math.max(100 - stats.complaints * 2, 0);
   const sosScore = Math.max(100 - stats.sos * 5, 0);
