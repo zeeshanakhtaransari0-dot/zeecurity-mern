@@ -175,7 +175,7 @@ export default function AdminDashboard() {
     sos: 0,
     payments: 0,
   });
- // const [messages, setMessages] = React.useState([]);
+
 const [text, setText] = React.useState("");
 const adminName = "Admin";
 const fetchMessages = async () => {
@@ -187,22 +187,7 @@ const fetchMessages = async () => {
   }
 };
 
-const sendMessage = async () => {
-  if (!text.trim()) return;
 
-  try {
-    await axios.post(`${API_BASE}/messages`, {
-      senderRole: "admin",
-      senderName: adminName,
-      message: text,
-    });
-
-    setText("");
-    fetchMessages();
-  } catch (err) {
-    console.error("Send message error:", err);
-  }
-};
 
   const calculateHealth = () => {
   const complaintScore = Math.max(100 - stats.complaints * 2, 0);
