@@ -218,39 +218,14 @@ function GuardHome() {
     sos: 0,
     notices: 0,
   });
-  //const [messages, setMessages] = useState([]);
-//const [text, setText] = useState("");
+
 
 const guardName = localStorage.getItem("guardName") || "Guard";
-const fetchMessages = async () => {
-  try {
-    const res = await axios.get(`${API_BASE}/messages`);
-    setMessages(res.data);
-  } catch (err) {
-    console.error("Message fetch error:", err);
-  }
-};
 
-const sendMessage = async () => {
-  if (!text.trim()) return;
 
-  try {
-    await axios.post(`${API_BASE}/messages`, {
-      senderRole: "guard",
-      senderName: guardName,
-      message: text,
-    });
-
-    setText("");
-    fetchMessages();
-  } catch (err) {
-    console.error("Send message error:", err);
-  }
-};
 
  useEffect(() => {
   fetchStats();
-  fetchMessages();
 }, []);
 
   const fetchStats = async () => {
