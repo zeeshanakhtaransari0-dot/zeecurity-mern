@@ -4,10 +4,14 @@ import {
   Typography,
   Grid,
   Card,
+  CardContent,
+  TextField,
+  Button,
   CircularProgress,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+const API_BASE = "https://zeecurity-backend.onrender.com/api";
 
 /* ===============================
    Reusable Circular Infographic
@@ -173,6 +177,34 @@ export default function AdminDashboard() {
     sos: 0,
     payments: 0,
   });
+  const [messages, setMessages] = React.useState([]);
+const [text, setText] = React.useState("");
+const adminName = "Admin";
+const fetchMessages = async () => {
+  try {
+    const res = await axios.get(`${API_BASE}/messages`);
+    setMessages(res.data);
+  } catch (err) {
+    console.error("Message fetch error:", err);
+  }
+};
+
+const sendMessage = async () => {
+  if (!text.trim()) return;
+
+  try {
+    await axios.post(`${API_BASE}/messages`, {
+      senderRole: "admin",
+      senderName: adminName,
+      message: text,
+    });
+
+    setText("");
+    fetchMessages();
+  } catch (err) {
+    console.error("Send message error:", err);
+  }
+};
 
   const calculateHealth = () => {
   const complaintScore = Math.max(100 - stats.complaints * 2, 0);
@@ -192,13 +224,15 @@ export default function AdminDashboard() {
 
 const systemHealth = calculateHealth();
 
-  useEffect(() => {
-    if (localStorage.getItem("role") !== "admin") {
-      navigate("/");
-    }
+ useEffect(() => {
+  if (localStorage.getItem("role") !== "admin") {
+    navigate("/");
+  }
 
-    fetchStats();
-  }, [navigate]);
+  fetchStats();
+  fetchMessages();
+
+}, [navigate]);
 
  const fetchStats = async () => {
   try {
@@ -431,6 +465,25 @@ React.useEffect(() => {
       </Typography>
     </Card>
   </Grid>
+  <Card
+  sx={{
+    mt: 30,
+    cursor: "pointer"
+  }}
+  onClick={() => navigate("/admin/chat")}
+>
+  <CardContent>
+
+    <Typography variant="h6">
+      Guard Communication
+    </Typography>
+
+    <Typography variant="body2" sx={{ mt: 2 }}>
+      Click to open live chat
+    </Typography>
+
+  </CardContent>
+</Card>
 
 </Grid>
   </Box>

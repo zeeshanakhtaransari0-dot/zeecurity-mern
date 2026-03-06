@@ -20,6 +20,7 @@ import ResidentProfile from "./ResidentProfile";
 
 import ResidentComplaints from "./pages/ResidentComplaints";
 import GuardComplaints from "./pages/GuardComplaints";
+import GuardChat from "./pages/GuardChat";
 import ResidentsPage from "./ResidentsPage";
 import AdminSidebar from "./components/AdminSidebar";
 import AdminDashboard from "./admin/AdminDashboard";
@@ -27,9 +28,18 @@ import AdminLogin from "./admin/AdminLogin";
 import AdminResidents from "./admin/AdminResidents";
 import AdminComplaints from "./admin/AdminComplaints";
 import AdminNotices from "./admin/AdminNotices";
+import AdminChat from "./admin/AdminChat";
 import PreApprovedVisitor from "./pages/PreApprovedVisitor";
 import GuardPreApproved from "./pages/GuardPreApproved";
 import ResidentPreApproved from "./pages/ResidentPreApproved";
+import PeopleIcon from "@mui/icons-material/People";
+import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import WarningIcon from "@mui/icons-material/Warning";
+import CampaignIcon from "@mui/icons-material/Campaign";
+import SecurityIcon from "@mui/icons-material/Security";
+import ApartmentIcon from "@mui/icons-material/Apartment";
+import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
+import ChatIcon from "@mui/icons-material/Chat";
 
 
 import axios from "axios";
@@ -200,16 +210,47 @@ if (role === "resident") {
 
 /* ================= GUARD HOME ================= */
 function GuardHome() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     visitors: 0,
     complaints: 0,
     sos: 0,
     notices: 0,
   });
+  const [messages, setMessages] = useState([]);
+const [text, setText] = useState("");
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
+const guardName = localStorage.getItem("guardName") || "Guard";
+const fetchMessages = async () => {
+  try {
+    const res = await axios.get(`${API_BASE}/messages`);
+    setMessages(res.data);
+  } catch (err) {
+    console.error("Message fetch error:", err);
+  }
+};
+
+const sendMessage = async () => {
+  if (!text.trim()) return;
+
+  try {
+    await axios.post(`${API_BASE}/messages`, {
+      senderRole: "guard",
+      senderName: guardName,
+      message: text,
+    });
+
+    setText("");
+    fetchMessages();
+  } catch (err) {
+    console.error("Send message error:", err);
+  }
+};
+
+ useEffect(() => {
+  fetchStats();
+  fetchMessages();
+}, []);
 
   const fetchStats = async () => {
     try {
@@ -234,48 +275,279 @@ function GuardHome() {
 
   return (
   <Box sx={{ p: 3 }}>
-    <Typography variant="h4" sx={{ mb: 2 }}>
+    <Typography variant="h4" sx={{ mb: 3 }} fontWeight={700}>
       Guard Dashboard
     </Typography>
 
-    {/* 👇 THIS WAS MISSING */}
-    <Grid container spacing={2}>
+    {/* 👇 GRID START */}
+<Grid container spacing={3}>
 
-      <Grid item xs={12} md={3}>
-        <Card>
-          <CardContent>
-            <Typography variant="subtitle2">Visitors</Typography>
-            <Typography variant="h4">{stats.visitors}</Typography>
-          </CardContent>
-        </Card>
-      </Grid>
+  {/* ---------------- WELCOME CARD ---------------- */}
+  <Grid item xs={12}>
+    <Card
+      sx={{
+        p: 2,
+        borderRadius: 3,
+        background: "linear-gradient(135deg,#1e3a8a,#3b82f6)",
+        color: "white",
+      }}
+    >
+      <Typography variant="h5" fontWeight={700}>
+        Welcome Guard
+      </Typography>
 
-      <Grid item xs={12} md={3}>
-        <Card>
-          <CardContent>
-            <Typography variant="subtitle2">Complaints</Typography>
-            <Typography variant="h4">{stats.complaints}</Typography>
-          </CardContent>
-        </Card>
-      </Grid>
+      <Typography variant="body2">
+        Security monitoring system is active.
+      </Typography>
+    </Card>
+  </Grid>
 
-      <Grid item xs={12} md={3}>
-        <Card>
-          <CardContent>
-            <Typography variant="subtitle2">SOS</Typography>
-            <Typography variant="h4">{stats.sos}</Typography>
-          </CardContent>
-        </Card>
-      </Grid>
+</Grid>
 
-      <Grid item xs={12} md={3}>
-        <Card>
-          <CardContent>
-            <Typography variant="subtitle2">Notices</Typography>
-            <Typography variant="h4">{stats.notices}</Typography>
-          </CardContent>
-        </Card>
-      </Grid>
+
+{/* ---------------- ROW 1 : SYSTEM STATS ---------------- */}
+
+<Grid container spacing={3} sx={{ mt: 1 }}>
+
+  {/* Visitors */}
+  <Grid item xs={12} md={3}>
+    <Card
+  sx={{
+    p: 2,
+    borderRadius: 3,
+    background: "linear-gradient(135deg,#2563eb,#3b82f6)",
+    color: "white",
+    boxShadow: "0 4px 15px rgba(0,0,0,0.2)"
+  }}
+>
+  <CardContent sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <Box>
+      <Typography variant="subtitle2">Visitors</Typography>
+      <Typography variant="h4">{stats.visitors}</Typography>
+    </Box>
+    <PeopleIcon sx={{ fontSize: 40 }} />
+  </CardContent>
+</Card>
+  </Grid>
+
+  {/* Complaints */}
+  <Grid item xs={12} md={3}>
+   <Card
+  sx={{
+    p: 2,
+    borderRadius: 3,
+    background: "linear-gradient(135deg,#f97316,#fb923c)",
+    color: "white",
+    boxShadow: "0 4px 15px rgba(0,0,0,0.2)"
+  }}
+>
+  <CardContent sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <Box>
+      <Typography variant="subtitle2">Complaints</Typography>
+      <Typography variant="h4">{stats.complaints}</Typography>
+    </Box>
+    <ReportProblemIcon sx={{ fontSize: 40 }} />
+  </CardContent>
+</Card>
+  </Grid>
+
+  {/* SOS */}
+  <Grid item xs={12} md={3}>
+   <Card
+  sx={{
+    p: 2,
+    borderRadius: 3,
+    background: "linear-gradient(135deg,#dc2626,#ef4444)",
+    color: "white",
+    boxShadow: "0 4px 15px rgba(0,0,0,0.2)"
+  }}
+>
+  <CardContent sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <Box>
+      <Typography variant="subtitle2">SOS</Typography>
+      <Typography variant="h4">{stats.sos}</Typography>
+    </Box>
+    <WarningIcon sx={{ fontSize: 40 }} />
+  </CardContent>
+</Card>
+  </Grid>
+
+  {/* Notices */}
+  <Grid item xs={12} md={3}>
+   <Card
+  sx={{
+    p: 2,
+    borderRadius: 3,
+    background: "linear-gradient(135deg,#7c3aed,#a855f7)",
+    color: "white",
+    boxShadow: "0 4px 15px rgba(0,0,0,0.2)"
+  }}
+>
+  <CardContent sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <Box>
+      <Typography variant="subtitle2">Notices</Typography>
+      <Typography variant="h4">{stats.notices}</Typography>
+    </Box>
+    <CampaignIcon sx={{ fontSize: 40 }} />
+  </CardContent>
+</Card>
+  </Grid>
+
+</Grid>
+
+
+{/* ---------------- ROW 2 : FUNCTIONAL CARDS ---------------- */}
+
+<Grid container spacing={3} sx={{ mt: 1 }}>
+
+  {/* Guard Info */}
+  <Grid item xs={12} md={3}>
+    <Card
+  sx={{
+    p: 2,
+    borderRadius: 3,
+    background: "linear-gradient(135deg,#1e3a8a,#2563eb)",
+    color: "white"
+  }}
+>
+  <CardContent sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <Box>
+      <Typography variant="subtitle2">Guard Information</Typography>
+      <Typography variant="h6">
+        {localStorage.getItem("guardName") || "Guard"}
+      </Typography>
+      <Typography variant="body2">
+        Status: Active
+      </Typography>
+    </Box>
+    <SecurityIcon sx={{ fontSize: 40 }} />
+  </CardContent>
+</Card>
+  </Grid>
+
+
+{/* Residents */}
+<Grid item xs={12} md={3}>
+  <Card
+    sx={{
+      height: "80%",
+      p: 2,
+      borderRadius: 3,
+      cursor: "pointer",
+      background: "linear-gradient(135deg,#16a34a,#22c55e)",
+      color: "white",
+      boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+      transition: "0.2s",
+      "&:hover": {
+        transform: "translateY(-3px)",
+      }
+    }}
+    onClick={() => navigate("/guard/residents")}
+  >
+    <CardContent
+      sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+    >
+      <Box>
+        <Typography variant="subtitle2">
+          Residents
+        </Typography>
+
+        <Typography variant="h5" fontWeight={700}>
+          View List
+        </Typography>
+
+        <Typography variant="body2">
+          Open residents history
+        </Typography>
+      </Box>
+
+      <ApartmentIcon sx={{ fontSize: 40 }} />
+    </CardContent>
+  </Card>
+</Grid>
+
+
+{/* Pre Approved Visitors */}
+<Grid item xs={12} md={3}>
+  <Card
+    sx={{
+      height: "80%",
+      p: 2,
+      borderRadius: 3,
+      cursor: "pointer",
+      background: "linear-gradient(135deg,#0f766e,#14b8a6)",
+      color: "white",
+      boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+      transition: "0.2s",
+      "&:hover": {
+        transform: "translateY(-3px)",
+      }
+    }}
+    onClick={() => navigate("/guard/preapproved")}
+  >
+    <CardContent
+      sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+    >
+      <Box>
+        <Typography variant="subtitle2">
+          Pre-Approved Visitors
+        </Typography>
+
+        <Typography variant="h5" fontWeight={700}>
+          Open List
+        </Typography>
+
+        <Typography variant="body2">
+          View approved visitors
+        </Typography>
+      </Box>
+
+      <VerifiedUserIcon sx={{ fontSize: 40 }} />
+    </CardContent>
+  </Card>
+</Grid>
+
+
+{/* Chat */}
+<Grid item xs={12} md={3}>
+  <Card
+    sx={{
+      height: "80%",
+      p: 2,
+      borderRadius: 3,
+      cursor: "pointer",
+      background: "linear-gradient(135deg,#4f46e5,#6366f1)",
+      color: "white",
+      boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+      transition: "0.2s",
+      "&:hover": {
+        transform: "translateY(-3px)",
+      }
+    }}
+    onClick={() => navigate("/guard/chat")}
+  >
+    <CardContent
+      sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+    >
+      <Box>
+        <Typography variant="subtitle2">
+          Chat With Admin
+        </Typography>
+
+        <Typography variant="h5" fontWeight={700}>
+          Open Chat
+        </Typography>
+
+        <Typography variant="body2">
+          Contact admin for help
+        </Typography>
+      </Box>
+
+      <ChatIcon sx={{ fontSize: 40 }} />
+    </CardContent>
+  </Card>
+</Grid>
+
 
     </Grid>
   </Box>
@@ -297,6 +569,7 @@ export default function App() {
             </Layout>
           }
         />
+         <Route path="/guard/chat" element={<GuardChat />} />
         <Route
   path="/guard/complaints"
   element={
@@ -349,6 +622,7 @@ export default function App() {
           }
         />
         <Route path="/guard/preapproved" element={<GuardPreApproved />} />
+       
         <Route
   path="/resident/notices"
   element={
@@ -478,6 +752,7 @@ export default function App() {
   }
 />
 <Route path="/admin/notices" element={<AdminNotices />} />
+<Route path="/admin/chat" element={<AdminChat />} />
       </Routes>
     </Router>
   );

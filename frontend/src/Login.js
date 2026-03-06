@@ -7,6 +7,7 @@ import {
   Typography,
   Paper,
 } from "@mui/material";
+const API_BASE = "https://zeecurity-backend.onrender.com/api";
 
 export default function Login() {
   const [name, setName] = useState("");
@@ -19,7 +20,7 @@ const handleResidentLogin = async () => {
   }
 
   try {
-    const response = await fetch(`${process.env.REACT_APP_API_BASE || "http://localhost:5000/api"}/auth/login`, {
+    const response = await fetch(`${API_BASE}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
