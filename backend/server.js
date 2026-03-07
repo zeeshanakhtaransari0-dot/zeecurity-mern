@@ -13,6 +13,7 @@ const sosRoutes = require("./routes/sosRoutes");
 const residentRoutes = require("./routes/residentRoutes");
 const residentSessionRoutes = require("./routes/residentSessionRoutes");
 const messageRoutes = require("./routes/messages");
+const User = require("../models/User");
 dotenv.config();
 
 const app = express(); // app FIRST
@@ -31,6 +32,14 @@ app.use("/api/sos", sosRoutes);
 app.use("/api/residents", residentRoutes);
 app.use("/api/residentsessions", residentSessionRoutes);
 app.use("/api/messages", messageRoutes);
+router.get("/users", async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 // test route
 app.get("/", (req, res) => {
@@ -40,6 +49,7 @@ app.use("/api/preapproved", require("./routes/preApprovedVisitorRoutes"));
 
 // db + server
 const PORT = process.env.PORT || 5000;
+
 
 mongoose
   .connect(process.env.MONGO_URI)
