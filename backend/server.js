@@ -32,7 +32,7 @@ app.use("/api/sos", sosRoutes);
 app.use("/api/residents", residentRoutes);
 app.use("/api/residentsessions", residentSessionRoutes);
 app.use("/api/messages", messageRoutes);
-router.get("/users", async (req, res) => {
+app.get("/api/users", async (req, res) => {
   try {
     const users = await User.find();
     res.json(users);
