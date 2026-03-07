@@ -13,7 +13,7 @@ const sosRoutes = require("./routes/sosRoutes");
 const residentRoutes = require("./routes/residentRoutes");
 const residentSessionRoutes = require("./routes/residentSessionRoutes");
 const messageRoutes = require("./routes/messages");
-const User = require("../models/User");
+const User = require("./models/User");
 dotenv.config();
 
 const app = express(); // app FIRST
