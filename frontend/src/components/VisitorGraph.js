@@ -23,9 +23,9 @@ export default function VisitorGraph() {
   const fetchVisitors = async () => {
     try {
 
-      const res = await axios.get(`${API}/preapproved`);
+     await axios.get(`${API}/preapproved`);
 
-      
+   
 
       const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 
