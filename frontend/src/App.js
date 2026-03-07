@@ -25,8 +25,6 @@ import ResidentsPage from "./ResidentsPage";
 import AdminSidebar from "./components/AdminSidebar";
 import AdminDashboard from "./admin/AdminDashboard";
 import AdminLogin from "./admin/AdminLogin";
-import AdminResidents from "./admin/AdminResidents";
-import AdminComplaints from "./admin/AdminComplaints";
 import AdminNotices from "./admin/AdminNotices";
 import AdminChat from "./admin/AdminChat";
 import PreApprovedVisitor from "./pages/PreApprovedVisitor";
