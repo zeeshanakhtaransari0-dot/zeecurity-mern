@@ -41,7 +41,7 @@ export default function PreApprovedVisitor() {
   };
 
   return (
-    <Box sx={{ p: 3, ml: "220px" }}>
+    <Box sx={{ p: 3}}>
       <Typography variant="h4" mb={3}>
         Pre-Approved Visitor
       </Typography>

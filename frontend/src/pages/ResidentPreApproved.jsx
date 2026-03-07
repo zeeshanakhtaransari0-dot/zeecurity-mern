@@ -28,7 +28,7 @@ export default function ResidentPreApproved() {
   return (
     <>
       <ResidentSidebar />
-      <Box sx={{ ml: "220px", p: 3 }}>
+      <Box sx={{ p: 3 }}>
         <Typography variant="h4" mb={3}>
           My Visitors
         </Typography>

@@ -40,6 +40,9 @@ import SecurityIcon from "@mui/icons-material/Security";
 import ApartmentIcon from "@mui/icons-material/Apartment";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import ChatIcon from "@mui/icons-material/Chat";
+import AdminVisitors from "./admin/AdminVisitors";
+import GuardRoster from "./admin/GuardRoster";
+import ResidentsInfo from "./admin/ResidentsInfo";
 
 
 import axios from "axios";
@@ -594,6 +597,7 @@ export default function App() {
             </Layout>
           }
         />
+      
         <Route path="/guard/preapproved" element={<GuardPreApproved />} />
        
         <Route
@@ -708,24 +712,27 @@ export default function App() {
     </Layout>
   }
 />
-<Route
-  path="/admin/residents"
+
+ <Route
+  path="/admin/visitors"
   element={
     <Layout sidebar={<AdminSidebar />}>
-      <AdminResidents />
-    </Layout>
-  }
-/>
-<Route
-  path="/admin/complaints"
-  element={
-    <Layout sidebar={<AdminSidebar />}>
-      <AdminComplaints />
+      <AdminVisitors />
     </Layout>
   }
 />
 <Route path="/admin/notices" element={<AdminNotices />} />
 <Route path="/admin/chat" element={<AdminChat />} />
+<Route path="/admin/guards" element={<GuardRoster />} />
+<Route
+ path="/admin/residents-info"
+ element={
+  <Layout sidebar={<AdminSidebar />}>
+   <ResidentsInfo />
+  </Layout>
+ }
+/>
+
       </Routes>
     </Router>
   );

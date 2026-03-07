@@ -9,6 +9,11 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import VisitorGraph from "../components/VisitorGraph";
+
+
+
+const API_BASE = "https://zeecurity-backend.onrender.com/api";
 
 
 /* ===============================
@@ -167,23 +172,26 @@ const SystemStatusBadge = () => {
    Admin Dashboard
 ================================ */
 export default function AdminDashboard() {
+  
   const navigate = useNavigate();
 
   const [stats, setStats] = React.useState({
-    residents: 0,
-    complaints: 0,
-    sos: 0,
-    payments: 0,
-  });
+  residents: 0,
+  complaints: 0,
+  sos: 0,
+  paymentsTotal: 0,
+  paymentsPaid: 0,
+  visitors: 0,
+});
 
   const calculateHealth = () => {
   const complaintScore = Math.max(100 - stats.complaints * 2, 0);
   const sosScore = Math.max(100 - stats.sos * 5, 0);
 
   const paymentScore =
-    stats.residents > 0
-      ? Math.min((stats.payments / stats.residents) * 100, 100)
-      : 0;
+    stats.paymentsTotal > 0
+      ? (stats.paymentsPaid / stats.paymentsTotal) * 100
+      : 100;
 
   const health = Math.round(
     (complaintScore + sosScore + paymentScore) / 3
@@ -204,22 +212,31 @@ const systemHealth = calculateHealth();
 
 }, [navigate]);
 
- const fetchStats = async () => {
+const fetchStats = async () => {
   try {
-    const [r, c, s, p] = await Promise.all([
-      axios.get("https://zeecurity-backend.onrender.com/api/residents"),
-      axios.get("https://zeecurity-backend.onrender.com/api/complaints"),
-      axios.get("https://zeecurity-backend.onrender.com/api/sos"),
-      axios.get("https://zeecurity-backend.onrender.com/api/maintenance"),
+    const [r, c, s, m, v] = await Promise.all([
+      axios.get(`${API_BASE}/residents`),
+      axios.get(`${API_BASE}/complaints`),
+      axios.get(`${API_BASE}/sos`),
+      axios.get(`${API_BASE}/maintenance`),
+      axios.get(`${API_BASE}/preapproved`)
     ]);
 
+    console.log("Maintenance data:", m.data);
+
+   const totalPayments = m.data.payments.length;
+
+const paidPayments = m.data.payments.filter(
+  (pay) => pay.status && pay.status.toLowerCase() === "paid"
+).length;
+
     setStats({
-      residents: Array.isArray(r.data) ? r.data.length : 0,
-      complaints: Array.isArray(c.data) ? c.data.length : 0,
-      sos: Array.isArray(s.data) ? s.data.length : 0,
-      payments: Array.isArray(p.data)
-        ? p.data.length
-        : p.data.payments?.length || 0,
+      residents: r.data.length,
+      complaints: c.data.length,
+      sos: s.data.length,
+      paymentsTotal: totalPayments,
+      paymentsPaid: paidPayments,
+      visitors: v.data.length,
     });
 
   } catch (err) {
@@ -260,6 +277,7 @@ React.useEffect(() => {
       <Grid item>
         <Card
           sx={{
+            height: 140,
             p: 2.5,
             borderRadius: 4,
             background:
@@ -293,7 +311,7 @@ React.useEffect(() => {
       boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
       textAlign: "center",
 
-      height: 160,          // fixed height
+      height: 155,          // fixed height
       display: "flex",
       flexDirection: "column",
       justifyContent: "center",
@@ -365,6 +383,33 @@ React.useEffect(() => {
     </Typography>
   </Card>
 </Grid>
+<Grid item xs={12} md={3}>
+  <Card
+    sx={{
+      p: 2.5,
+      borderRadius: 4,
+      cursor: "pointer",
+      background:
+        "linear-gradient(135deg, rgb(20, 160, 170), rgba(166,228,241,0.9))",
+      color: "#fff",
+      boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
+      height: 140
+    }}
+    onClick={() => navigate("/admin/visitors")}
+  >
+    <Typography variant="caption" sx={{ opacity: 0.8 }}>
+      Visitors
+    </Typography>
+
+    <Typography variant="h3" fontWeight={900}>
+      {stats.visitors}
+    </Typography>
+
+    <Typography variant="caption">
+      Pre-approved visitors
+    </Typography>
+  </Card>
+</Grid>
     </Grid>
   </Grid>
 
@@ -372,8 +417,8 @@ React.useEffect(() => {
   <Grid item xs={12} md={9}>
     <Card
       sx={{
-        borderRadius: 3,
-        p: 2,
+        borderRadius: 5,
+        p: 3,
         background:
           "linear-gradient(135deg, #0bdce7db, #eef2ff)",
       }}
@@ -387,7 +432,7 @@ React.useEffect(() => {
         System Overview
       </Typography>
 
-      <Grid container spacing={3} justifyContent="center">
+      <Grid container spacing={9} justifyContent="center">
         <Grid item>
           <InfoCircle
             total={stats.complaints}
@@ -412,8 +457,8 @@ React.useEffect(() => {
 
         <Grid item>
           <InfoCircle
-            total={stats.payments}
-            solved={Math.floor(stats.payments * 0.85)}
+           total={stats.paymentsTotal}
+solved={stats.paymentsPaid}
             label="Payments"
             colorSolved="#6366f1"
             colorPending="#1e293b"
@@ -437,7 +482,7 @@ React.useEffect(() => {
   </Grid>
   <Card
   sx={{
-    mt: 30,
+    mt: 60,
     cursor: "pointer"
   }}
   onClick={() => navigate("/admin/chat")}
@@ -451,11 +496,52 @@ React.useEffect(() => {
     <Typography variant="body2" sx={{ mt: 2 }}>
       Click to open live chat
     </Typography>
+    
+   
 
   </CardContent>
 </Card>
+<Card
+  sx={{
+    p: 3,
+    borderRadius: 6,
+    cursor: "pointer",
+    background: "#dbeafe",
+    boxShadow: "0 5px 20px rgba(0,0,0,0.1)"
+  }}
+  onClick={() => navigate("/admin/guards")}
+>
+  <Typography variant="h6" fontWeight={700}>
+    Guard Duty Roster
+  </Typography>
+
+  <Typography variant="body2">
+    View guard shifts and assignments
+  </Typography>
+</Card>
+<Card
+  onClick={() => navigate("/admin/residents-info")}
+  sx={{ p:2, cursor:"pointer" }}
+>
+  <Typography variant="h6">
+    Residents Info
+  </Typography>
+
+  <Typography>
+    Click to view residents
+  </Typography>
+</Card>
+<Card sx={{ p:3 }}>
+<Typography variant="h6" mb={2}>
+Visitor Activity
+</Typography>
+
+<VisitorGraph />
+
+</Card>
 
 </Grid>
+
   </Box>
 );
 }

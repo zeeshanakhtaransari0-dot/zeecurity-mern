@@ -9,6 +9,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/zeecurity_logo.png";
 import CampaignIcon from "@mui/icons-material/Campaign";
+import PersonIcon from "@mui/icons-material/Person";
 
 export default function AdminSidebar() {
   const navigate = useNavigate();
@@ -91,6 +92,13 @@ export default function AdminSidebar() {
     <CampaignIcon sx={{ color: "#fff" }} />
   </ListItemIcon>
   <ListItemText primary="Notices" />
+</ListItem>
+<ListItem button onClick={() => navigate("/admin/visitors")}>
+  <ListItemIcon sx={{color: "white"}}>
+  <PersonIcon />
+</ListItemIcon>
+
+<ListItemText primary="Visitors Info" />
 </ListItem>
 
         <ListItem button onClick={handleLogout}>
