@@ -41,7 +41,7 @@ import ChatIcon from "@mui/icons-material/Chat";
 import AdminVisitors from "./admin/AdminVisitors";
 import GuardRoster from "./admin/GuardRoster";
 import ResidentsInfo from "./admin/ResidentsInfo";
-
+import LandingPage from "./pages/LandingPage";
 
 import axios from "axios";
 import {
@@ -533,7 +533,8 @@ export default function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<LandingPage />} />
+<Route path="/login" element={<Login />} />
 
         <Route
           path="/guard"
