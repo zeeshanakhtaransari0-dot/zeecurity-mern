@@ -32,6 +32,7 @@ app.use("/api/sos", sosRoutes);
 app.use("/api/residents", residentRoutes);
 app.use("/api/residentsessions", residentSessionRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api", require("./routes/taskRoutes"));
 app.get("/api/users", async (req, res) => {
   try {
     const users = await User.find();
