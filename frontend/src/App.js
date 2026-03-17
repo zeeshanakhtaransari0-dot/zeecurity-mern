@@ -42,6 +42,8 @@ import AdminVisitors from "./admin/AdminVisitors";
 import GuardRoster from "./admin/GuardRoster";
 import ResidentsInfo from "./admin/ResidentsInfo";
 import LandingPage from "./pages/LandingPage";
+import GuardTodo from "./pages/GuardTodo";
+import AdminTodo from "./pages/AdminTodo";
 
 import axios from "axios";
 import {
@@ -274,6 +276,29 @@ function GuardHome() {
     </Card>
   </Grid>
 
+    {/* NEW TODO CARD */}
+  <Grid item xs={12} md={6}>
+    <Card
+      sx={{
+        height: 40,
+        p: 3,
+        borderRadius: 4,
+        cursor: "pointer",
+        background: "linear-gradient(135deg,#667eea,#764ba2)",
+        color: "#fff"
+      }}
+      onClick={() => navigate("/guard/todo")}
+    >
+      <Typography variant="h6">
+        Today’s Tasks
+      </Typography>
+
+      <Typography variant="body2">
+        View & update assigned duties
+      </Typography>
+    </Card>
+  </Grid>
+
 </Grid>
 
 
@@ -385,15 +410,21 @@ function GuardHome() {
 >
   <CardContent sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
     <Box>
-      <Typography variant="subtitle2">Guard Information</Typography>
-      <Typography variant="h6">
+      <Typography variant="subtitle2"><h4>Guard Information</h4></Typography>
+      <Typography variant="h6s">
        
       </Typography>
       <Typography variant="body2">
         Status: Active
+         <Typography variant="body2"></Typography>
+        Name:Admin
+        <Typography variant="body2"></Typography>
+        Shift:Day
+        <Typography variant="body2"></Typography>
+        DutyAssigned:Visitor Entry 
       </Typography>
     </Box>
-    <SecurityIcon sx={{ fontSize: 40 }} />
+    <SecurityIcon sx={{ fontSize: 50 }} />
   </CardContent>
 </Card>
   </Grid>
@@ -522,6 +553,7 @@ function GuardHome() {
 </Grid>
 
 
+
     </Grid>
   </Box>
 );
@@ -598,6 +630,7 @@ export default function App() {
         />
       
         <Route path="/guard/preapproved" element={<GuardPreApproved />} />
+        <Route path="/guard/todo" element={<GuardTodo />} />
        
         <Route
   path="/resident/notices"
@@ -723,6 +756,7 @@ export default function App() {
 <Route path="/admin/notices" element={<AdminNotices />} />
 <Route path="/admin/chat" element={<AdminChat />} />
 <Route path="/admin/guards" element={<GuardRoster />} />
+<Route path="/admin/todo" element={<AdminTodo />} />
 <Route
  path="/admin/residents-info"
  element={

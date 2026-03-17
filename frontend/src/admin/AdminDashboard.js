@@ -127,7 +127,9 @@ export default function AdminDashboard() {
   const [stats, setStats] = React.useState({
     residents: 0,
     complaints: 0,
+    complaintsResolved: 0,
     sos: 0,
+    sosResolved: 0,
     paymentsTotal: 0,
     paymentsPaid: 0,
     visitors: 0,
@@ -175,15 +177,30 @@ export default function AdminDashboard() {
         (pay) => pay.status && pay.status.toLowerCase() === "paid"
       ).length;
 
-      setStats({
-        residents: r.data.length,
-        complaints: c.data.length,
-        sos: s.data.length,
-        paymentsTotal: totalPayments,
-        paymentsPaid: paidPayments,
-        visitors: v.data.length,
-      });
+     const totalComplaints = c.data.length;
+const resolvedComplaints = c.data.filter(
+  (item) => item.status?.toLowerCase() === "resolved"
+).length;
 
+const totalSOS = s.data.length;
+const resolvedSOS = s.data.filter(
+  (item) => item.status?.toLowerCase() === "resolved"
+).length;
+
+setStats({
+  residents: r.data.length,
+
+  complaints: totalComplaints,
+  complaintsResolved: resolvedComplaints,
+
+  sos: totalSOS,
+  sosResolved: resolvedSOS,
+
+  paymentsTotal: totalPayments,
+  paymentsPaid: paidPayments,
+
+  visitors: v.data.length,
+});
     } catch (err) {
       console.error("Admin stats error:", err);
     }
@@ -289,7 +306,7 @@ export default function AdminDashboard() {
               <Grid item>
                 <InfoCircle
                   total={stats.complaints}
-                  solved={Math.floor(stats.complaints * 0.6)}
+                solved={stats.complaintsResolved}
                   label="Complaints"
                   colorSolved="#22c55e"
                   colorPending="#64748b"
@@ -300,7 +317,7 @@ export default function AdminDashboard() {
               <Grid item>
                 <InfoCircle
                   total={stats.sos}
-                  solved={Math.floor(stats.sos * 0.4)}
+                  solved={stats.sosResolved}
                   label="SOS"
                   colorSolved="#f97316"
                   colorPending="#334155"
@@ -464,6 +481,27 @@ export default function AdminDashboard() {
           </Card>
 
         </Grid>
+        <Grid item xs={12} md={3}>
+  <Card
+    sx={{
+      height: 110,
+      p: 3,
+      borderRadius: 4,
+      cursor: "pointer",
+      background: "linear-gradient(135deg,#667eea,#764ba2)",
+      color: "#fff"
+    }}
+    onClick={() => navigate("/admin/todo")}
+  >
+    <Typography variant="h6">
+      Task Manager
+    </Typography>
+
+    <Typography variant="body2">
+      Assign guard duties
+    </Typography>
+  </Card>
+</Grid>
         
 
 

@@ -28,45 +28,61 @@ export default function ResidentPreApproved() {
   return (
     <>
       <ResidentSidebar />
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h4" mb={3}>
-          My Visitors
-        </Typography>
+     <Box sx={{ display: "flex" }}>
 
-        <Grid container spacing={2}>
-          {visitors.map((v) => (
-            <Grid item xs={12} md={6} key={v._id}>
-              <Card sx={{ p: 2 }}>
-                <Typography fontWeight={600}>
-                  {v.visitorName}
-                </Typography>
-                <Typography>Work: {v.workType}</Typography>
-                <Typography>
-                  Status:{" "}
-                  <strong
-                    style={{
-                      color:
-                        v.status === "approved"
-                          ? "green"
-                          : v.status === "rejected"
-                          ? "red"
-                          : "orange",
-                    }}
-                  >
-                    {v.status}
-                  </strong>
-                </Typography>
+  {/* Sidebar */}
+  <ResidentSidebar />
 
-                {v.status === "approved" && (
-                  <Typography sx={{ color: "green", mt: 1 }}>
-                    Visitor has entered the building 🚪
-                  </Typography>
-                )}
-              </Card>
-            </Grid>
-          ))}
+  {/* Main Content */}
+  <Box
+    sx={{
+      ml: "220px",
+      p: 3,
+      width: "100%"
+    }}
+  >
+    <Typography variant="h4" mb={3}>
+      My Visitors
+    </Typography>
+
+    <Grid container spacing={2}>
+      {visitors.map((v) => (
+        <Grid item xs={12} md={6} key={v._id}>
+          <Card sx={{ p: 2 }}>
+            <Typography fontWeight={600}>
+              {v.visitorName}
+            </Typography>
+
+            <Typography>Work: {v.workType}</Typography>
+
+            <Typography>
+              Status:{" "}
+              <strong
+                style={{
+                  color:
+                    v.status === "approved"
+                      ? "green"
+                      : v.status === "rejected"
+                      ? "red"
+                      : "orange",
+                }}
+              >
+                {v.status}
+              </strong>
+            </Typography>
+
+            {v.status === "approved" && (
+              <Typography sx={{ color: "green", mt: 1 }}>
+                Visitor has entered the building 🚪
+              </Typography>
+            )}
+          </Card>
         </Grid>
-      </Box>
+      ))}
+    </Grid>
+
+  </Box>
+</Box>
     </>
   );
 }

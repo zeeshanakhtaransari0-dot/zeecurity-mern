@@ -49,53 +49,96 @@ export default function AdminChat() {
 }, []);
 
   return (
-    <Box sx={{ p: 3, ml: "220px" }}>
+    <Box sx={{ p: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+  <Typography variant="h5">Guard ↔ Admin Chat</Typography>
 
-      <Typography variant="h5" sx={{ mb: 2 }}>
-        Guard ↔ Admin Chat
-      </Typography>
-       <Button
-          variant="outlined"
-          color="error"
-          onClick={() => navigate("/guard")}
-        >
-          Exit
-        </Button>
-
+  <Button
+    variant="outlined"
+    color="error"
+    onClick={() => navigate("/admin")}
+  >
+    EXIT
+  </Button>
+  </Box>
+  
+<Box
+  sx={{
+    border: "1px solid #e0e0e0",
+    borderRadius: 3,
+    height: 400,
+    overflowY: "auto",
+    p: 2,
+    mb: 2,
+    background: "#f9fafc"
+  }}
+>
+  {messages.length === 0 ? (
+    <Typography variant="body2" color="text.secondary">
+      No messages yet
+    </Typography>
+  ) : (
+    messages.map((m) => (
       <Box
+        key={m._id}
         sx={{
-          border: "1px solid #ddd",
+          mb: 1.5,
+          p: 1.5,
           borderRadius: 2,
-          height: 400,
-          overflowY: "auto",
-          p: 2,
-          mb: 2
+          background: "#ffffff",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+          borderLeft: m.senderRole === "admin"
+            ? "4px solid #1976d2"
+            : "4px solid #4caf50"
         }}
       >
+        <Typography
+          variant="caption"
+          sx={{
+            fontWeight: 600,
+            color: m.senderRole === "admin" ? "#1976d2" : "#2e7d32"
+          }}
+        >
+          {m.senderRole === "admin" ? "Admin" : "Guard"}
+        </Typography>
 
-        {messages.map((m) => (
-          <Typography key={m._id}>
-            <b>{m.senderName}:</b> {m.message}
-          </Typography>
-        ))}
+        <Typography variant="body2">
+          {m.message}
+        </Typography>
+      </Box>
+    ))
+  )}
+</Box>
+<Box
+  sx={{
+    display: "flex",
+    gap: 1,
+    background: "#fff",
+    p: 1,
+    borderRadius: 2,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
+  }}
+>
+  <TextField
+    fullWidth
+    placeholder="Type message..."
+    value={text}
+    onChange={(e) => setText(e.target.value)}
+    size="small"
+  />
+
+  <Button
+    variant="contained"
+    onClick={sendMessage}
+    sx={{ borderRadius: 2, px: 3 }}
+  >
+    Send
+  </Button>
+</Box>
+        
 
       </Box>
 
-      <Box sx={{ display: "flex", gap: 1 }}>
-
-        <TextField
-          fullWidth
-          placeholder="Type message..."
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
-
-        <Button variant="contained" onClick={sendMessage}>
-          Send
-        </Button>
-
-      </Box>
-
-    </Box>
+  
   );
 }

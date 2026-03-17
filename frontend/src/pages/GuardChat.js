@@ -54,7 +54,7 @@ export default function GuardChat() {
 }, []);
 
   return (
-    <Box sx={{ p: 3, ml: "220px" }}>
+    <Box sx={{ p: 3 }}>
 
     <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
   <Typography variant="h5">
@@ -75,42 +75,78 @@ export default function GuardChat() {
 
           {/* Chat messages */}
           <Box
-            sx={{
-              height: 400,
-              overflowY: "auto",
-              border: "1px solid #ddd",
-              borderRadius: 2,
-              p: 2,
-              mb: 2
-            }}
-          >
-            {messages.length === 0 ? (
-              <Typography variant="body2" color="text.secondary">
-                No messages yet
-              </Typography>
-            ) : (
-             messages.map((m) => (
-  <Typography key={m._id} sx={{ mb: 1 }}>
-    <b>{m.senderRole === "guard" ? "Guard" : "Admin"}:</b> {m.message}
-  </Typography>
-))
-            )}
-          </Box>
+  sx={{
+    border: "1px solid #e0e0e0",
+    borderRadius: 3,
+    height: 400,
+    overflowY: "auto",
+    p: 2,
+    mb: 2,
+    background: "#f9fafc"
+  }}
+>
+  {messages.length === 0 ? (
+    <Typography variant="body2" color="text.secondary">
+      No messages yet
+    </Typography>
+  ) : (
+    messages.map((m) => (
+      <Box
+        key={m._id}
+        sx={{
+          mb: 1.5,
+          p: 1.5,
+          borderRadius: 2,
+          background: "#ffffff",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
+          borderLeft: m.senderRole === "admin"
+            ? "4px solid #1976d2"
+            : "4px solid #4caf50"
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{
+            fontWeight: 600,
+            color: m.senderRole === "admin" ? "#1976d2" : "#2e7d32"
+          }}
+        >
+          {m.senderRole === "admin" ? "Admin" : "Guard"}
+        </Typography>
 
-          {/* Send message */}
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <TextField
-              fullWidth
-              placeholder="Type message..."
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-            />
+        <Typography variant="body2">
+          {m.message}
+        </Typography>
+      </Box>
+    ))
+  )}
+</Box>
+<Box
+  sx={{
+    display: "flex",
+    gap: 1,
+    background: "#fff",
+    p: 1,
+    borderRadius: 2,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)"
+  }}
+>
+  <TextField
+    fullWidth
+    placeholder="Type message..."
+    value={text}
+    onChange={(e) => setText(e.target.value)}
+    size="small"
+  />
 
-            <Button variant="contained" onClick={sendMessage}>
-              Send
-            </Button>
-          </Box>
-
+  <Button
+    variant="contained"
+    onClick={sendMessage}
+    sx={{ borderRadius: 2, px: 3 }}
+  >
+    Send
+  </Button>
+</Box>
         </CardContent>
       </Card>
 

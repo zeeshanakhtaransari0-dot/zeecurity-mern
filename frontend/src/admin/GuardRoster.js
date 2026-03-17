@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Box, Typography, Grid, Card, CardContent } from "@mui/material";
+import { Box, Typography, Grid, Card, CardContent,Button } from "@mui/material";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
 
 const API_BASE = "https://zeecurity-backend.onrender.com/api";
 
 export default function GuardRoster() {
+  const navigate = useNavigate();
   const [guards, setGuards] = useState([]);
 
   const fetchGuards = async () => {
@@ -25,11 +28,31 @@ export default function GuardRoster() {
     fetchGuards();
   }, []);
 
-  return (
-    <Box sx={{ ml: "220px", p: 3 }}>
-      <Typography variant="h4" fontWeight={700} mb={3}>
-        Guard Duty Roster
+ return (
+  <Box sx={{ p: 3 }}>
+
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        mb: 2
+      }}
+    >
+      <Typography variant="h5" fontWeight={600}>
+        Guard Roster
       </Typography>
+
+      <Button
+        variant="outlined"
+        color="error"
+        onClick={() => navigate("/admin")}
+        sx={{ borderRadius: 2 }}
+      >
+        EXIT
+      </Button>
+    </Box>
+       
 
       <Grid container spacing={3}>
         {guards.map((g) => (

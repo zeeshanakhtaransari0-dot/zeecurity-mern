@@ -22,7 +22,8 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 
 import logo from "../assets/zeecurity_logo.png";
-import QrCodeIcon from "@mui/icons-material/QrCode";
+import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
+import PeopleIcon from "@mui/icons-material/People";
 import axios from "axios";
 
 const drawerWidth = 220;
@@ -86,15 +87,15 @@ const handleLogout = async () => {
     >
       {/* LOGO */}
       <Toolbar sx={{ minHeight: 80, px: 2 }}>
-        <Box sx={{ textAlign: "center", width: "100%" }}>
-          <img src={logo} alt="logo" style={{ width: 120 }} />
+        <Box sx={{ textAlign: "center", width: "90%" }}>
+          <img src={logo} alt="logo" style={{ width: 100 }} />
           <Typography
             variant="caption"
             sx={{
               color: "rgba(148,163,184,0.9)",
               textTransform: "uppercase",
               letterSpacing: 1.5,
-              fontSize: 14,
+              fontSize: 13,
               mt: 0.5,
               display: "block",
             }}
@@ -152,14 +153,67 @@ const handleLogout = async () => {
             </ListItem>
           );
         })}
-        <ListItem button onClick={() => navigate("/resident/preapproved")}>
-  <ListItemIcon>
-    <QrCodeIcon sx={{ color: "#fff" }} />
-  </ListItemIcon>
-  <ListItemText primary="Pre-Approved Visitor" />
+        <ListItem disablePadding>
+  <ListItemButton
+    onClick={() => navigate("/resident/preapproved")}
+    sx={{
+      borderRadius: 2,
+      mx: 1,
+      mb: 0.5,
+      transition: "0.3s",
+      background: location.pathname.includes("preapproved")
+        ? "rgba(255,255,255,0.2)"
+        : "transparent",
+      "&:hover": {
+        background: "rgba(255,255,255,0.1)"
+      }
+    }}
+  >
+    <ListItemIcon sx={{ color: "#fff" }}>
+      <QrCodeScannerIcon />
+    </ListItemIcon>
+
+    <ListItemText
+      primary="Pre-Approved Visitor"
+      primaryTypographyProps={{
+        sx: {
+          fontSize: 15,
+          fontWeight: location.pathname.includes("preapproved") ? 700 : 500
+        }
+      }}
+    />
+  </ListItemButton>
 </ListItem>
-<ListItem button onClick={() => navigate("/resident/visitors")}>
-  <ListItemText primary="My Visitors" />
+<ListItem disablePadding>
+  <ListItemButton
+    onClick={() => navigate("/resident/visitors")}
+    sx={{
+      borderRadius: 2,
+      mx: 1,
+      mb: 0.5,
+      transition: "0.3s",
+      background: location.pathname.includes("visitors")
+        ? "rgba(255,255,255,0.2)"
+        : "transparent",
+      "&:hover": {
+        background: "rgba(255,255,255,0.1)"
+      }
+    }}
+  >
+    <ListItemIcon sx={{ color: "#fff" }}>
+      <PeopleIcon />
+    </ListItemIcon>
+
+    <ListItemText
+      primary="My Visitors"
+      primaryTypographyProps={{
+        sx: {
+          fontSize: 15,
+          fontWeight: location.pathname.includes("visitors") ? 700 : 500
+        }
+      }}
+    />
+  </ListItemButton>
 </ListItem>
       </List>
 

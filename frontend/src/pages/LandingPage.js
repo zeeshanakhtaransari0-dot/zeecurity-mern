@@ -13,20 +13,15 @@ import VerifiedIcon from "@mui/icons-material/Verified";
 import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
 import HomeIcon from "@mui/icons-material/Home";
 import ChatIcon from "@mui/icons-material/Chat";
-import AOS from "aos";
-import "aos/dist/aos.css";
+
+
 import { useEffect } from "react";
 
 
 
 
 export default function LandingPage() {
-    useEffect(() => {
-  AOS.init({
-    duration: 400,
-    once: true
-  });
-}, []);
+   
 
 const navigate = useNavigate();
 
@@ -170,7 +165,7 @@ Smart Security App for modern communities. Monitor guards, visitors, residents a
 
   {/* FEATURES SECTION */}
 <Box sx={{ mt: 12 }}
-data-aos="fade-up">
+>
   <Typography variant="h4" fontWeight={700} mb={5}>
     Key Features
   </Typography>
@@ -250,9 +245,88 @@ data-aos="fade-up">
     </Grid>
 
   </Grid>
+
+  {/* PLATFORM CAPABILITIES */}
+
+<Box sx={{ mt: 12, textAlign: "center", color: "white" }}>
+
+<Typography variant="h4" fontWeight={700} mb={5}>
+Platform Capabilities
+</Typography>
+
+<Grid container spacing={4} justifyContent="center">
+
+{/* Resident */}
+<Grid item xs={12} md={3}>
+<Box sx={{
+   p: 3,
+  borderRadius: 4,
+  background: "rgba(0, 0, 0, 0.55)",   // darker glass effect
+  backdropFilter: "blur(12px)",
+  color: "#fff",
+  transition: "0.3s",
+  "&:hover": {
+    transform: "translateY(-6px)",
+    background: "rgba(0, 0, 0, 0.7)"
+  }
+}}>
+<Typography fontWeight={700}>Resident Panel</Typography>
+<Typography variant="body2">
+Manage visitors, complaints and payments
+</Typography>
+</Box>
+</Grid>
+
+{/* Guard */}
+<Grid item xs={12} md={3}>
+<Box sx={{
+   p: 3,
+  borderRadius: 4,
+  background: "rgba(0, 0, 0, 0.55)",   // darker glass effect
+  backdropFilter: "blur(12px)",
+  color: "#fff",
+  transition: "0.3s",
+  "&:hover": {
+    transform: "translateY(-6px)",
+    background: "rgba(0, 0, 0, 0.7)"
+  }
+}}>
+<Typography fontWeight={700}>Guard Panel</Typography>
+<Typography variant="body2">
+Verify visitors and manage entry logs
+</Typography>
+</Box>
+</Grid>
+
+{/* Admin */}
+<Grid item xs={12} md={3}>
+<Box sx={{
+  p: 3,
+  borderRadius: 4,
+  background: "rgba(0, 0, 0, 0.55)",   // darker glass effect
+  backdropFilter: "blur(12px)",
+  color: "#fff",
+  transition: "0.3s",
+  "&:hover": {
+    transform: "translateY(-6px)",
+    background: "rgba(0, 0, 0, 0.7)"
+  }
+}}>
+<Typography fontWeight={700}>Admin Control</Typography>
+<Typography variant="body2">
+Monitor entire society system in real-time
+</Typography>
+</Box>
+</Grid>
+
+</Grid>
+
+</Box>
+
+
   {/* HOW IT WORKS */}
 
-<Box sx={{ mt: 12, textAlign: "center", color: "white" }}
+<Box sx={{ mt: 10, textAlign: "center", color: "white" }}
 >
 
 <Typography variant="h3" fontWeight={400} mb={5}>
