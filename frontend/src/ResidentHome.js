@@ -16,6 +16,8 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { Link as RouterLink,} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 
 const API_BASE =
   process.env.REACT_APP_API_BASE ||
@@ -52,7 +54,8 @@ const cardStyles = {
   },
 };
 
-export default function ResidentHome() {
+export default function ResidentHome({ darkMode, setDarkMode }) {
+  const navigate = useNavigate();
   
 
 
@@ -129,7 +132,9 @@ export default function ResidentHome() {
 
 
   return (
-    <Box sx={{ p: 3 }}>
+  <Box
+  sx={{p: 3}}
+>
     
 
       {/* HEADER */}
@@ -142,15 +147,43 @@ export default function ResidentHome() {
           gap: 2,
         }}
       >
+        
         <Box>
+
           <Typography variant="overline">Resident Panel</Typography>
           <Typography variant="h4" sx={{ fontWeight: 800 }}>
             Welcome to Zeecurity
           </Typography>
+          
           <Typography variant="body2" color="text.secondary">
             View your notices, complaints, payments and SOS alerts in one place.
           </Typography>
         </Box>
+        
+   <Grid item xs={12} sm={6} md={4}>
+  <Card
+    onClick={() => navigate("/resident/emergency")}
+    sx={{
+  p: 2,
+  borderRadius: 4,
+  cursor: "pointer",
+  background: "linear-gradient(135deg,#667eea,#764ba2)",
+  color: "#fff",
+      transition: "0.3s",
+      "&:hover": {
+        transform: "scale(1.05)"
+      }
+    }}
+  >
+    <Typography variant="h6" fontWeight={600}>
+      Emergency Contact
+    </Typography>
+
+    <Typography variant="body2">
+      Click to view emergency numbers
+    </Typography>
+  </Card>
+</Grid>
 
         <Box sx={{ display: "flex", gap: 1 }}>
           <TextField
@@ -277,6 +310,7 @@ export default function ResidentHome() {
             </CardContent>
           </Card>
         </Grid>
+     
       </Grid>
     </Box>
   );

@@ -222,7 +222,10 @@ setStats({
   }, [systemHealth]);
 
   return (
-    <Box sx={{ p: 3, ml: "220px" }}>
+    <Box sx={{ p: 3, ml: {
+  xs: 0,
+  md: "220px"
+}}}>
 
       <Typography variant="h4" fontWeight={700} mb={1}>
         Admin Control Center

@@ -63,7 +63,10 @@ export default function AdminNotices() {
       <AdminSidebar />
 
       {/* Main Content */}
-      <Box sx={{ ml: "220px", p: 3 }}>
+      <Box sx={{ ml: {
+  xs: 0,
+  md: "220px"
+}, p: 3 }}>
         <Typography variant="h4" fontWeight={700} mb={3}>
           Notice Panel
         </Typography>

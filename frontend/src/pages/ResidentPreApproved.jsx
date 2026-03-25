@@ -36,7 +36,10 @@ export default function ResidentPreApproved() {
   {/* Main Content */}
   <Box
     sx={{
-      ml: "220px",
+      ml: {
+  xs: 0,
+  md: "220px"
+},
       p: 3,
       width: "100%"
     }}

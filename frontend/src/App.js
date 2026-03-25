@@ -7,6 +7,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 
+
 import Sidebar from "./components/Sidebar";
 import ResidentSidebar from "./components/ResidentSidebar";
 
@@ -44,6 +45,9 @@ import ResidentsInfo from "./admin/ResidentsInfo";
 import LandingPage from "./pages/LandingPage";
 import GuardTodo from "./pages/GuardTodo";
 import AdminTodo from "./pages/AdminTodo";
+import EmergencyPage from "./pages/EmergencyPage";
+
+
 
 import axios from "axios";
 import {
@@ -561,8 +565,10 @@ function GuardHome() {
 
 /* ================= APP ROUTES ================= */
 export default function App() {
+ 
 
   return (
+    
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
@@ -631,7 +637,8 @@ export default function App() {
       
         <Route path="/guard/preapproved" element={<GuardPreApproved />} />
         <Route path="/guard/todo" element={<GuardTodo />} />
-       
+
+       <Route path="/resident/emergency" element={<EmergencyPage />} />
         <Route
   path="/resident/notices"
   element={
@@ -697,6 +704,7 @@ export default function App() {
   path="/resident/visitors"
   element={<ResidentPreApproved />}
 />
+
         <Route
   path="/admin"
   element={
@@ -768,6 +776,7 @@ export default function App() {
 
       </Routes>
     </Router>
+  
   );
 }
 
