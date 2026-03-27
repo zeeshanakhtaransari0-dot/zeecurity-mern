@@ -20,12 +20,11 @@ import {
   TableCell,
   TableContainer,
   Paper,
-  IconButton,
   Snackbar,
   Alert,
   CircularProgress,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
+
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { useLocation } from "react-router-dom";
 
@@ -170,31 +169,6 @@ const isResident = location.pathname.includes("/resident");
     }
   }
 
-  // optional delete if backend supports it (maintenanceRoutes screenshot did not show delete,
-  // but we call it and handle errors gracefully)
-  async function handleDelete(id) {
-    try {
-      if (!window.confirm("Delete this payment record?")) return;
-      console.log("DELETE", `${API_BASE}/maintenance/${id}`);
-      const res = await axios.delete(`${API_BASE}/maintenance/${id}`);
-      console.log("DELETE /maintenance", res.status, res.data);
-      if (res.status === 200 || (res.data && res.data.success)) {
-        setPayments((prev) => prev.filter((p) => p._id !== id));
-        setSnack({ open: true, severity: "success", msg: "Payment deleted" });
-      } else {
-        setSnack({ open: true, severity: "error", msg: "Failed to delete payment" });
-      }
-    } catch (err) {
-      console.error("delete payment error:", err);
-      const message = err.response?.data?.message || err.response?.data?.error || err.message || "Server error";
-      setSnack({ open: true, severity: "error", msg: "Delete failed: " + message });
-      // refetch to sync
-      fetchPayments();
-
-      
-    }
-    
-  }
   async function handlePay(id) {
   try {
     const res = await axios.put(`${API_BASE}/maintenance/pay/${id}`);
