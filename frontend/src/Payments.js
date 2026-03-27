@@ -27,6 +27,7 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import { useLocation } from "react-router-dom";
 
 // base URL -- uses same base logic as other pages
 const API_BASE = process.env.REACT_APP_API_BASE || "https://zeecurity-backend.onrender.com/api";
@@ -34,6 +35,9 @@ const API_BASE = process.env.REACT_APP_API_BASE || "https://zeecurity-backend.on
 
 // Payment UI that works with your existing Maintenance model & routes.
 export default function Payments() {
+ const userFlat = localStorage.getItem("residentFlat");
+  const location = useLocation();
+const isResident = location.pathname.includes("/resident");
   const [form, setForm] = useState({
     name: "",
     flatNumber: "",
@@ -46,6 +50,7 @@ export default function Payments() {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [snack, setSnack] = useState({ open: false, severity: "success", msg: "" });
+  const role = localStorage.getItem("role"); // admin / guard / resident
 
   useEffect(() => {
     fetchPayments();
@@ -185,8 +190,26 @@ export default function Payments() {
       setSnack({ open: true, severity: "error", msg: "Delete failed: " + message });
       // refetch to sync
       fetchPayments();
+
+      
     }
+    
   }
+  async function handlePay(id) {
+  try {
+    const res = await axios.put(`${API_BASE}/maintenance/pay/${id}`);
+
+    if (res.data.success) {
+      setSnack({ open: true, severity: "success", msg: "Payment Successful" });
+      fetchPayments();
+    }
+  } catch (err) {
+    console.error(err);
+    setSnack({ open: true, severity: "error", msg: "Payment Failed" });
+  }
+}
+  
+  
 
   return (
     <Box sx={{ p: 3 }}>
@@ -195,9 +218,10 @@ export default function Payments() {
       </Typography>
 
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid sx={{ width: { xs: "100%", md: "40%" } }}>
+        <Grid sx={{ width: { xs: "100%", md: "60%" } }}>
           <Card>
             <CardContent>
+          {!isResident && (
               <Box component="form" onSubmit={handleSubmit}>
                 <TextField
                   label="Name"
@@ -266,11 +290,12 @@ export default function Payments() {
                   </Button>
                 </Box>
               </Box>
+              )}
             </CardContent>
           </Card>
         </Grid>
 
-        <Grid sx={{ width: { xs: "100%", md: "60%" } }}>
+        <Grid sx={{ width: { xs: "100%", md: "100%" } }}>
           <Card>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 2 }}>
@@ -285,16 +310,17 @@ export default function Payments() {
                 <TableContainer component={Paper}>
                   <Table size="small">
                     <TableHead>
-                      <TableRow>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Flat</TableCell>
-                        <TableCell>Month</TableCell>
-                        <TableCell>Amount</TableCell>
-                        <TableCell>Mode</TableCell>
-                        <TableCell>Date</TableCell>
-                        <TableCell align="right">Actions</TableCell>
-                      </TableRow>
-                    </TableHead>
+  <TableRow>
+    <TableCell>Status</TableCell>
+    <TableCell>Name</TableCell>
+    <TableCell>Flat</TableCell>
+    <TableCell>Month</TableCell>
+    <TableCell>Amount</TableCell>
+    <TableCell>Mode</TableCell>
+    <TableCell>Date</TableCell>
+    <TableCell align="right">Actions</TableCell>
+  </TableRow>
+</TableHead>
 
                     <TableBody>
                       {payments.length === 0 ? (
@@ -303,9 +329,14 @@ export default function Payments() {
                             No payment records found.
                           </TableCell>
                         </TableRow>
-                      ) : (
-                        payments.map((p) => (
+                      ) : ((isResident
+  ? payments.filter(p => p.flatNumber === userFlat)
+  : payments
+).map((p) => (
                           <TableRow key={p._id}>
+                            <TableCell>
+  {p.status === "Paid" ? "✅ Paid" : "⏳ Pending"}
+</TableCell>
                             <TableCell>{p.name || "-"}</TableCell>
                             <TableCell>{p.flatNumber || "-"}</TableCell>
                             <TableCell>{p.month || "-"}</TableCell>
@@ -313,10 +344,20 @@ export default function Payments() {
                             <TableCell>{p.paymentMode || "-"}</TableCell>
                             <TableCell>{p.date ? new Date(p.date).toLocaleString() : "-"}</TableCell>
                             <TableCell align="right">
-                              <IconButton size="small" color="error" onClick={() => handleDelete(p._id)}>
-                                <DeleteIcon />
-                              </IconButton>
-                            </TableCell>
+{role === "resident" && p.status === "Pending" ? (
+  <Button
+    variant="contained"
+    size="small"
+    onClick={() => handlePay(p._id)}
+  >
+    Pay
+  </Button>
+) : (
+  <Typography>
+    {p.status === "Paid" ? "✅ Paid" : "⏳ Pending"}
+  </Typography>
+)}
+</TableCell>
                           </TableRow>
                         ))
                       )}

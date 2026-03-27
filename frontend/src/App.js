@@ -94,6 +94,11 @@ if (role === "resident") {
     username,
     flatNumber: flat,
   });
+  console.log(res.data); // check what comes
+
+localStorage.setItem("name", res.data.name);
+localStorage.setItem("flatNumber", res.data.flatNumber);
+localStorage.setItem("role", "resident");
   console.log("LOGIN RESPONSE:", res.data);
 
   localStorage.setItem("residentId", res.data.user._id); // ⭐ IMPORTANT
