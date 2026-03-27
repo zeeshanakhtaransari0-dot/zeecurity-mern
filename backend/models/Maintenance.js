@@ -6,7 +6,7 @@ const maintenanceSchema = new mongoose.Schema({
     month: { type: String, required: true },
     amount: { type: Number, required: true },
     paymentMode: { type: String, default: "Online" },
-    status: { type: String, default: "Paid" },
+    status: { type: String, default: "Pending" },
     date: { type: Date, default: Date.now }
 });
 

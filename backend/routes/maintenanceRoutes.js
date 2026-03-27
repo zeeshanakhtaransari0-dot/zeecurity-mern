@@ -16,6 +16,7 @@ router.get("/", async (req, res) => {
   }
 });
 
+
 // ADD payment (maintenance)
 router.post("/", async (req, res) => {
   try {
@@ -27,6 +28,25 @@ router.post("/", async (req, res) => {
     return res.status(201).json({ success: true, payment });
   } catch (err) {
     console.error("SAVE ERROR:", err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+// UPDATE PAYMENT STATUS (Pending → Paid)
+router.put("/pay/:id", async (req, res) => {
+  try {
+    const updated = await Maintenance.findByIdAndUpdate(
+      req.params.id,
+      { status: "Paid" },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "Not found" });
+    }
+
+    return res.json({ success: true, payment: updated });
+  } catch (err) {
+    console.error("PAY ERROR:", err);
     return res.status(500).json({ success: false, message: err.message });
   }
 });
