@@ -18,7 +18,7 @@ const STATUS_COLORS = { Pending: "warning", Acknowledged: "info", Resolved: "suc
 export default function SOS() {
   const location = useLocation();
 const isResident = location.pathname.includes("/resident");
-  const role = localStorage.getItem("role");
+  
   const [name, setName] = useState("");
   const [flat, setFlat] = useState("");
   const [type, setType] = useState("");
