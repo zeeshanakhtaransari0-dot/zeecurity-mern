@@ -15,6 +15,7 @@ const TYPES = ["Medical", "Fire", "Security", "Other"];
 const STATUS_COLORS = { Pending: "warning", Acknowledged: "info", Resolved: "success" };
 
 export default function SOS() {
+  const role = localStorage.getItem("role");
   const [name, setName] = useState("");
   const [flat, setFlat] = useState("");
   const [type, setType] = useState("");
@@ -245,13 +246,21 @@ export default function SOS() {
                   <CardActions>
                     <Button size="small" onClick={() => setPreview(a)}>Preview</Button>
 
-                    {a.status === "Pending" ? (
-                      <Button size="small" onClick={() => updateStatus(id, "Acknowledged")}>Acknowledge</Button>
-                    ) : a.status === "Acknowledged" ? (
-                      <Button size="small" onClick={() => updateStatus(id, "Resolved")}>Resolve</Button>
-                    ) : (
-                      <Button size="small" disabled>Resolved</Button>
-                    )}
+                   {role !== "resident" && (
+  a.status === "Pending" ? (
+    <Button size="small" onClick={() => updateStatus(id, "Acknowledged")}>
+      Acknowledge
+    </Button>
+  ) : a.status === "Acknowledged" ? (
+    <Button size="small" onClick={() => updateStatus(id, "Resolved")}>
+      Resolve
+    </Button>
+  ) : (
+    <Button size="small" disabled>
+      Resolved
+    </Button>
+  )
+)}
 
                     <Button size="small" color="error" onClick={() => handleDelete(id)} sx={{ marginLeft: "auto" }}>
                       Delete
