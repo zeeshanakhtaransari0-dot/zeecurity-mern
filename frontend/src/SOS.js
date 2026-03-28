@@ -7,6 +7,7 @@ import {
   InputLabel, Chip, CircularProgress, Snackbar, Alert,
   Dialog, DialogTitle, DialogContent, DialogActions
 } from "@mui/material";
+import { useLocation } from "react-router-dom";
 
 const API_BASE = process.env.REACT_APP_API_BASE || "https://zeecurity-backend.onrender.com/api";
 
@@ -15,6 +16,8 @@ const TYPES = ["Medical", "Fire", "Security", "Other"];
 const STATUS_COLORS = { Pending: "warning", Acknowledged: "info", Resolved: "success" };
 
 export default function SOS() {
+  const location = useLocation();
+const isResident = location.pathname.includes("/resident");
   const role = localStorage.getItem("role");
   const [name, setName] = useState("");
   const [flat, setFlat] = useState("");
@@ -93,80 +96,63 @@ export default function SOS() {
 
   // ---------- robust updateStatus ----------
   async function updateStatus(id, newStatus) {
-    try {
-      const realId = id && (id._id || id.id) ? (id._id || id.id) : id;
-      console.log("updateStatus ->", { id: realId, newStatus });
-      const url = `${API_BASE}/sos/${realId}/status`;
+  try {
+    const realId = id && (id._id || id.id) ? (id._id || id.id) : id;
 
-      // try PUT first
-      try {
-        const res = await axios.put(url, { status: newStatus });
-        console.log("PUT status response:", res.status, res.data);
-        if (res.status === 200) {
-          setAlerts(prev => prev.map(a => (a._id === realId ? { ...a, status: newStatus } : a)));
-          setSnack({ open: true, severity: "success", msg: "Status updated" });
-          return;
-        }
-      } catch (putErr) {
-        console.warn("PUT failed:", putErr && (putErr.response ? putErr.response.status : putErr.message));
-        // fallback for 404/405 or no response
-        if (!putErr.response || putErr.response.status === 404 || putErr.response.status === 405) {
-          try {
-            const res2 = await axios.post(`${API_BASE}/sos/${realId}/status`, { status: newStatus });
-            console.log("POST fallback status response:", res2.status, res2.data);
-            if (res2.status === 200 || res2.status === 201) {
-              setAlerts(prev => prev.map(a => (a._id === realId ? { ...a, status: newStatus } : a)));
-              setSnack({ open: true, severity: "success", msg: "Status updated (fallback)" });
-              return;
-            }
-          } catch (postErr) {
-            console.error("POST fallback also failed:", postErr);
-            throw postErr;
-          }
-        } else {
-          throw putErr;
-        }
-      }
+    const url = `${API_BASE}/sos/${realId}/status`;
 
-      // last resort: re-fetch
-      await fetchAlerts();
-      setSnack({ open: true, severity: "info", msg: "Status update attempted. Refreshed list." });
-    } catch (err) {
-      console.error("updateStatus error final:", err);
-      const msg = err && err.response ? `${err.response.status} ${JSON.stringify(err.response.data)}` : (err.message || String(err));
-      setSnack({ open: true, severity: "error", msg: "Failed to update status: " + msg });
+    const res = await axios.put(url, { status: newStatus });
+
+    if (res.status === 200) {
+      setSnack({ open: true, severity: "success", msg: "Status updated" });
+
+      // ✅ IMPORTANT → refresh data
+      fetchAlerts();
+
+      return;
     }
-  }
 
+  } catch (err) {
+    console.error("Update failed:", err);
+
+    setSnack({ open: true, severity: "error", msg: "Failed to update status" });
+  }
+}
   // ---------- robust delete ----------
-  async function handleDelete(id) {
-    try {
-      const realId = id && (id._id || id.id) ? (id._id || id.id) : id;
-      if (!realId) {
-        setSnack({ open: true, severity: "error", msg: "Invalid id for delete" });
-        return;
-      }
-      if (!window.confirm("Delete this alert?")) return;
+ async function handleDelete(id) {
+  try {
+    const realId = id && (id._id || id.id) ? (id._id || id.id) : id;
 
-      const url = `${API_BASE}/sos/${realId}`;
-      console.log("handleDelete -> DELETE", url);
-
-      const res = await axios.delete(url);
-      console.log("DELETE response:", res.status, res.data);
-
-      if (res.status === 200 || (res.data && res.data.success)) {
-        setAlerts(prev => prev.filter(a => (a._id || a.id) !== realId));
-        setSnack({ open: true, severity: "success", msg: "Alert deleted" });
-      } else {
-        await fetchAlerts();
-        setSnack({ open: true, severity: "info", msg: "Delete attempted. Refreshed list." });
-      }
-    } catch (err) {
-      console.error("handleDelete error:", err);
-      const msg = err && err.response ? `${err.response.status} ${JSON.stringify(err.response.data)}` : (err.message || String(err));
-      setSnack({ open: true, severity: "error", msg: "Failed to delete: " + msg });
+    if (!realId) {
+      setSnack({ open: true, severity: "error", msg: "Invalid id" });
+      return;
     }
+
+    if (!window.confirm("Delete this alert?")) return;
+
+    const url = `${API_BASE}/sos/${realId}`;
+
+    const res = await axios.delete(url);
+
+    if (res.status === 200 || res.data?.success) {
+      setSnack({ open: true, severity: "success", msg: "Deleted successfully" });
+
+      // ✅ IMPORTANT → refresh data
+      fetchAlerts();
+
+    } else {
+      setSnack({ open: true, severity: "error", msg: "Delete failed" });
+    }
+
+  } catch (err) {
+    console.error("Delete error:", err);
+
+    setSnack({ open: true, severity: "error", msg: "Error deleting alert" });
+
+    // ✅ fallback refresh
+    fetchAlerts();
   }
+}
 
   return (
     <Box>
@@ -246,19 +232,17 @@ export default function SOS() {
                   <CardActions>
                     <Button size="small" onClick={() => setPreview(a)}>Preview</Button>
 
-                   {role !== "resident" && (
+                   {!isResident && (
   a.status === "Pending" ? (
-    <Button size="small" onClick={() => updateStatus(id, "Acknowledged")}>
+    <Button onClick={() => updateStatus(id, "Acknowledged")}>
       Acknowledge
     </Button>
   ) : a.status === "Acknowledged" ? (
-    <Button size="small" onClick={() => updateStatus(id, "Resolved")}>
+    <Button onClick={() => updateStatus(id, "Resolved")}>
       Resolve
     </Button>
   ) : (
-    <Button size="small" disabled>
-      Resolved
-    </Button>
+    <Button disabled>Resolved</Button>
   )
 )}
 
